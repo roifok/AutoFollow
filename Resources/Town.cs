@@ -39,79 +39,79 @@ namespace AutoFollow.Coroutines.Resources
 
         public static DiaObject NearestVendor
         {
-            get { return ZetaDia.Actors.GetActorsOfType<DiaGizmo>(true).Where(o => VendorIds.Contains(o.ActorSNO)).OrderBy(o => o.Distance).FirstOrDefault(); }
+            get { return ZetaDia.Actors.GetActorsOfType<DiaGizmo>(true).Where(o => VendorIds.Contains(o.ActorSnoId)).OrderBy(o => o.Distance).FirstOrDefault(); }
         }
 
         public static class Actors
         {
             public static DiaObject Stash 
             {
-                get { return ZetaDia.Actors.GetActorsOfType<DiaGizmo>(true).FirstOrDefault(o => o.ActorSNO == ActorIds.Stash); }
+                get { return ZetaDia.Actors.GetActorsOfType<DiaGizmo>(true).FirstOrDefault(o => o.ActorSnoId == ActorIds.Stash); }
             }
 
             public static DiaObject TheQuaterMaster
             {
-                get { return ZetaDia.Actors.GetActorsOfType<DiaUnit>(true).FirstOrDefault(o => o.ActorSNO == ActorIds.TheQuaterMaster); }
+                get { return ZetaDia.Actors.GetActorsOfType<DiaUnit>(true).FirstOrDefault(o => o.ActorSnoId == ActorIds.TheQuaterMaster); }
             }
             
             public static DiaObject ThePeddler
             {
-                get { return ZetaDia.Actors.GetActorsOfType<DiaUnit>(true).FirstOrDefault(o => o.ActorSNO == ActorIds.ThePeddler); }
+                get { return ZetaDia.Actors.GetActorsOfType<DiaUnit>(true).FirstOrDefault(o => o.ActorSnoId == ActorIds.ThePeddler); }
             }
 
             public static DiaObject TheMiner
             {
-                get { return ZetaDia.Actors.GetActorsOfType<DiaUnit>(true).FirstOrDefault(o => o.ActorSNO == ActorIds.TheMiner); }
+                get { return ZetaDia.Actors.GetActorsOfType<DiaUnit>(true).FirstOrDefault(o => o.ActorSnoId == ActorIds.TheMiner); }
             }
 
             public static DiaObject Tyrael
             {
-                get { return ZetaDia.Actors.GetActorsOfType<DiaUnit>(true).FirstOrDefault(o => o.ActorSNO == ActorIds.Tyrael); }
+                get { return ZetaDia.Actors.GetActorsOfType<DiaUnit>(true).FirstOrDefault(o => o.ActorSnoId == ActorIds.Tyrael); }
             }
 
             public static DiaObject BookOfCain
             {
-                get { return ZetaDia.Actors.GetActorsOfType<DiaGizmo>(true).FirstOrDefault(o => o.ActorSNO == ActorIds.BookOfCain); }
+                get { return ZetaDia.Actors.GetActorsOfType<DiaGizmo>(true).FirstOrDefault(o => o.ActorSnoId == ActorIds.BookOfCain); }
             }
 
             public static DiaObject Jeweler
             {
-                get { return ZetaDia.Actors.GetActorsOfType<DiaUnit>(true).FirstOrDefault(o => o.ActorSNO == ActorIds.Jeweler); }
+                get { return ZetaDia.Actors.GetActorsOfType<DiaUnit>(true).FirstOrDefault(o => o.ActorSnoId == ActorIds.Jeweler); }
             }
 
             public static DiaObject BlackSmith
             {
-                get { return ZetaDia.Actors.GetActorsOfType<DiaUnit>(true).FirstOrDefault(o => o.ActorSNO == ActorIds.BlackSmith); }
+                get { return ZetaDia.Actors.GetActorsOfType<DiaUnit>(true).FirstOrDefault(o => o.ActorSnoId == ActorIds.BlackSmith); }
             }
 
             public static DiaObject Kadala
             {
-                get { return ZetaDia.Actors.GetActorsOfType<DiaUnit>(true).FirstOrDefault(o => o.ActorSNO == ActorIds.Kadala); }
+                get { return ZetaDia.Actors.GetActorsOfType<DiaUnit>(true).FirstOrDefault(o => o.ActorSnoId == ActorIds.Kadala); }
             }
 
             public static DiaObject KanaisCube
             {
-                get { return ZetaDia.Actors.GetActorsOfType<DiaGizmo>(true).FirstOrDefault(o => o.ActorSNO == ActorIds.KanaisCube); }
+                get { return ZetaDia.Actors.GetActorsOfType<DiaGizmo>(true).FirstOrDefault(o => o.ActorSnoId == ActorIds.KanaisCube); }
             } 
          
             public static DiaObject RiftObelisk
             {
-                get { return ZetaDia.Actors.GetActorsOfType<DiaGizmo>(true).FirstOrDefault(o => o.ActorSNO == ActorIds.RiftObelisk); }
+                get { return ZetaDia.Actors.GetActorsOfType<DiaGizmo>(true).FirstOrDefault(o => o.ActorSnoId == ActorIds.RiftObelisk); }
             } 
 
             public static DiaObject TheCollector
             {
-                get { return ZetaDia.Actors.GetActorsOfType<DiaUnit>(true).FirstOrDefault(o => o.ActorSNO == ActorIds.TheCollector); }
+                get { return ZetaDia.Actors.GetActorsOfType<DiaUnit>(true).FirstOrDefault(o => o.ActorSnoId == ActorIds.TheCollector); }
             }
  
             public static DiaObject TheMystic
             {
-                get { return ZetaDia.Actors.GetActorsOfType<DiaUnit>(true).FirstOrDefault(o => o.ActorSNO == ActorIds.TheMystic); }
+                get { return ZetaDia.Actors.GetActorsOfType<DiaUnit>(true).FirstOrDefault(o => o.ActorSnoId == ActorIds.TheMystic); }
             } 
 
             public static DiaObject TheFence
             {
-                get { return ZetaDia.Actors.GetActorsOfType<DiaUnit>(true).FirstOrDefault(o => o.ActorSNO == ActorIds.TheFence); }
+                get { return ZetaDia.Actors.GetActorsOfType<DiaUnit>(true).FirstOrDefault(o => o.ActorSnoId == ActorIds.TheFence); }
             }    
         }
 
@@ -124,7 +124,7 @@ namespace AutoFollow.Coroutines.Resources
             {
                 get
                 {
-                    var levelAreaId = ZetaDia.CurrentLevelAreaId;
+                    var levelAreaId = ZetaDia.CurrentLevelAreaSnoId;
                     switch (levelAreaId)
                     {
                         case 19947: // Campaign A1 Hub
@@ -147,7 +147,7 @@ namespace AutoFollow.Coroutines.Resources
             {
                 get
                 {
-                    var levelAreaId = ZetaDia.CurrentLevelAreaId;
+                    var levelAreaId = ZetaDia.CurrentLevelAreaSnoId;
                     switch (levelAreaId)
                     {
                         case 19947: // Campaign A1 Hub
@@ -170,7 +170,7 @@ namespace AutoFollow.Coroutines.Resources
             {
                 get
                 {
-                    var levelAreaId = ZetaDia.CurrentLevelAreaId;
+                    var levelAreaId = ZetaDia.CurrentLevelAreaSnoId;
                     switch (levelAreaId)
                     {
                         case 19947: // Campaign A1 Hub
@@ -193,7 +193,7 @@ namespace AutoFollow.Coroutines.Resources
             {
                 get
                 {
-                    var levelAreaId = ZetaDia.CurrentLevelAreaId;
+                    var levelAreaId = ZetaDia.CurrentLevelAreaSnoId;
                     switch (levelAreaId)
                     {
                         case 19947: // Campaign A1 Hub
@@ -216,7 +216,7 @@ namespace AutoFollow.Coroutines.Resources
             {
                 get
                 {
-                    var levelAreaId = ZetaDia.CurrentLevelAreaId;
+                    var levelAreaId = ZetaDia.CurrentLevelAreaSnoId;
                     switch (levelAreaId)
                     {
                         case 19947: // Campaign A1 Hub
@@ -239,7 +239,7 @@ namespace AutoFollow.Coroutines.Resources
             {
                 get
                 {
-                    var levelAreaId = ZetaDia.CurrentLevelAreaId;
+                    var levelAreaId = ZetaDia.CurrentLevelAreaSnoId;
                     switch (levelAreaId)
                     {
                         case 19947: // Campaign A1 Hub
@@ -262,7 +262,7 @@ namespace AutoFollow.Coroutines.Resources
             {
                 get
                 {
-                    var levelAreaId = ZetaDia.CurrentLevelAreaId;
+                    var levelAreaId = ZetaDia.CurrentLevelAreaSnoId;
                     switch (levelAreaId)
                     {
                         case 270011: // A5 Hub
@@ -277,7 +277,7 @@ namespace AutoFollow.Coroutines.Resources
             {
                 get
                 {
-                    var levelAreaId = ZetaDia.CurrentLevelAreaId;
+                    var levelAreaId = ZetaDia.CurrentLevelAreaSnoId;
                     switch (levelAreaId)
                     {
                         case 168314: // A2 Hub

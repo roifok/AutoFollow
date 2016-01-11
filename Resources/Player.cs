@@ -14,8 +14,8 @@ namespace AutoFollow.Resources
     public class Player
     {
         public int Index { get; set; }
-        public int RActorGuid { get; set; }
-        public int ACDGuid { get; set; }
+        public int RActorId { get; set; }
+        public int AcdId { get; set; }
         public double HitpointsCurrent { get; set; }
         public double HitpointsMaxTotal { get; set; }
         public double HitpointsCurrentPct { get; set; }
@@ -27,7 +27,7 @@ namespace AutoFollow.Resources
         }
 
         public int CurrentLevelAreaId { get; set; }
-        public int CurrentWorldId { get; set; }
+        public int CurrentWorldSnoId { get; set; }
         public int CurrentDynamicWorldId { get; set; }
         public bool IsInTown { get; set; }
         public bool IsInGame { get; set; }
@@ -74,7 +74,7 @@ namespace AutoFollow.Resources
                 if (CachedLevelAreaId != -1 && !(DateTime.UtcNow.Subtract(LastUpdatedLevelAreaId).TotalSeconds > 2)) 
                     return CachedLevelAreaId;
                 
-                CachedLevelAreaId = ZetaDia.CurrentLevelAreaId;
+                CachedLevelAreaId = ZetaDia.CurrentLevelAreaSnoId;
                 LastUpdatedLevelAreaId = DateTime.UtcNow;
                 return CachedLevelAreaId;
             }
@@ -111,10 +111,10 @@ namespace AutoFollow.Resources
             //Update();
         }
 
-        public Player(int rActorGuid)
+        public Player(int rActorId)
         {
             Log.Info("Creating Player Obj");
-            this.RActorGuid = rActorGuid;
+            this.RActorId = rActorId;
             //Update();
         }
 
@@ -136,29 +136,29 @@ namespace AutoFollow.Resources
             if (!ZetaDia.Me.IsValid || !ZetaDia.Me.CommonData.IsValid || ZetaDia.Me.CommonData.IsDisposed)
                 return;
 
-            if (ZetaDia.CPlayer == null || !ZetaDia.CPlayer.IsValid)
+            if (ZetaDia.PlayerData == null || !ZetaDia.PlayerData.IsValid)
                 return;
 
             using (new MemoryHelper())
             {
                 try
                 {
-                    Index = ZetaDia.CPlayer.Index;
-                    RActorGuid = ZetaDia.Me.RActorGuid;
+                    Index = ZetaDia.PlayerData.Index;
+                    RActorId = ZetaDia.Me.RActorId;
                     LastUpdate = DateTime.UtcNow;
                     IsInGame = ZetaDia.IsInGame;
-                    ACDGuid = ZetaDia.Me.ACDGuid;
+                    AcdId = ZetaDia.Me.ACDId;
                     HitpointsCurrent = ZetaDia.Me.HitpointsCurrent;
                     HitpointsMaxTotal = ZetaDia.Me.HitpointsMaxTotal;
                     HitpointsCurrentPct = HitpointsMaxTotal > 0 ? ZetaDia.Me.HitpointsCurrent/ZetaDia.Me.HitpointsMaxTotal : 0;
                     //TryUpdate(ref _position, () => ZetaDia.Me.Position);
                     Position = ZetaDia.Me.Position;
                     CurrentLevelAreaId = LevelAreaId;
-                    CurrentWorldId = ZetaDia.CurrentWorldId;
-                    CurrentDynamicWorldId = ZetaDia.CurrentWorldDynamicId;
+                    CurrentWorldSnoId = ZetaDia.CurrentWorldSnoId;
+                    CurrentDynamicWorldId = ZetaDia.WorldId;
                     IsInTown = ZetaDia.IsInTown;
                     IsVendoring = BrainBehavior.IsVendoring;
-                    ActorId = ZetaDia.Me.ActorSNO;
+                    ActorId = ZetaDia.Me.ActorSnoId;
                     ActorClass = ZetaDia.Me.ActorClass;
                     HeroName = Common.CleanString(ZetaDia.Service.Hero.Name);
                     CurrentGameId = ZetaDia.Service.CurrentGameId;
@@ -197,8 +197,8 @@ namespace AutoFollow.Resources
 
         public override string ToString()
         {            
-            return String.Format("Player ({12} - {13}): RActorGuid={0} ACDGuid={1} HitpointsCurrent={2:0} HitpointsCurrentPct={3:0} HitpointsMaxTotal={4:0} Position={5} LevelAreaId={6} WorldId={7} DynamicWorldId={8} IsInGame={9} IsInTown={10} IsVendoring: {11}",
-                this.RActorGuid, this.ACDGuid, this.HitpointsCurrent, this.HitpointsCurrentPct*100, this.HitpointsMaxTotal, this.Position, this.CurrentLevelAreaId, this.CurrentWorldId, this.CurrentDynamicWorldId, this.IsInGame, this.IsInTown, this.IsVendoring, AutoFollow.CurrentBehaviorType, AutoFollow.CurrentBehavior.Category);
+            return String.Format("Player ({12} - {13}): RActorId={0} AcdId={1} HitpointsCurrent={2:0} HitpointsCurrentPct={3:0} HitpointsMaxTotal={4:0} Position={5} LevelAreaId={6} WorldSnoId={7} DynamicWorldId={8} IsInGame={9} IsInTown={10} IsVendoring: {11}",
+                this.RActorId, this.AcdId, this.HitpointsCurrent, this.HitpointsCurrentPct*100, this.HitpointsMaxTotal, this.Position, this.CurrentLevelAreaId, this.CurrentWorldSnoId, this.CurrentDynamicWorldId, this.IsInGame, this.IsInTown, this.IsVendoring, AutoFollow.CurrentBehaviorType, AutoFollow.CurrentBehavior.Category);
         }
 
         public static int BattleTagHash

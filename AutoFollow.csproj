@@ -1,14 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{00000000-0000-0000-0000-000000000000}</ProjectGuid>
+    <ProjectGuid>{0C725027-0F61-4392-A1D1-67ACA55691EF}</ProjectGuid>
     <OutputType>Library</OutputType>
     <NoStandardLibraries>false</NoStandardLibraries>
     <AssemblyName>ClassLibrary</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -18,6 +19,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -26,18 +28,138 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RootNamespace>AutoFollow</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Demonbuddy">
+      <HintPath>..\..\DB-PTR\Demonbuddy.exe</HintPath>
+    </Reference>
+    <Reference Include="GreyMagic">
+      <HintPath>..\..\DB-PTR\GreyMagic.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data.Linq" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Windows" />
+    <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AutoFollow.cs" />
+    <Compile Include="Behaviors\BaseBehavior.cs" />
+    <Compile Include="Behaviors\FollowerCombat.cs" />
+    <Compile Include="Behaviors\FollowerPowerLevel.cs" />
+    <Compile Include="Behaviors\Leader.cs" />
+    <Compile Include="Behaviors\Structures\BehaviorCategory.cs" />
+    <Compile Include="Behaviors\Structures\BehaviorType.cs" />
+    <Compile Include="Behaviors\Structures\IBehavior.cs" />
+    <Compile Include="Coroutines\Coordination.cs" />
+    <Compile Include="Coroutines\Movement.cs" />
+    <Compile Include="Coroutines\Party.cs" />
+    <Compile Include="Coroutines\Questing.cs" />
+    <Compile Include="Coroutines\SafeLeaveGame.cs" />
+    <Compile Include="Coroutines\TeleportToPlayer.cs" />
+    <Compile Include="Events\ChangeMonitor.cs" />
+    <Compile Include="Events\EventData.cs" />
+    <Compile Include="Events\EventDispatcher.cs" />
+    <Compile Include="Events\EventManager.cs" />
+    <Compile Include="Events\EventType.cs" />
+    <Compile Include="Networking\Client.cs" />
+    <Compile Include="Networking\CommunicationThread.cs" />
+    <Compile Include="Networking\ConnectionMode.cs" />
+    <Compile Include="Networking\IService.cs" />
+    <Compile Include="Networking\Message.cs" />
+    <Compile Include="Networking\MessageWrapper.cs" />
+    <Compile Include="Networking\Server.cs" />
+    <Compile Include="Networking\Service.cs" />
+    <Compile Include="ProfileTags\AutoFollowTag.cs" />
+    <Compile Include="Resources\AsyncEvent.cs" />
+    <Compile Include="Resources\BotHistory.cs" />
+    <Compile Include="Resources\CacheField.cs" />
+    <Compile Include="Resources\Common.cs" />
+    <Compile Include="Resources\Conditions.cs" />
+    <Compile Include="Resources\CoroutineHelper.cs" />
+    <Compile Include="Resources\Data.cs" />
+    <Compile Include="Resources\Extensions.cs" />
+    <Compile Include="Resources\GameUI.cs" />
+    <Compile Include="Resources\Interactable.cs" />
+    <Compile Include="Resources\InterfaceLoader.cs" />
+    <Compile Include="Resources\IPluginCommunicator.cs" />
+    <Compile Include="Resources\Log.cs" />
+    <Compile Include="Resources\MathUtil.cs" />
+    <Compile Include="Resources\MemoryHelper.cs" />
+    <Compile Include="Resources\Player.cs" />
+    <Compile Include="Resources\PluginCommunicator.cs" />
+    <Compile Include="Resources\RiftHelper.cs" />
+    <Compile Include="Resources\SimpleAES.cs" />
+    <Compile Include="Resources\StackPanelReader.cs" />
+    <Compile Include="Resources\Target.cs" />
+    <Compile Include="Resources\Timer.cs" />
+    <Compile Include="Resources\Town.cs" />
+    <Compile Include="Resources\UIElementExtensions.cs" />
+    <Compile Include="UI\Settings\Settings.cs" />
+    <Compile Include="UI\Tab\TabUI.cs" />
+    <Compile Include="UI\Tab\TabViewModel.cs" />
+    <Compile Include="UI\UILoader.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="FollowerCombat.xml" />
+    <Content Include="FollowerPowerLevel.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="UI\Settings\Settings.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\Tab\Tab.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include=".vs\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />
   <ProjectExtensions>
     <VisualStudio AllowExistingFolder="true" />
   </ProjectExtensions>
+  <PropertyGroup>
+    <PostBuildEvent>SET TARGETDIR=C:\DB\DB-PTR\Plugins\AutoFollow\
+
+rd "%25TARGETDIR%25" /S /Q
+xcopy "$(ProjectDir)*" "%25TARGETDIR%25" /Q /E /C /I /R /Y
+rd "%25TARGETDIR%25bin\" /S /Q
+rd "%25TARGETDIR%25obj\" /S /Q
+del "%25TARGETDIR%25$(ProjectName).csproj"
+del "%25TARGETDIR%25*.suo"
+del "%25TARGETDIR%25*.user"
+del "%25TARGETDIR%25*.DotSettings"
+del "%25TARGETDIR%25packages.config"
+
+SET TARGETDIR=C:\VirtualMachines\Shared\DB-PTR\Plugins\AutoFollow\
+
+rd "%25TARGETDIR%25" /S /Q
+xcopy "$(ProjectDir)*" "%25TARGETDIR%25" /Q /E /C /I /R /Y
+rd "%25TARGETDIR%25bin\" /S /Q
+rd "%25TARGETDIR%25obj\" /S /Q
+del "%25TARGETDIR%25$(ProjectName).csproj"
+del "%25TARGETDIR%25*.suo"
+del "%25TARGETDIR%25*.user"
+del "%25TARGETDIR%25*.DotSettings"
+del "%25TARGETDIR%25packages.config"
+</PostBuildEvent>
+  </PropertyGroup>
 </Project>

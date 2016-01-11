@@ -45,7 +45,7 @@ namespace AutoFollow.Coroutines
             if (RiftHelper.IsGreaterRiftStarted)
                 return false;
 
-            if (Player.IsFollower && player.WorldId != Player.Instance.Message.WorldId && player.IsInSameGame && !player.IsInCombat)
+            if (Player.IsFollower && player.WorldSnoId != Player.Instance.Message.WorldSnoId && player.IsInSameGame && !player.IsInCombat)
             {
                 Log.Info("{0} is in a different world... attempting teleport!", player.HeroName);
                 await TeleportToPlayer.Execute(player);
@@ -56,7 +56,7 @@ namespace AutoFollow.Coroutines
 
         public async static Task<bool> TeleportWhenTooFarAway(Message player)
         {
-            if (Player.IsFollower && player.WorldId == Player.Instance.Message.WorldId && player.IsInSameGame && !player.IsInCombat && player.Distance > 300f)
+            if (Player.IsFollower && player.WorldSnoId == Player.Instance.Message.WorldSnoId && player.IsInSameGame && !player.IsInCombat && player.Distance > 300f)
             {
                 Log.Info("{0} is getting quite far away... attempting teleport!", player.HeroName);
                 await TeleportToPlayer.Execute(player);

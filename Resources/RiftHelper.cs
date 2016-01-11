@@ -50,7 +50,7 @@ namespace AutoFollow.Resources
             if (currentRift == null)
                 return;
 
-            var currentWorldId = ZetaDia.CurrentWorldId;
+            var currentWorldId = ZetaDia.CurrentWorldSnoId;
             var isInRift = RiftWorldIds.Contains(currentWorldId);    
             var isStarted = currentRift.IsStarted;
             var type = currentRift.Type;
@@ -140,7 +140,7 @@ namespace AutoFollow.Resources
     //        public Vector3 ExitPosition { get; set; }
     //        public MapPoint StartPoint { get; set; }
     //        public int Depth { get; set; }
-    //        public int WorldId { get; set; }
+    //        public int WorldSnoId { get; set; }
     //        public bool HasGaurdian { get; set; }
 
     //        public List<Vector3> GetPathToExit()
@@ -238,8 +238,8 @@ namespace AutoFollow.Resources
     //            _isParticipatingInRift = true;
     //        }
 
-    //        var currentWorldId = ZetaDia.CurrentWorldId;
-    //        var currentLevel = Levels.FirstOrDefault(l => l.WorldId == currentWorldId);
+    //        var currentWorldId = ZetaDia.CurrentWorldSnoId;
+    //        var currentLevel = Levels.FirstOrDefault(l => l.WorldSnoId == currentWorldId);
     //        var myPosition = ZetaDia.Me.Position;
 
     //        if (!IsInRift)
@@ -251,7 +251,7 @@ namespace AutoFollow.Resources
     //            currentLevel = new RiftLevel
     //            {
     //                Depth = GetDepthByWorldId(currentWorldId),
-    //                WorldId = currentWorldId
+    //                WorldSnoId = currentWorldId
     //            };
     //            Levels.Add(currentLevel);
     //        }
@@ -297,7 +297,7 @@ namespace AutoFollow.Resources
 
     //    public static bool IsInRift
     //    {
-    //        get { return RiftWorldIds.Contains(ZetaDia.CurrentLevelAreaId); }
+    //        get { return RiftWorldIds.Contains(ZetaDia.CurrentLevelAreaSnoId); }
     //    }
 
     //    private static void Reset()

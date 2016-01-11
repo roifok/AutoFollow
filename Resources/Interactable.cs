@@ -17,11 +17,11 @@ namespace AutoFollow.Resources
         {
             InternalName = obj.Name;
             ActorPosition = obj.Position;
-            ActorSNO = obj.ActorSNO;
+            ActorSnoId = obj.ActorSnoId;
             TimeFirstSeen = DateTime.UtcNow;
             LastSeenTime = DateTime.UtcNow;
             GizmoType = obj.CommonData.GizmoType;
-            WorldId = ZetaDia.CurrentWorldId;
+            WorldSnoId = ZetaDia.CurrentWorldSnoId;
 
             var marker = ZetaDia.Minimap.Markers.AllMarkers.FirstOrDefault(m => m.Position.Distance(ActorPosition) < 15f);
             if (marker != null)
@@ -32,15 +32,15 @@ namespace AutoFollow.Resources
         public Vector3 ActorPosition { get; set; }
         public GizmoType GizmoType { get; set; }
         public DateTime TimeFirstSeen { get; set; }
-        public int ActorSNO { get; set; }
+        public int ActorSnoId { get; set; }
         public int MarkerHash { get; set; }
-        public int WorldId { get; set; }
+        public int WorldSnoId { get; set; }
         public DateTime LastSeenTime { get; set; }
 
         public override string ToString()
         {
-            return string.Format("Portal Record: {0} ({1}) Position={2} WorldId={3} MsSinceFirstSeen={4}",
-                InternalName, ActorSNO, ActorPosition, WorldId,
+            return string.Format("Portal Record: {0} ({1}) Position={2} WorldSnoId={3} MsSinceFirstSeen={4}",
+                InternalName, ActorSnoId, ActorPosition, WorldSnoId,
                 DateTime.UtcNow.Subtract(TimeFirstSeen).TotalMilliseconds);
         }
 

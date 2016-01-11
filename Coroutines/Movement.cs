@@ -101,7 +101,7 @@ namespace AutoFollow.Coroutines
             {
                 for (int i = 1; i <= interactLimit; i++)
                 {
-                    Log.Verbose("Interacting with {0} ({1}) Attempt={2}", obj.Name, obj.ActorSNO, i);
+                    Log.Verbose("Interacting with {0} ({1}) Attempt={2}", obj.Name, obj.ActorSnoId, i);
                     if (obj.Interact())
                         break;
 
@@ -141,7 +141,7 @@ namespace AutoFollow.Coroutines
                     return false;
             }
 
-            var actor = Data.Actors.FirstOrDefault(a => a.ActorSNO == actorId);
+            var actor = Data.Actors.FirstOrDefault(a => a.ActorSnoId == actorId);
             if (actor == null)
             {
                 Log.Verbose("Interaction Failed: Actor not found with Id={0}", actorId);
@@ -153,7 +153,7 @@ namespace AutoFollow.Coroutines
             {
                 for (int i = 1; i <= interactLimit; i++)
                 {
-                    Log.Verbose("Interacting with {0} ({1}) Attempt={2}", actor.Name, actor.ActorSNO, i);
+                    Log.Verbose("Interacting with {0} ({1}) Attempt={2}", actor.Name, actor.ActorSnoId, i);
                     if (actor.Interact())
                         break;
 
@@ -190,14 +190,14 @@ namespace AutoFollow.Coroutines
             if (!ZetaDia.IsInGame || ZetaDia.Me.IsInCombat)
                 return false;
 
-            if (player.LastPortalUsed == null || ZetaDia.CurrentWorldId != player.LastPortalUsed.WorldId)
+            if (player.LastPortalUsed == null || ZetaDia.CurrentWorldSnoId != player.LastPortalUsed.WorldSnoId)
                 return false;
 
             var myPosition = ZetaDia.Me.Position;
 
             Func<GizmoPortal, bool> distanceToMe = portal => portal.Position.Distance(myPosition) <= 100f;
             Func<GizmoPortal, bool> distanceToPortal = portal => portal.Position.Distance(player.LastPortalUsed.ActorPosition) <= 100f;
-            Func<GizmoPortal, bool> matchingSNO = portal => portal.ActorSNO == player.LastPortalUsed.ActorSNO;
+            Func<GizmoPortal, bool> matchingSNO = portal => portal.ActorSnoId == player.LastPortalUsed.ActorSnoId;
 
             var matches = ZetaDia.Actors.GetActorsOfType<GizmoPortal>(true).Where(i => distanceToMe(i) && distanceToPortal(i) && matchingSNO(i)).ToList();
             var match = matches.OrderBy(i => i.Distance).FirstOrDefault();
@@ -231,7 +231,7 @@ namespace AutoFollow.Coroutines
 
             Log.Verbose("Assuming we should use this exit portal nearby: {0} Position={1} IsExit={2} NameHash={3} MinimapTex={4} CurrentDepth={5}",
                 nearbyPortal.Name, nearbyPortal.Position, portalExitMarker.IsPortalExit,  portalExitMarker.NameHash, 
-                portalExitMarker.MinimapTexture, RiftHelper.CurrentDepth);
+                portalExitMarker.MinimapTextureSnoId, RiftHelper.CurrentDepth);
 
             await MoveToAndInteract(nearbyPortal);
             return true;       
@@ -243,8 +243,8 @@ namespace AutoFollow.Coroutines
                 return false;
 
             var riftEntrancePortal = Data.Portals.FirstOrDefault(p =>
-                p.ActorSNO == 396751 || // Greater/Empowered Rift
-                p.ActorSNO == 345935); // Normal Rift        
+                p.ActorSnoId == 396751 || // Greater/Empowered Rift
+                p.ActorSnoId == 345935); // Normal Rift        
 
             Log.Info("Entering the open rift... ");
 

@@ -17,8 +17,8 @@ namespace AutoFollow.Resources
             if (!Data.IsValid(actor))
                 return;
 
-            Id = actor.ActorSNO;
-            ACDId = actor.ACDGuid;
+            Id = actor.ActorSnoId;
+            ACDId = actor.ACDId;
             Name = actor.Name;
 
             var quality = actor.CommonData.MonsterQualityLevel;

@@ -50,7 +50,7 @@ namespace AutoFollow.Networking
         public int Index { get; set; }
 
         [DataMember]
-        public int WorldId { get; set; }
+        public int WorldSnoId { get; set; }
 
         [DataMember]
         public int LevelAreaId { get; set; }
@@ -175,7 +175,7 @@ namespace AutoFollow.Networking
                 if (!ZetaDia.IsInGame || !IsInSameGame)
                     return false;
 
-                return Player.Instance.CurrentWorldId == WorldId;
+                return Player.Instance.CurrentWorldSnoId == WorldSnoId;
             }
         }
 
@@ -308,7 +308,7 @@ namespace AutoFollow.Networking
                         ProfilePathPrecision = GetProfilePathPrecision(),
                         ProfileTagName = GetProfileTagname(),
                         IsInCombat = Player.Instance.IsInCombat,
-                        WorldId = Player.Instance.CurrentWorldId,
+                        WorldSnoId = Player.Instance.CurrentWorldSnoId,
                         IsVendoring = BrainBehavior.IsVendoring,
                         BattleTagEncrypted = GetMyEncryptedBattleTag(),
                         HeroName = Player.Instance.HeroName,
@@ -335,7 +335,7 @@ namespace AutoFollow.Networking
                         GameId = Player.Instance.CurrentGameId,
                         Id = Player.BattleTagHash,
                         IsInTown = false,
-                        WorldId = -1,
+                        WorldSnoId = -1,
                         LevelAreaId = -1,
                         LastUpdated = DateTime.UtcNow,
                         IsInParty = Player.IsInParty,
@@ -359,7 +359,7 @@ namespace AutoFollow.Networking
                         IsInGame = false,
                         IsInTown = false,
                         Id = Player.BattleTagHash,
-                        WorldId = -1,
+                        WorldSnoId = -1,
                         LastUpdated = DateTime.UtcNow,
                         IsInParty = Player.IsInParty,
                         NumPartymembers = Player.NumPlayersInParty,
@@ -397,10 +397,10 @@ namespace AutoFollow.Networking
         public override string ToString()
         {
             return string.Format(
-                "WorldID: {0} LevelAreaId: {1} Position: {2} IsInTown: {3} IsInGame: {4} ActorSNO: {5} ActorClass: {6} " +
+                "WorldID: {0} LevelAreaId: {1} Position: {2} IsInTown: {3} IsInGame: {4} ActorSnoId: {5} ActorClass: {6} " +
                 "Hitpointsmax: {7} HitpointsCurrent: {8} GameId: {9} LastUpdated: {10} IsVendoring: {11} IsLoadingWorld: {12} " +
                 "ProfileTagName: {13} Class={14} IsInParty={15} Id={16} EventsCount={17} PlayerName={18} Target={19} BattleTagHash={20}",
-                WorldId,
+                WorldSnoId,
                 LevelAreaId,
                 Position,
                 IsInTown,

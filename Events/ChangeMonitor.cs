@@ -44,14 +44,14 @@ namespace AutoFollow.Events
 
             Log.Info("World Transfer Start Fired!");
 
-            //var lastPortal = orderedPortals.LastOrDefault(p => p.WorldId != ZetaDia.CurrentWorldId);
+            //var lastPortal = orderedPortals.LastOrDefault(p => p.WorldSnoId != ZetaDia.CurrentWorldSnoId);
             //if (lastPortal != null)
             //{
             var portal = Data.Portals.OrderByDescending(p => p.Distance).FirstOrDefault();
             if (portal != null)
             {
                 var interactable = new Interactable(portal);
-                Log.Info("Recording Last Portal Used as {0} WorldId={1}", interactable.InternalName, interactable.WorldId);
+                Log.Info("Recording Last Portal Used as {0} WorldSnoId={1}", interactable.InternalName, interactable.WorldSnoId);
                 Player.LastPortalUsed = interactable;
                 EventManager.FireEvent(new EventData(EventType.UsedPortal, null, interactable));
             }
@@ -103,7 +103,7 @@ namespace AutoFollow.Events
                     AutoFollow.ServerMessage.IsInTown = true;
             }
 
-            var worldId = ZetaDia.CurrentWorldId;
+            var worldId = ZetaDia.CurrentWorldSnoId;
             if (ZetaDia.WorldInfo.IsValid && worldId != _worldId && worldId != 0)
             {                
                 EventManager.FireEvent(new EventData(EventType.WorldAreaChanged, _worldId, worldId));

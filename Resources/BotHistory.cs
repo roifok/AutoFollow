@@ -48,7 +48,7 @@ namespace AutoFollow.Resources
             {
                 if (PortalHistory.ContainsKey(p.Position))
                 {
-                    Log.Verbose("Updating Last Seen Time for Portal - {0} ({1})", p.Name, p.ActorSNO);
+                    Log.Verbose("Updating Last Seen Time for Portal - {0} ({1})", p.Name, p.ActorSnoId);
                     PortalHistory[p.Position].LastSeenTime = DateTime.UtcNow;
                 }                    
             }
@@ -56,7 +56,7 @@ namespace AutoFollow.Resources
             var nearestPortal = portals.OrderBy(p => p.Distance).FirstOrDefault();
             if (nearestPortal != null && PortalHistory.All(p => p.Value.ActorPosition != nearestPortal.Position))
             {
-                Log.Verbose("Adding new Portal to History - {0} ({1})", nearestPortal.Name, nearestPortal.ActorSNO);
+                Log.Verbose("Adding new Portal to History - {0} ({1})", nearestPortal.Name, nearestPortal.ActorSnoId);
                 PortalHistory.Add(nearestPortal.Position, new Interactable(nearestPortal));
             }
 
@@ -94,7 +94,7 @@ namespace AutoFollow.Resources
                 {
                     Position = ZetaDia.Me.Position;
                     RecordedAt = DateTime.UtcNow;
-                    WorldId = ZetaDia.CurrentWorldId;
+                    WorldId = ZetaDia.CurrentWorldSnoId;
                 }
             }
 
@@ -145,7 +145,7 @@ namespace AutoFollow.Resources
                 }
                 else
                 {
-                    lastCachedPosition = Cache.Where(p => p.WorldId != ZetaDia.CurrentWorldId).OrderBy(p => p.RecordedAt).LastOrDefault();
+                    lastCachedPosition = Cache.Where(p => p.WorldId != ZetaDia.CurrentWorldSnoId).OrderBy(p => p.RecordedAt).LastOrDefault();
                 }
                 
                 return lastCachedPosition != null ? lastCachedPosition.Position : default(Vector3);
