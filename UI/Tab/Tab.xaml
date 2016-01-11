@@ -1,0 +1,50 @@
+﻿<UserControl 
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+             mc:Ignorable="d" d:DesignHeight="200" d:DesignWidth="300" Background="#393939" Foreground="White">
+    <Border Padding="10">
+        <Grid Background="#393939">
+            <UniformGrid Columns="2" Rows="1">
+                <StackPanel>
+                    <WrapPanel>
+                        <Label>IsConnected: </Label>
+                        <Label Content="{Binding IsConnected, FallbackValue=False}" />
+                    </WrapPanel>
+                    <WrapPanel>
+                        <Label>Connection Mode: </Label>
+                        <Label Content="{Binding ConnectionMode, FallbackValue=N/A}" />
+                    </WrapPanel>
+                    <WrapPanel>
+                        <Label>Connected Bots: </Label>
+                        <Label Content="{Binding ConnectedBots, FallbackValue=0}" />
+                    </WrapPanel>
+                    <WrapPanel>
+                        <Label>Behavior Type: </Label>
+                        <Label Content="{Binding BehaviorType, FallbackValue=Unknown}" />
+                    </WrapPanel>
+                </StackPanel>
+                <StackPanel>
+                    <WrapPanel>
+                        <Label>Update Interval: </Label>
+                        <Label Content="{Binding UpdateInterval, FallbackValue=0}" />
+                    </WrapPanel>
+                    <WrapPanel>
+                        <Label>Last Update:</Label>
+                        <Label Content="{Binding LastUpdateMs, FallbackValue=0}" ContentStringFormat=" {1:00.00000}ms." />
+                    </WrapPanel>
+                    <WrapPanel>
+                        <Label>Server URI:</Label>
+                        <Label Content="{Binding ServerURI, FallbackValue=Unknown}" />
+                    </WrapPanel>
+                    <WrapPanel>
+                        <Button Command="{Binding OpenSettingsCommand}">Open Settings</Button>
+                        <Button Command="{Binding TestCommand}">Test</Button>
+                    </WrapPanel>
+                </StackPanel>
+            </UniformGrid>
+        </Grid>
+    </Border>
+</UserControl>

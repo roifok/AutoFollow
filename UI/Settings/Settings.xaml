@@ -1,0 +1,45 @@
+﻿<UserControl 
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" Foreground="{DynamicResource TextBrush}" Height="356" Width="300" Background="Gray">
+    <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*" />
+            <ColumnDefinition Width="3*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />            
+        </Grid.RowDefinitions>
+
+
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="5,6" HorizontalAlignment="Right" Text="Server Port" VerticalAlignment="Center"/>
+        <TextBox Grid.Row="2" Grid.Column="1" Margin="5,5" HorizontalAlignment="Left" Text="{Binding Path=ServerPort, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Width="50" BorderBrush="DarkGray"  />
+
+        <TextBlock Grid.Row="3" Grid.Column="0" Margin="5,6" HorizontalAlignment="Right" Text="Bind Address" VerticalAlignment="Center"/>
+        <TextBox Grid.Row="3" Grid.Column="1" Margin="5,5" HorizontalAlignment="Left" Text="{Binding Path=BindAddress, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Width="150" BorderBrush="DarkGray"  />
+        <TextBlock Grid.Row="8" Grid.Column="1" Margin="25,6" Text="?" Foreground="DeepSkyBlue" Visibility="Hidden" TextDecorations="Underline" ToolTip="Trinity HotSpots is an inter-bot target assistance system - e.g. focus fire" />
+
+        <TextBlock Grid.Row="9" Grid.Column="0" Margin="5,5" HorizontalAlignment="Right" Text="Debug Logging" VerticalAlignment="Center"/>
+        <CheckBox Grid.Row="9" Grid.Column="1" Margin="5,6" HorizontalAlignment="Left" IsEnabled="True" IsChecked="{Binding Path=DebugLogging, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center"  />
+        <TextBlock Grid.Row="9" Grid.Column="1" Margin="25,6" Text="?" Foreground="DeepSkyBlue" Visibility="Hidden" TextDecorations="Underline" ToolTip="This will be re-enabled after the first few stable releases" />
+
+        <TextBlock Grid.Row="10" Grid.Column="0" Margin="5,5" HorizontalAlignment="Right" Text="Update Interval" VerticalAlignment="Center"/>
+        <TextBox Grid.Row="10" Grid.Column="1" Margin="5,5" HorizontalAlignment="Left" VerticalAlignment="Center" Text="{Binding Path=UpdateInterval, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                 Width="30"/>
+        <TextBlock Grid.Row="10" Grid.Column="1" Margin="40,5" HorizontalAlignment="Left" Text="ms" VerticalAlignment="Center"/>
+
+    </Grid>
+</UserControl>
