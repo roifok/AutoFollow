@@ -132,12 +132,12 @@ namespace AutoFollow.Events
             }
 
             //var currentTarget = Player.Instance.Message.CurrentTarget;
-            //if (currentTarget != null && !EngagedMonsters.Contains(currentTarget.ACDId))
+            //if (currentTarget != null && !EngagedMonsters.Contains(currentTarget.AcdId))
             //{
             //    if (currentTarget.Quality >= MonsterQuality.Champion)
             //    {
             //        EventManager.FireEvent(new EventData(EventType.EngagedSpecialMonster, null, currentTarget));
-            //        EngagedMonsters.Add(currentTarget.ACDId);
+            //        EngagedMonsters.Add(currentTarget.AcdId);
             //    }
             //    _currentTarget = currentTarget;
             //}

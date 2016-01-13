@@ -23,7 +23,7 @@ namespace AutoFollow.Networking
     [DataContract]
     [KnownType(typeof(Interactable))]
     [KnownType(typeof(Target))]
-    public class Message
+    public class Message : ITargetable
     {
         private static readonly SimpleAES Crypto = new SimpleAES();
 
@@ -84,6 +84,9 @@ namespace AutoFollow.Networking
 
         [DataMember]
         public int ActorSNO { get; set; }
+
+        [DataMember]
+        public int AcdId { get; set; }
 
         [DataMember]
         public ActorClass ActorClass { get; set; }
@@ -282,6 +285,7 @@ namespace AutoFollow.Networking
                         BehaviorType = AutoFollow.CurrentBehavior.Type,
                         IsQuickJoinEnabled = Player.Instance.IsQuickJoinEnabled,
                         BattleTagEncrypted = GetMyEncryptedBattleTag(),
+                        AcdId = Player.Instance.AcdId,
                     };
                 }
                 else if (ZetaDia.IsInGame && !ZetaDia.IsLoadingWorld && ZetaDia.Me.IsValid)
@@ -323,6 +327,7 @@ namespace AutoFollow.Networking
                         LastPortalUsed = Player.LastPortalUsed,
                         BehaviorType = AutoFollow.CurrentBehavior.Type,
                         IsInRift = RiftHelper.IsInRift,
+                        AcdId = Player.Instance.AcdId,
                     };
                 }
                 else if (ZetaDia.IsInGame && ZetaDia.IsLoadingWorld)
@@ -349,6 +354,7 @@ namespace AutoFollow.Networking
                         BehaviorType = AutoFollow.CurrentBehavior.Type,
                         BattleTagEncrypted = GetMyEncryptedBattleTag(),
                         IsInRift = RiftHelper.IsInRift,
+                        AcdId = Player.Instance.AcdId,
                     };
                 }
                 else
@@ -371,6 +377,7 @@ namespace AutoFollow.Networking
                         IsQuickJoinEnabled = Player.Instance.IsQuickJoinEnabled,
                         BehaviorType = AutoFollow.CurrentBehavior.Type,
                         BattleTagEncrypted = GetMyEncryptedBattleTag(),
+                        AcdId = Player.Instance.AcdId,
                     };
                 }
 
@@ -549,5 +556,7 @@ namespace AutoFollow.Networking
             return new Target(CombatTargeting.Instance.Provider.GetObjectsByWeight().FirstOrDefault());
         }
     }
+
+
 }
 

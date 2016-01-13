@@ -7,5 +7,5 @@
     <LeaveGame questId="1" />
   </Order>
   <KillMonsters>True</KillMonsters>
-  <PickupLoot>False</PickupLoot>
+  <PickupLoot>True</PickupLoot>
 </Profile>

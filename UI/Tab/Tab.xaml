@@ -39,10 +39,11 @@
                         <Label>Server URI:</Label>
                         <Label Content="{Binding ServerURI, FallbackValue=Unknown}" />
                     </WrapPanel>
-                    <WrapPanel>
+                    <StackPanel>
                         <Button Command="{Binding OpenSettingsCommand}">Open Settings</Button>
-                        <Button Command="{Binding TestCommand}">Test</Button>
-                    </WrapPanel>
+                        <!--<Button Command="{Binding TestCommand}">Test</Button>-->
+                        <Button Command="{Binding InvitePlayerCommand}">Invite Player</Button>
+                    </StackPanel>
                 </StackPanel>
             </UniformGrid>
         </Grid>

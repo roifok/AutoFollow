@@ -9,6 +9,7 @@ using AutoFollow.Coroutines.Resources;
 using AutoFollow.Events;
 using AutoFollow.Networking;
 using AutoFollow.Resources;
+using AutoFollow.UI.Settings;
 using Zeta.Bot;
 using Zeta.Common;
 using Zeta.Game;
@@ -49,7 +50,7 @@ namespace AutoFollow.Behaviors
                 }
                 else
                 {
-                    Log.Info("Leader message was invalid");
+                    Log.Debug("Leader message was invalid");
                 }
                 
                 return true;
@@ -87,7 +88,7 @@ namespace AutoFollow.Behaviors
                 }
                 else
                 {
-                    Log.Info("Leader message was invalid");
+                    Log.Debug("Leader message was invalid");
                 }
 
                 return true;
@@ -134,7 +135,7 @@ namespace AutoFollow.Behaviors
                 Log.Info("Moving to attack {0}'s target - {1} Distance={2}", 
                     player.HeroName, player.CurrentTarget.Name, player.CurrentTarget.Distance);
 
-                await Movement.MoveTo(player.CurrentTarget.Position, player.CurrentTarget.Name, 10f, () => 
+                await Movement.MoveTo(player.CurrentTarget, player.CurrentTarget.Name, 10f, () => 
                     ZetaDia.Me.IsInCombat || !ZetaDia.Me.Movement.IsMoving);
 
                 return true;

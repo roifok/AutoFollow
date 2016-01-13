@@ -49,22 +49,41 @@ namespace AutoFollow.Coroutines
             return true;
         }
 
-        //private static Coroutine _navigateToCoroutine;
+        public async static Task<bool> MoveTo(ITargetable message, string destinationName, float range, Func<bool> stopCondition)
+        {
+            var distance = 0f;
+            var location = message.Position;
+            var name = string.IsNullOrEmpty(destinationName) ? location.ToString() : destinationName;
 
-        //public static MoveResult NavigateTo(Vector3 destination, string destinationName = "")
-        //{
-        //    Log.Verbose("NavigateTo: {1} at {0}", destination, destinationName);
+            while (ZetaDia.IsInGame)
+            {
+                if (stopCondition != null && stopCondition())
+                    break;
 
-        //    if (_navigateToCoroutine == null || _navigateToCoroutine.IsFinished)
-        //        _navigateToCoroutine = new Coroutine(async () => await Navigator.MoveTo(destination, destinationName));
+                if (ZetaDia.Me.IsDead || Navigator.StuckHandler.IsStuck)
+                    break;
 
-        //    _navigateToCoroutine.Resume();
+                var actor = Data.Players.FirstOrDefault(p => p.ACDId == message.AcdId);
+                if (actor != null)
+                {
+                    location = actor.Position;
+                }
 
-        //    if (_navigateToCoroutine.Status == CoroutineStatus.RanToCompletion)
-        //        return (MoveResult)_navigateToCoroutine.Result;
+                distance = location.Distance(ZetaDia.Me.Position);
+                if (distance <= range)
+                    break;
 
-        //    return MoveResult.Moved;
-        //}
+                Log.Verbose("Moving to {0} Distance={1}", name, distance);
+                await Navigator.MoveTo(location, name);
+                await Coroutine.Yield();
+            }
+
+            if (distance <= range)
+                Navigator.PlayerMover.MoveStop();
+
+            Log.Verbose("MoveTo Finished. Distance={0}", distance);
+            return true;
+        }
 
         /// <summary>
         /// Moves to something and interacts with it
@@ -178,7 +197,7 @@ namespace AutoFollow.Coroutines
                 Log.Verbose("Moving to Player {0} CurrentDistance={1} DistanceRequired={2} ",
                     player.HeroName, player.Distance, range);
 
-                await MoveTo(player.Position, player.HeroName, range, () => !player.IsInSameWorld);
+                await MoveTo(player, player.HeroName, range, () => !player.IsInSameWorld);
                 return true;
             }
 

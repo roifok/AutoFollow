@@ -18,7 +18,7 @@ namespace AutoFollow.Coroutines
 
         public static async Task<bool> Execute(Message playerMessage)
         {
-            Log.Debug("Started TeleportToPlayer Task");            
+            Log.Debug("Started TeleportToPlayer Task DistToTarget={0}", playerMessage.Distance);            
 
             if (!ZetaDia.IsInGame || ZetaDia.IsLoadingWorld)
                 return false;

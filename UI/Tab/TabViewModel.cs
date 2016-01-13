@@ -6,15 +6,21 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using System.Windows.Input;
 using AutoFollow.Behaviors.Structures;
 using AutoFollow.Coroutines.Resources;
 using AutoFollow.Networking;
 using AutoFollow.Resources;
+using AutoFollow.UI.Components.Controls;
 using AutoFollow.UI.Settings;
 using Buddy.Overlay.Commands;
 using JetBrains.Annotations;
+using Zeta.Bot;
+using Zeta.Common;
+using Zeta.Game;
 using Zeta.Game.Internals;
+using Zeta.Game.Internals.Actors;
 
 namespace AutoFollow.UI.Tab 
 {
@@ -116,6 +122,56 @@ namespace AutoFollow.UI.Tab
             }
         }
 
+        public ICommand InvitePlayerCommand
+        {
+            get
+            {
+                return new RelayCommand(param =>
+                {
+                    //if (!BotMain.IsRunning || BotMain.IsPausedForStateExecution)
+                    //{
+                    //    Log.Error("Bot must be running to invite someone");
+                    //    return;
+                    //}
+
+                    //var mbox = InputBox.Show("Enter Battle>net", "Adventurer", string.Empty);
+                    //if (mbox.ReturnCode == DialogResult.Cancel)
+                    //{
+                    //    return;
+                    //}
+                    //if (string.IsNullOrWhiteSpace(mbox.Text))
+                    //{
+                    //    Logger.Info("Enter an actorId");
+                    //    return;
+                    //}
+
+                    //int actorId;
+                    //if (!int.TryParse(mbox.Text, out actorId))
+                    //{
+                    //    Logger.Info("Invalid actorId");
+                    //    return;
+                    //}
+
+                    //if (!ZetaDia.IsInGame)
+                    //    return;
+
+                    //using (ZetaDia.Memory.AcquireFrame(true))
+                    //{
+
+                    //    if (ZetaDia.Me == null)
+                    //        return;
+                    //    if (!ZetaDia.Me.IsValid)
+                    //        return;
+
+                    //    ZetaDia.Actors.Update();
+
+
+                    //}
+
+                });
+            }           
+        }
+
         public ICommand TestCommand
         {
             get
@@ -125,27 +181,27 @@ namespace AutoFollow.UI.Tab
                     try
                     {
 
-                        Log.Info("Test button clicked!");
-                        var partyInvite = GameUI.PartyInviteDialog;
-                        if (partyInvite.IsVisible)
-                        {
-                            Log.Info("We have a pending request dialog!");
+                        //Log.Info("Test button clicked!");
+                        //var partyInvite = GameUI.PartyInviteDialog;
+                        //if (partyInvite.IsVisible)
+                        //{
+                        //    Log.Info("We have a pending request dialog!");
 
-                            var el = partyInvite.FindDecedentsWithText("d3dex1").FirstOrDefault();
-                            if (el != null)
-                            {
-                                Log.Info("Element found {0} {1} {2}", el.Text, el.Hash, el.Name);
-                            }
+                        //    var el = partyInvite.FindDecedentsWithText("d3dex1").FirstOrDefault();
+                        //    if (el != null)
+                        //    {
+                        //        Log.Info("Element found {0} {1} {2}", el.Text, el.Hash, el.Name);
+                        //    }
 
-                            //var name = UIElement.FromName("Root.TopLayer.BattleNetNotifications_main.Invite To Party Notification.PartyPlayer");                            
-                            var name = UIElement.FromHash(12614685561186959926);
-                            if (name != null)
-                            {
-                                Log.Info("PlayerName is {0}", name.Text);
-                            }
+                        //    //var name = UIElement.FromName("Root.TopLayer.BattleNetNotifications_main.Invite To Party Notification.PartyPlayer");                            
+                        //    var name = UIElement.FromHash(12614685561186959926);
+                        //    if (name != null)
+                        //    {
+                        //        Log.Info("PlayerName is {0}", name.Text);
+                        //    }
                             
 
-                        }
+                        //}
 
                         //if (!GameUI.FriendsListContent.IsVisible)
                         //{

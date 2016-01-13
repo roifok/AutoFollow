@@ -132,7 +132,7 @@ namespace AutoFollow.Behaviors
                 return true;
             }
 
-            Log.Verbose("Base InGameTask");
+            //Log.Verbose("Base InGameTask");
             GameUI.SafeCheckClickButtons();
             return false;
         }
@@ -146,7 +146,7 @@ namespace AutoFollow.Behaviors
         {
             if (!TreeHooks.Instance.Hooks.Any(h => h.Value.Contains(InGameHook)))
             {
-                Log.Info("InGameHook not found");
+                //Log.Info("InGameHook not found");
                 InsertHooks();
             }
         }

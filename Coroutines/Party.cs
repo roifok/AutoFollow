@@ -5,6 +5,7 @@ using AutoFollow.Coroutines.Resources;
 using AutoFollow.Events;
 using AutoFollow.Networking;
 using AutoFollow.Resources;
+using AutoFollow.UI.Settings;
 using Buddy.Coroutines;
 using Zeta.Bot.Navigation;
 using Zeta.Common;
@@ -56,7 +57,7 @@ namespace AutoFollow.Coroutines
 
         public async static Task<bool> TeleportWhenTooFarAway(Message player)
         {
-            if (Player.IsFollower && player.WorldSnoId == Player.Instance.Message.WorldSnoId && player.IsInSameGame && !player.IsInCombat && player.Distance > 300f)
+            if (Player.IsFollower && player.WorldSnoId == Player.Instance.Message.WorldSnoId && player.IsInSameGame && !player.IsInCombat && player.Distance > AutoFollowSettings.Instance.TeleportDistance)
             {
                 Log.Info("{0} is getting quite far away... attempting teleport!", player.HeroName);
                 await TeleportToPlayer.Execute(player);
@@ -147,9 +148,6 @@ namespace AutoFollow.Coroutines
 
         public static async Task<bool> QuickJoinLeader()
         {
-            //if (AutoFollow.CurrentLeader.IsInTown)
-            //    return false;
-
             if (DateTime.UtcNow.Subtract(_lastAttemptQuickJoin) > TimeSpan.FromSeconds(5) && !Player.IsInParty && AutoFollow.CurrentLeader.IsInGame && AutoFollow.CurrentLeader != null)
             {
                 var quickJoinElements = UIElement.UIMap.Where(e => e.Name.Contains("CallToArmsElem")).ToList();
@@ -218,11 +216,8 @@ namespace AutoFollow.Coroutines
 
             foreach (var item in stackPanelItems)
             {
-                var text = item.TextElement.Text;
-                
+                var text = item.TextElement.Text;                
                 var isBattleTag = Message.IsBattleTag(Common.CleanString(text), follower.BattleTagEncrypted);
-
-                Log.Info("Found {0} IsBattleTag={1} TagEnc={2}", text, isBattleTag, follower.BattleTagEncrypted);
 
                 if (isBattleTag)
                 {

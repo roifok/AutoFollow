@@ -52,6 +52,7 @@
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Windows" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
@@ -98,6 +99,7 @@
     <Compile Include="Resources\Interactable.cs" />
     <Compile Include="Resources\InterfaceLoader.cs" />
     <Compile Include="Resources\IPluginCommunicator.cs" />
+    <Compile Include="Resources\ITargetable.cs" />
     <Compile Include="Resources\Log.cs" />
     <Compile Include="Resources\MathUtil.cs" />
     <Compile Include="Resources\MemoryHelper.cs" />
@@ -110,6 +112,7 @@
     <Compile Include="Resources\Timer.cs" />
     <Compile Include="Resources\Town.cs" />
     <Compile Include="Resources\UIElementExtensions.cs" />
+    <Compile Include="UI\Components\Controls\InputBox.cs" />
     <Compile Include="UI\Settings\Settings.cs" />
     <Compile Include="UI\Tab\TabUI.cs" />
     <Compile Include="UI\Tab\TabViewModel.cs" />
@@ -131,13 +134,28 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include=".vs\" />
+    <Folder Include="UI\Components\Converters\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />
   <ProjectExtensions>
     <VisualStudio AllowExistingFolder="true" />
   </ProjectExtensions>
   <PropertyGroup>
-    <PostBuildEvent>SET TARGETDIR=C:\DB\DB-PTR\Plugins\AutoFollow\
+    <PostBuildEvent>SET TARGETDIR=C:\DB\DB-Current\Plugins\AutoFollow\
+
+rd "%25TARGETDIR%25" /S /Q
+xcopy "$(ProjectDir)*" "%25TARGETDIR%25" /Q /E /C /I /R /Y
+rd "%25TARGETDIR%25bin\" /S /Q
+rd "%25TARGETDIR%25obj\" /S /Q
+del "%25TARGETDIR%25$(ProjectName).csproj"
+del "%25TARGETDIR%25*.suo"
+del "%25TARGETDIR%25*.user"
+del "%25TARGETDIR%25*.sln"
+del "%25TARGETDIR%25*.DotSettings"
+del "%25TARGETDIR%25packages.config"
+
+
+SET TARGETDIR=C:\DB\DB-PTR\Plugins\AutoFollow\
 
 rd "%25TARGETDIR%25" /S /Q
 xcopy "$(ProjectDir)*" "%25TARGETDIR%25" /Q /E /C /I /R /Y
@@ -148,6 +166,7 @@ del "%25TARGETDIR%25*.suo"
 del "%25TARGETDIR%25*.user"
 del "%25TARGETDIR%25*.DotSettings"
 del "%25TARGETDIR%25packages.config"
+del "%25TARGETDIR%25*.sln"
 
 SET TARGETDIR=C:\VirtualMachines\Shared\DB-PTR\Plugins\AutoFollow\
 
@@ -160,6 +179,6 @@ del "%25TARGETDIR%25*.suo"
 del "%25TARGETDIR%25*.user"
 del "%25TARGETDIR%25*.DotSettings"
 del "%25TARGETDIR%25packages.config"
-</PostBuildEvent>
+del "%25TARGETDIR%25*.sln"</PostBuildEvent>
   </PropertyGroup>
 </Project>

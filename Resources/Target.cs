@@ -10,7 +10,7 @@ using Zeta.Game.Internals.Actors;
 namespace AutoFollow.Resources
 {
     [Serializable]
-    public class Target
+    public class Target : ITargetable
     {
         public Target(DiaObject actor)
         {
@@ -18,7 +18,7 @@ namespace AutoFollow.Resources
                 return;
 
             Id = actor.ActorSnoId;
-            ACDId = actor.ACDId;
+            AcdId = actor.ACDId;
             Name = actor.Name;
 
             var quality = actor.CommonData.MonsterQualityLevel;
@@ -30,7 +30,7 @@ namespace AutoFollow.Resources
         }
 
         public int Id { get; set; }
-        public int ACDId { get; set; }
+        public int AcdId { get; set; }
         public string Name { get; set; }
         public MonsterQuality Quality { get; set; }
         public Vector3 Position { get; set; }
@@ -43,9 +43,10 @@ namespace AutoFollow.Resources
         public override string ToString()
         {
             return string.Format(
-                "( Id: {0} ACDId: {1} Name: {2} Quality: {3} Position: {4} )",
-                Id, ACDId, Name, Quality, Position
+                "( Id: {0} AcdId: {1} Name: {2} Quality: {3} Position: {4} )",
+                Id, AcdId, Name, Quality, Position
                 );
         }
+
     }
 }

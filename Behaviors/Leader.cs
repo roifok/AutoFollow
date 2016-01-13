@@ -9,6 +9,7 @@ using AutoFollow.Coroutines.Resources;
 using AutoFollow.Events;
 using AutoFollow.Networking;
 using AutoFollow.Resources;
+using AutoFollow.UI.Settings;
 using Zeta.Bot;
 using Zeta.Common;
 using Zeta.Game;
@@ -48,7 +49,7 @@ namespace AutoFollow.Behaviors
             if (await Party.WaitToBecomePartyLeader())
                 return true;
 
-            if (await Party.LeavePartyUnknownPlayersInGame())
+            if (AutoFollowSettings.Instance.AvoidUnknownPlayers && await Party.LeavePartyUnknownPlayersInGame())
                 return true;
 
             if (await Party.WaitForPlayersToLeaveGame())
@@ -62,7 +63,7 @@ namespace AutoFollow.Behaviors
         {
             if (!AutoFollow.CurrentLeader.IsValid)
             {
-                Log.Info("Leader message was invalid");
+                Log.Debug("Leader message was invalid");
                 return false;
             }
 

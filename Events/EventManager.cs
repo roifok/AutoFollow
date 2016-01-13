@@ -149,8 +149,11 @@ namespace AutoFollow.Events
 
             Message m;
             if (TryGetMessageForId(e, out m))
+            {
+                Log.Debug("Unable to find message for the event. Owner='{0}'", e.OwnerId);
                 return;
-
+            }
+                
             if (e.IsLeaderEvent)
             {
                 if (AutoFollowSettings.Instance.DebugLogging)
@@ -219,7 +222,7 @@ namespace AutoFollow.Events
         /// </summary>
         private static async Task<bool> TreeStartTask()
         {
-            Log.Verbose("EventManager Task");
+            //Log.Verbose("EventManager Task");
             while (EventQueue.Any())
             {
                 var e = EventQueue.Dequeue();
