@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoFollow.Behaviors;
+using AutoFollow.Coroutines.Resources;
 using AutoFollow.Networking;
 using AutoFollow.Resources;
 using Buddy.Coroutines;
@@ -256,10 +258,36 @@ namespace AutoFollow.Coroutines
             return true;       
         }
 
+        //public static async Task<bool> UseReturnPortalInTown()
+        //{
+        //    if (!RiftHelper.IsStarted || !Player.Instance.IsInTown || !AutoFollow.CurrentLeader.IsInRift || BrainBehavior.IsVendoring)
+        //        return false;
+
+        //    var riftEntrancePortal = Data.Portals.FirstOrDefault(p =>
+        //        p.ActorSnoId == 396751 || // Greater/Empowered Rift
+        //        p.ActorSnoId == 345935); // Normal Rift        
+
+        //    Log.Info("Entering the open rift... ");
+
+        //    if (riftEntrancePortal == null)
+        //        return false;
+
+        //    await MoveToAndInteract(riftEntrancePortal);
+        //    return true;
+        //}
+
         public static async Task<bool> UseOpenRiftPortalInTown()
         {
             if (!RiftHelper.IsStarted || !Player.Instance.IsInTown || !AutoFollow.CurrentLeader.IsInRift || BrainBehavior.IsVendoring)
                 return false;
+
+            //ActorId: 191492, Type: Gizmo, Name: hearthPortal-46321, Distance2d: 6.981126, CollisionRadius: 8.316568, MinimapActive: 0, MinimapIconOverride: -1, MinimapDisableArrow: 0 
+            var returnPortal = Data.Portals.FirstOrDefault(p => p.ActorSnoId == 191492);
+            if (returnPortal != null && AutoFollow.CurrentLeader.IsInRift && !Player.Instance.IsVendoring)
+            {
+                Log.Info("Entering the return portal back to rift... ");
+                await MoveToAndInteract(returnPortal);
+            }
 
             var riftEntrancePortal = Data.Portals.FirstOrDefault(p =>
                 p.ActorSnoId == 396751 || // Greater/Empowered Rift
@@ -269,6 +297,9 @@ namespace AutoFollow.Coroutines
 
             if (riftEntrancePortal == null)
                 return false;
+
+            // todo: add rift obelisk locations for each act and go there instead.
+            await MoveTo(Town.Locations.KanaisCube);
 
             await MoveToAndInteract(riftEntrancePortal);
             return true;

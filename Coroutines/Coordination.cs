@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AutoFollow.Resources;
 using Buddy.Coroutines;
 using Zeta.Bot;
+using Zeta.Game.Internals.Actors;
 
 namespace AutoFollow.Coroutines
 {
@@ -44,13 +45,20 @@ namespace AutoFollow.Coroutines
             if (_ignoreOtherBotsUntilTime > DateTime.UtcNow)
                 return false;
 
+            if (AutoFollow.CurrentFollowers.Any(f => f.IsVendoring))
+            {
+                Log.Info("Waiting for followers to finish vendoring.");
+                await Coroutine.Sleep(15000);
+                return false;
+            }
+
             if (AutoFollow.NumberOfConnectedBots == 0 || !AutoFollow.CurrentFollowers.All(f => f.IsInSameGame))
             {
                 if (!_startedWaiting.HasValue)
                 {
                     _startedWaiting = DateTime.UtcNow;
                     Log.Info("Waiting for bots to connect/join.");
-                    await Coroutine.Sleep(5000);
+                    await Coroutine.Sleep(8000);
                     return true;
                 }
 
@@ -58,11 +66,12 @@ namespace AutoFollow.Coroutines
                 if (secondsWaiting < 60)
                 {
                     Log.Info("Waiting for bots to connect/join. Waited {0} seconds", secondsWaiting);
-                    await Coroutine.Sleep(5000);
+                    await Coroutine.Sleep(8000);
                     return true;
                 }
 
                 Log.Info("Waited for {0}s bots to connect.. starting without them.", secondsWaiting);
+                await Coroutine.Sleep(5000);
                 _startedWaiting = null;
                 _ignoreOtherBotsUntilTime = DateTime.UtcNow.AddMinutes(2);
             }

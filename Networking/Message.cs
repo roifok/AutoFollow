@@ -104,7 +104,7 @@ namespace AutoFollow.Networking
         public DateTime LastUpdated { get; set; }
 
         [DataMember]
-        public int Id { get; set; }
+        public int OwnerId { get; set; }
 
         [DataMember]
         public string ProfileTagName { get; set; }
@@ -184,7 +184,7 @@ namespace AutoFollow.Networking
 
         public bool IsMe
         {
-            get { return Player.BattleTagHash == Id; }
+            get { return Player.BattleTagHash == OwnerId; }
         }
 
         public bool IsLeavingGame
@@ -232,7 +232,7 @@ namespace AutoFollow.Networking
 
         public bool IsLeader
         {
-            get { return Id == LeaderId; }
+            get { return OwnerId == LeaderId; }
         }
 
         public bool IsFollower
@@ -275,7 +275,7 @@ namespace AutoFollow.Networking
                         IsInGame = false,
                         LastUpdated = DateTime.UtcNow,
                         IsInParty = Player.IsInParty,
-                        Id = Player.BattleTagHash,
+                        OwnerId = Player.BattleTagHash,
                         NumPartymembers = Player.NumPlayersInParty,
                         Events = EventManager.Events.ToList(),
                         BNetPartyMembers = ZetaDia.Service.Party.NumPartyMembers,
@@ -295,7 +295,7 @@ namespace AutoFollow.Networking
                         Index = Player.Instance.Index,
                         LastUpdated = DateTime.UtcNow,
                         IsInGame = ZetaDia.IsInGame,
-                        Id = Player.BattleTagHash,
+                        OwnerId = Player.BattleTagHash,
                         IsInParty = Player.IsInParty,
                         NumPartymembers = Player.NumPlayersInParty,
                         IsLoadingWorld = Player.Instance.IsLoadingWorld,
@@ -338,7 +338,7 @@ namespace AutoFollow.Networking
                         IsInGame = true,
                         IsLoadingWorld = true,
                         GameId = Player.Instance.CurrentGameId,
-                        Id = Player.BattleTagHash,
+                        OwnerId = Player.BattleTagHash,
                         IsInTown = false,
                         WorldSnoId = -1,
                         LevelAreaId = -1,
@@ -364,7 +364,7 @@ namespace AutoFollow.Networking
                         Index = Player.Instance.Index,
                         IsInGame = false,
                         IsInTown = false,
-                        Id = Player.BattleTagHash,
+                        OwnerId = Player.BattleTagHash,
                         WorldSnoId = -1,
                         LastUpdated = DateTime.UtcNow,
                         IsInParty = Player.IsInParty,
@@ -423,7 +423,7 @@ namespace AutoFollow.Networking
                 ProfileTagName,
                 ActorClass,
                 IsInParty,
-                Id,
+                OwnerId,
                 Events.Count,
                 HeroName,
                 CurrentTarget,

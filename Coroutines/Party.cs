@@ -43,7 +43,7 @@ namespace AutoFollow.Coroutines
 
         public async static Task<bool> TeleportWhenInDifferentWorld(Message player)
         {
-            if (RiftHelper.IsGreaterRiftStarted)
+            if ((RiftHelper.IsInRift || player.IsInRift) && RiftHelper.IsGreaterRiftStarted)
                 return false;
 
             if (Player.IsFollower && player.WorldSnoId != Player.Instance.Message.WorldSnoId && player.IsInSameGame && !player.IsInCombat)
@@ -57,6 +57,9 @@ namespace AutoFollow.Coroutines
 
         public async static Task<bool> TeleportWhenTooFarAway(Message player)
         {
+            if ((RiftHelper.IsInRift || player.IsInRift) && RiftHelper.IsGreaterRiftStarted)
+                return false;
+
             if (Player.IsFollower && player.WorldSnoId == Player.Instance.Message.WorldSnoId && player.IsInSameGame && !player.IsInCombat && player.Distance > AutoFollowSettings.Instance.TeleportDistance)
             {
                 Log.Info("{0} is getting quite far away... attempting teleport!", player.HeroName);
@@ -188,6 +191,12 @@ namespace AutoFollow.Coroutines
         {
             if (DateTime.UtcNow.Subtract(_lastInviteAttempt).TotalSeconds < 5)
                 return false;
+
+            if (ZetaDia.Service.Party.CurrentPartyLockReasonFlags != PartyLockReasonFlag.None)
+            {
+                Log.Info("Party is locked, can't invite right now");
+                return false;
+            }
 
             if (AutoFollow.NumberOfConnectedBots == 0)
                 return false;

@@ -287,7 +287,7 @@ namespace AutoFollow.Resources
 
         public static bool IsLeader
         {
-            get { return AutoFollow.CurrentLeader != null && Instance.Message != null && Instance.Message.Id == AutoFollow.CurrentLeader.Id; }
+            get { return AutoFollow.CurrentLeader != null && Instance.Message != null && Instance.Message.OwnerId == AutoFollow.CurrentLeader.OwnerId; }
         }
 
         public static bool IsFollower

@@ -170,13 +170,13 @@ namespace AutoFollow.Networking
         {
             foreach (var message in messages)
             {
-                if (!BotsLastSeenTime.ContainsKey(message.Id))
-                    BotsLastSeenTime.Add(message.Id, DateTime.UtcNow);
+                if (!BotsLastSeenTime.ContainsKey(message.OwnerId))
+                    BotsLastSeenTime.Add(message.OwnerId, DateTime.UtcNow);
                 else
-                    BotsLastSeenTime[message.Id] = DateTime.UtcNow;
+                    BotsLastSeenTime[message.OwnerId] = DateTime.UtcNow;
             }
 
-            return BotsLastSeenTime.Count(r => DateTime.UtcNow.Subtract(r.Value).TotalMilliseconds <= 10 && r.Key != Player.CurrentMessage.Id);
+            return BotsLastSeenTime.Count(r => DateTime.UtcNow.Subtract(r.Value).TotalMilliseconds <= 10 && r.Key != Player.CurrentMessage.OwnerId);
         }
     }
 }

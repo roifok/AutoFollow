@@ -144,7 +144,7 @@ namespace AutoFollow.Networking
         private static void UpdateDataAsServer()
         {
             var serverMessage = Player.Instance.Message;
-            serverMessage.LeaderId = AutoFollow.SelectLeader().Id;
+            serverMessage.LeaderId = AutoFollow.SelectLeader().OwnerId;
             AutoFollow.ClientMessages.ForEach(cm => cm.Value.LeaderId = serverMessage.LeaderId);
             AutoFollow.CurrentParty = new List<Message>(AutoFollow.ClientMessages.Values) {serverMessage};
             AutoFollow.CurrentFollowers = AutoFollow.CurrentParty.Where(o => o.IsFollower).ToList();
@@ -204,12 +204,12 @@ namespace AutoFollow.Networking
 
                 try
                 {
-                    if (message.Id != 0)
+                    if (message.OwnerId != 0)
                     {
-                        if (AutoFollow.ClientMessages.ContainsKey(message.Id))
-                            AutoFollow.ClientMessages[message.Id] = message;
+                        if (AutoFollow.ClientMessages.ContainsKey(message.OwnerId))
+                            AutoFollow.ClientMessages[message.OwnerId] = message;
                         else
-                            AutoFollow.ClientMessages.Add(message.Id, message);
+                            AutoFollow.ClientMessages.Add(message.OwnerId, message);
                     }
 
                     EventManager.Add(message.Events);

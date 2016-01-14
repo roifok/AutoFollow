@@ -145,10 +145,10 @@ namespace AutoFollow.Events
         /// </summary>
         public static void FireEvent(EventData e)
         {           
-            Log.Info("New Event {0} EventId={1}", e.ToString(), e.GetHashCode());
+            Log.Debug("New Event {0} EventId={1}", e.ToString(), e.GetHashCode());
 
             Message m;
-            if (TryGetMessageForId(e, out m))
+            if (!TryGetMessageForId(e, out m))
             {
                 Log.Debug("Unable to find message for the event. Owner='{0}'", e.OwnerId);
                 return;
@@ -200,16 +200,15 @@ namespace AutoFollow.Events
             {
                 m = Player.Instance.Message;
             }
-            else if (e.OwnerId == AutoFollow.CurrentLeader.Id)
+            else if (e.OwnerId == AutoFollow.CurrentLeader.OwnerId)
             {
                 m = AutoFollow.CurrentLeader;
             }
             else
             {
-                if (!AutoFollow.ClientMessages.TryGetValue(e.OwnerId, out m))
-                    return true;
-            }
-            return false;
+                m = AutoFollow.CurrentParty.FirstOrDefault(message => message.OwnerId == e.OwnerId);                
+            }            
+            return m != null;
         }
 
         public static bool HasFired(EventData e)
