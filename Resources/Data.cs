@@ -30,6 +30,11 @@ namespace AutoFollow.Resources
             get { return ZetaDia.Actors.GetActorsOfType<DiaObject>(true).Where(IsValid).ToList(); }
         }
 
+        public static List<MinimapMarker> Markers
+        {
+            get { return ZetaDia.Minimap.Markers.CurrentWorldMarkers.ToList(); }
+        }
+
         public static List<DiaPlayer> Players
         {
             get { return ZetaDia.Actors.GetActorsOfType<DiaPlayer>(true).Where(o => IsValid(o)).ToList(); }

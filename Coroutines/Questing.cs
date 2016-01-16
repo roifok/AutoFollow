@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AutoFollow.Coroutines.Resources;
 using AutoFollow.Resources;
 using Buddy.Coroutines;
 
@@ -17,7 +18,7 @@ namespace AutoFollow.Coroutines
             if (DateTime.UtcNow.Subtract(LastRequestedGemUpgrade).TotalMinutes < 1)
                 return false;
 
-            if (RiftHelper.IsInRift && RiftHelper.CurrentRift.IsCompleted)
+            if (RiftHelper.IsInRift && RiftHelper.RiftQuest.Step == RiftQuest.RiftStep.UrshiSpawned && RiftHelper.CurrentRift.IsCompleted)
             {
                 if (AutoFollow.CurrentLeader.Distance > 150f)
                     await TeleportToPlayer.Execute(AutoFollow.CurrentLeader);
@@ -31,5 +32,18 @@ namespace AutoFollow.Coroutines
 
             return false;            
         }
+
+        public static async Task<bool> TalkToOrek()
+        {
+            if (!Player.Instance.IsVendoring && Player.Instance.IsInTown && RiftHelper.IsGreaterRiftProfile && RiftHelper.RiftQuest.Step == RiftQuest.RiftStep.Cleared)
+            {
+                if(!await Movement.MoveToAndInteract(Town.Actors.Orek))
+                    return false;
+
+                return true;
+            }
+            return false;
+        }
+
     }
 }

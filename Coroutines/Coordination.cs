@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AutoFollow.Coroutines.Resources;
 using AutoFollow.Resources;
 using Buddy.Coroutines;
 using Zeta.Bot;
@@ -42,15 +43,20 @@ namespace AutoFollow.Coroutines
             if (!RiftHelper.IsGreaterRiftProfile || RiftHelper.IsGreaterRiftStarted)
                 return false;
 
-            if (_ignoreOtherBotsUntilTime > DateTime.UtcNow)
-                return false;
-
             if (AutoFollow.CurrentFollowers.Any(f => f.IsVendoring))
             {
                 Log.Info("Waiting for followers to finish vendoring.");
-                await Coroutine.Sleep(15000);
+
+                var obelisk = Town.Actors.RiftObelisk;
+                if(obelisk != null)
+                    await Movement.MoveTo(obelisk.Position);
+
+                await Coroutine.Sleep(30000);
                 return false;
             }
+
+            if (_ignoreOtherBotsUntilTime > DateTime.UtcNow)
+                return false;
 
             if (AutoFollow.NumberOfConnectedBots == 0 || !AutoFollow.CurrentFollowers.All(f => f.IsInSameGame))
             {

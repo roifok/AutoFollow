@@ -69,6 +69,7 @@ namespace AutoFollow.Behaviors
             EventManager.InTrouble += OnInTrouble;
             EventManager.UsedPortal += OnUsedPortal;
             EventManager.InviteRequest += OnInviteRequest;
+            EventManager.RequestPartyLeaveGame += OnRequestPartyLeaveGame;
 
             Pulsator.OnPulse += Pulsator_OnPulse;
             LastActivated = DateTime.UtcNow;
@@ -201,6 +202,11 @@ namespace AutoFollow.Behaviors
             return false;
         }
 
+        public virtual async Task<bool> OnRequestPartyLeaveGame(Message sender, EventData e)
+        {
+            return false;
+        }
+        
         public static bool IsGameReady
         {
             get { return ZetaDia.Service.IsValid && ZetaDia.Service.Hero.IsValid && AutoFollow.Enabled && !ZetaDia.IsLoadingWorld; }

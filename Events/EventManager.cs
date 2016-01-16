@@ -43,6 +43,7 @@ namespace AutoFollow.Events
         public static AsyncEvent<Message, EventData> UsedPortal;
         public static AsyncEvent<Message, EventData> Died;
         public static AsyncEvent<Message, EventData> InviteRequest;
+        public static AsyncEvent<Message, EventData> RequestPartyLeaveGame;
 
         static EventManager()
         {
@@ -183,6 +184,7 @@ namespace AutoFollow.Events
                 case EventType.UsedPortal: Queue(UsedPortal, e, m); break;
                 case EventType.Died: Queue(Died, e, m); break;
                 case EventType.InviteRequest: Queue(InviteRequest, e, m); break;
+                case EventType.RequestPartyLeaveGame: Queue(RequestPartyLeaveGame, e, m); break;
             }
 
             lock (Synchronizer)

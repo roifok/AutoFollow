@@ -46,16 +46,16 @@
                 </StackPanel>
             </GroupBox>
             <GroupBox Header="Coodination">
-                <UniformGrid>
+                <StackPanel>
                     <WrapPanel>
                         <TextBlock Margin="5,5" HorizontalAlignment="Right" Text="Teleport Distance" VerticalAlignment="Center" ToolTip="How far away bots need to be from leader before teleporting"/>
                         <TextBox Margin="5,5" HorizontalAlignment="Left" ToolTip="How far away bots need to be from leader before teleporting" Text="{Binding Path=TeleportDistance, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Width="40" BorderBrush="DarkGray"  />
                     </WrapPanel>
-                    <!--<WrapPanel>
-                        <TextBlock Margin="5,5" HorizontalAlignment="Right" Text="Player Whitelist" VerticalAlignment="Center" ToolTip="How far away bots need to be from leader before teleporting"/>
-                        <TextBox Margin="5,5" HorizontalAlignment="Left" ToolTip="How far away bots need to be from leader before teleporting" Text="{Binding Path=ServerPort, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Width="30" BorderBrush="DarkGray"  />
-                    </WrapPanel>-->
-                </UniformGrid>
+                    <WrapPanel>
+                        <TextBlock Margin="5,5" HorizontalAlignment="Right" Text="Follow Distance" VerticalAlignment="Center" ToolTip="This determines how close the bots will get to the leader when following."/>
+                        <TextBox Margin="5,5" HorizontalAlignment="Left" ToolTip="This determines how close the bots will get to the leader when following." Text="{Binding Path=FollowDistance, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Width="40" BorderBrush="DarkGray"  />
+                    </WrapPanel>                    
+                </StackPanel>
             </GroupBox>
             <GroupBox Header="Misc">
                 <UniformGrid Columns="1">

@@ -5,6 +5,7 @@ using AutoFollow.Networking;
 using AutoFollow.Resources;
 using Zeta.Bot;
 using Zeta.Bot.Logic;
+using Zeta.Bot.Navigation;
 using Zeta.Common;
 using Zeta.Game;
 
@@ -31,22 +32,11 @@ namespace AutoFollow.Events
 
         private static void GameEvents_OnWorldTransferStart(object sender, EventArgs e)
         {
-            if (ZetaDia.IsInTown) // todo Detect if no portal was used / town portal spell
+            if (ZetaDia.IsInTown) 
                 return;
-
-            // Look at distance to our last known position in previous world to figure out 
-            // which of the portals we have been tracking was the one we used.
-
-            //var lastPositionInWorld = BotHistory.PositionCache.GetLastPositionInWorld();
-            //var closeEnoughPortals = BotHistory.PortalHistory.Values.Where(p => p.ActorPosition.Distance(lastPositionInWorld) < 15f);
-            //var orderedPortals = closeEnoughPortals.OrderByDescending(p => p.ActorPosition.Distance(lastPositionInWorld));
-            //orderedPortals.ForEach(p => Log.Verbose(p.ToString() + " DistanceInPreviousWorld=" + p.ActorPosition.Distance(lastPositionInWorld)));
 
             Log.Info("World Transfer Start Fired!");
 
-            //var lastPortal = orderedPortals.LastOrDefault(p => p.WorldSnoId != ZetaDia.CurrentWorldSnoId);
-            //if (lastPortal != null)
-            //{
             var portal = Data.Portals.OrderByDescending(p => p.Distance).FirstOrDefault();
             if (portal != null)
             {
@@ -55,6 +45,87 @@ namespace AutoFollow.Events
                 Player.LastPortalUsed = interactable;
                 EventManager.FireEvent(new EventData(EventType.UsedPortal, null, interactable));
             }
+        }
+
+        //private static void GameEvents_OnWorldTransferStart(object sender, EventArgs e)
+        //{
+        //    if (ZetaDia.IsInTown) // todo Detect if no portal was used / town portal spell
+        //        return;
+
+        //    // Look at distance to our last known position in previous world to figure out 
+        //    // which of the portals we have been tracking was the one we used.
+
+        //    //var lastPositionInWorld = BotHistory.PositionCache.GetLastPositionInWorld();
+        //    //var closeEnoughPortals = BotHistory.PortalHistory.Values.Where(p => p.ActorPosition.Distance(lastPositionInWorld) < 15f);
+        //    //var orderedPortals = closeEnoughPortals.OrderByDescending(p => p.ActorPosition.Distance(lastPositionInWorld));
+        //    //orderedPortals.ForEach(p => Log.Verbose(p.ToString() + " DistanceInPreviousWorld=" + p.ActorPosition.Distance(lastPositionInWorld)));
+
+        //    Log.Info("World Transfer Start Fired!");
+
+        //    var portal = Data.Portals.OrderByDescending(p => p.Distance).FirstOrDefault();
+        //    if (portal != null)
+        //    {
+        //        var interactable = BotHistory.PortalHistory.FirstOrDefault(p => p.Value.AcdId == portal.ACDId);
+        //        if (interactable.Value != null)
+        //        {
+        //            Log.Info("Recording Last Portal Used as {0} WorldSnoId={1}", interactable.Value.InternalName, interactable.Value.WorldSnoId);
+        //            Player.LastPortalUsed = interactable.Value;
+        //            EventManager.FireEvent(new EventData(EventType.UsedPortal, null, interactable.Value));
+        //        }
+        //        //var interactable = new Interactable(portal);
+
+        //    }
+        //}
+
+
+        //private static void GameEvents_OnWorldChanged(object sender, EventArgs e)
+        //{
+        //    var portal = Data.Portals.OrderByDescending(p => p.Distance).FirstOrDefault();
+        //    if (portal != null)
+        //    {
+        //        //var interactable = new Interactable(portal);                
+        //        var interactable = BotHistory.PortalHistory.FirstOrDefault(p => p.Value.AcdId == portal.ACDId);
+        //        if (interactable.Value != null)
+        //        {
+        //            Log.Info("Processing portal relationship for {0} in WorldSnoId={1}", interactable.Value.InternalName, interactable.Value.WorldSnoId);
+
+        //            if (Player.LastPortalUsed != null)
+        //            {
+        //                interactable.Value.EntryPortal = Player.LastPortalUsed;
+        //                Player.LastPortalUsed.ExitPortal = interactable.Value;
+        //            }
+        //        }
+
+        //        EventManager.FireEvent(new EventData(EventType.UsedPortal, null, interactable));
+        //    }
+        //}
+
+        private static void GameEvents_OnWorldChanged(object sender, EventArgs e)
+        {
+            var portal = Data.Portals.OrderByDescending(p => p.Distance).FirstOrDefault();
+            if (portal != null)
+            {
+                //var interactable = new Interactable(portal);                
+                var interactable = BotHistory.PortalHistory.FirstOrDefault(p => p.Value.AcdId == portal.ACDId);
+                if (interactable.Value != null)
+                {
+                    Log.Info("Processing portal relationship for {0} in WorldSnoId={1}", interactable.Value.InternalName, interactable.Value.WorldSnoId);
+
+                    Player.LastEntryPortal = interactable.Value;
+
+                    //if (Player.LastPortalUsed != null)
+                    //{
+                    //    interactable.Value.EntryPortal = Player.LastPortalUsed;
+                    //    Player.LastPortalUsed.ExitPortal = interactable.Value;
+                    //}
+                }
+
+                EventManager.FireEvent(new EventData(EventType.UsedPortal, null, interactable));
+
+                // There's an issue after zoning into a new area the navigator doesnt seem to want to work.
+                // After moving the char manually a bit away from the portal it kicks in.
+                Navigator.PlayerMover.MoveTowards(MathEx.GetPointAt(portal.Position, 20f, portal.Movement.Rotation));
+            }            
         }
 
         private static void GameEvents_OnPlayerDied(object sender, EventArgs e)
@@ -72,10 +143,6 @@ namespace AutoFollow.Events
             EventManager.FireEvent(new EventData(EventType.JoinedGame));
         }
 
-        private static void GameEvents_OnWorldChanged(object sender, EventArgs e)
-        {
-           
-        }
 
         public static void CheckForChanges()
         {

@@ -25,6 +25,7 @@ namespace AutoFollow.UI.Settings
         private int _updateInterval;
         private bool _avoidUnknownPlayers;
         private int _teleportDistance;
+        private int _followDistance;
 
         public AutoFollowSettings() : base(StoragePath)
         {
@@ -81,6 +82,14 @@ namespace AutoFollow.UI.Settings
         {
             get { return _teleportDistance; }
             set { if (value >= 50) SetField(ref _teleportDistance, value); }
+        }
+
+        [XmlElement("FollowDistance")]
+        [Setting, DefaultValue(4)]
+        public int FollowDistance
+        {
+            get { return _followDistance; }
+            set { if (value >= 3) SetField(ref _followDistance, value); }
         }
 
         private bool SetField<T>(ref T field, T value, [CallerMemberName] string propertyName = "")

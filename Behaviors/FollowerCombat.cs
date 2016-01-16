@@ -10,7 +10,9 @@ using AutoFollow.Events;
 using AutoFollow.Networking;
 using AutoFollow.Resources;
 using AutoFollow.UI.Settings;
+using Buddy.Coroutines;
 using Zeta.Bot;
+using Zeta.Bot.Coroutines;
 using Zeta.Common;
 using Zeta.Game;
 using Zeta.Game.Internals;
@@ -115,13 +117,16 @@ namespace AutoFollow.Behaviors
             if (await AttackWithPlayer(AutoFollow.CurrentLeader))
                 return true;
 
-            if (await Movement.MoveToPlayer(AutoFollow.CurrentLeader, 4f))
+            if (await Movement.MoveToPlayer(AutoFollow.CurrentLeader, AutoFollowSettings.Instance.FollowDistance))
                 return true;
 
             if (await Movement.UseNearbyRiftDeeperPortal())
                 return true;
 
             if (await Movement.UseOpenRiftPortalInTown())
+                return true;
+
+            if (await Movement.FindExitPortal())
                 return true;
 
             return false;
@@ -173,6 +178,20 @@ namespace AutoFollow.Behaviors
             {
                 Log.Info("Leader ({0}) changed world from {1} to {2}", 
                     sender.HeroName, e.OldValue, e.NewValue);
+            }
+            return false;
+        }
+
+        public override async Task<bool> OnRequestPartyLeaveGame(Message sender, EventData e)
+        {
+            if (e.IsLeaderEvent && Player.Instance.IsInGame)
+            {
+                Log.Info("Leader ({0}) wants us to leave the game!",
+                    sender.HeroName, e.OldValue, e.NewValue);
+
+                await SafeLeaveGame.Execute();
+                await Coroutine.Sleep(1000);
+                return true;
             }
             return false;
         }

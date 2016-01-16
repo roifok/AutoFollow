@@ -50,6 +50,8 @@ namespace AutoFollow.Resources
             if (currentRift == null)
                 return;
 
+            RiftQuest = new RiftQuest();
+
             var currentWorldId = ZetaDia.CurrentWorldSnoId;
             var isInRift = RiftWorldIds.Contains(currentWorldId);    
             var isStarted = currentRift.IsStarted;
@@ -74,6 +76,8 @@ namespace AutoFollow.Resources
                 Player.CurrentMessage.ProfileTagName != null && 
                 Player.CurrentMessage.ProfileTagName.ToLower().Contains("greater");
         }
+
+        public static RiftQuest RiftQuest { get; set; }
 
         public static bool IsGreaterRiftStarted { get; set; }
 
@@ -117,6 +121,60 @@ namespace AutoFollow.Resources
                 case 288806: return 8;
             }
             return -1;
+        }
+
+    }
+
+    public class RiftQuest
+    {
+        private const int RIFT_QUEST_ID = 337492;
+
+        public enum RiftStep
+        {
+            NotStarted,
+            KillingMobs,
+            BossSpawned,
+            UrshiSpawned,
+            Cleared,
+            Completed
+        }
+
+        public QuestState State { get; private set; }
+        public RiftStep Step { get; private set; }
+
+        public RiftQuest()
+        {
+            Step = RiftStep.NotStarted;
+            State = QuestState.NotStarted;
+
+            var quest = QuestInfo.FromId(RIFT_QUEST_ID);
+            if (quest != null)
+            {
+                State = quest.State;
+                var step = quest.QuestStep;
+                switch (step)
+                {
+                    case 1: // Normal rift 
+                    case 13: // Greater rift
+                        Step = RiftStep.KillingMobs;
+                        break;
+                    case 3: // Normal rift 
+                    case 16: // Greater rift 
+                        Step = RiftStep.BossSpawned;
+                        break;
+                    case 34:
+                        Step = RiftStep.UrshiSpawned;
+                        break;
+                    case 10:
+                        Step = RiftStep.Cleared;
+                        break;
+                }
+            }
+
+            if (State == QuestState.Completed)
+            {
+                Step = RiftStep.Completed;
+            }
         }
 
     }

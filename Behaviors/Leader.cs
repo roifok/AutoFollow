@@ -87,7 +87,7 @@ namespace AutoFollow.Behaviors
         {
             if (e.IsFollowerEvent)
             {
-                Log.Info("My minion {0} changed world from {1} to {2}, attempting to teleport", sender.HeroName, e.OldValue, e.NewValue);
+                Log.Info("My minion {0} changed world from {1} to {2}", sender.HeroName, e.OldValue, e.NewValue);
             }
             return false;
         }
@@ -99,7 +99,6 @@ namespace AutoFollow.Behaviors
                 Log.Info("My minion {0} is attacking a Unique! {1} at {2} DistanceFromMe={3}",
                     sender.HeroName, sender.CurrentTarget.Name, sender.Position, ZetaDia.Me.Position.Distance(sender.CurrentTarget.Position));
             }
-
             return true;
         }
 

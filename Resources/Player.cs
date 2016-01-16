@@ -299,5 +299,6 @@ namespace AutoFollow.Resources
         public GameId CurrentGameId { get; set; }
 
         public static Interactable LastPortalUsed { get; set; }
+        public static Interactable LastEntryPortal { get; set; }
     }
 }

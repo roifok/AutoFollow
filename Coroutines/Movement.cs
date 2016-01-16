@@ -6,6 +6,7 @@ using AutoFollow.Coroutines.Resources;
 using AutoFollow.Networking;
 using AutoFollow.Resources;
 using Buddy.Coroutines;
+using Zeta.Bot;
 using Zeta.Bot.Coroutines;
 using Zeta.Bot.Logic;
 using Zeta.Bot.Navigation;
@@ -28,6 +29,8 @@ namespace AutoFollow.Coroutines
         {
             var distance = 0f;
             var name = string.IsNullOrEmpty(destinationName) ? location.ToString() : destinationName;
+
+            Navigator.PlayerMover.MoveTowards(location);
 
             while (ZetaDia.IsInGame && (distance = location.Distance(ZetaDia.Me.Position)) >= range)
             {
@@ -56,6 +59,8 @@ namespace AutoFollow.Coroutines
             var distance = 0f;
             var location = message.Position;
             var name = string.IsNullOrEmpty(destinationName) ? location.ToString() : destinationName;
+
+            Navigator.PlayerMover.MoveTowards(location);
 
             while (ZetaDia.IsInGame)
             {
@@ -98,6 +103,8 @@ namespace AutoFollow.Coroutines
             if (!Data.IsValid(obj))
                 return false;
 
+            var startWorldSnoId = ZetaDia.CurrentWorldSnoId;
+
             if (interactLimit < 1) interactLimit = 5;
             if (range < 0) range = obj.CollisionSphere.Radius;
             
@@ -129,7 +136,7 @@ namespace AutoFollow.Coroutines
                     await Coroutine.Sleep(1000);
                     await Coroutine.Yield();
                 }
-            }
+            }           
 
             Navigator.PlayerMover.MoveTowards(obj.Position);
             await Coroutine.Sleep(250);
@@ -138,6 +145,13 @@ namespace AutoFollow.Coroutines
                 obj.Interact();
 
             await Coroutine.Sleep(1000);
+
+            if (obj is GizmoPortal && ZetaDia.IsLoadingWorld || ZetaDia.CurrentWorldSnoId != startWorldSnoId)
+            {
+                Log.Verbose("A portal was successfully interacted with");
+                GameEvents.FireWorldTransferStart();
+            }
+
             return true;
         }
 
@@ -198,7 +212,7 @@ namespace AutoFollow.Coroutines
             {
                 Log.Verbose("Moving to Player {0} CurrentDistance={1} DistanceRequired={2} ",
                     player.HeroName, player.Distance, range);
-
+                
                 await MoveTo(player, player.HeroName, range, () => !player.IsInSameWorld);
                 return true;
             }
@@ -211,13 +225,18 @@ namespace AutoFollow.Coroutines
             if (!ZetaDia.IsInGame || ZetaDia.Me.IsInCombat)
                 return false;
 
-            if (player.LastPortalUsed == null || ZetaDia.CurrentWorldSnoId != player.LastPortalUsed.WorldSnoId)
+
+            if (player.LastPortalUsed == null || player.LastPortalUsed.IsWorldEntryPoint)
+                return false;
+
+            var notInSameWorldAsPortal = ZetaDia.CurrentWorldSnoId != player.LastPortalUsed.WorldSnoId;
+            if (notInSameWorldAsPortal)
                 return false;
 
             var myPosition = ZetaDia.Me.Position;
 
-            Func<GizmoPortal, bool> distanceToMe = portal => portal.Position.Distance(myPosition) <= 100f;
-            Func<GizmoPortal, bool> distanceToPortal = portal => portal.Position.Distance(player.LastPortalUsed.ActorPosition) <= 100f;
+            Func<GizmoPortal, bool> distanceToMe = portal => portal.Position.Distance(myPosition) <= 200f;
+            Func<GizmoPortal, bool> distanceToPortal = portal => portal.Position.Distance(player.LastPortalUsed.ActorPosition) <= 200f;
             Func<GizmoPortal, bool> matchingSNO = portal => portal.ActorSnoId == player.LastPortalUsed.ActorSnoId;
 
             var matches = ZetaDia.Actors.GetActorsOfType<GizmoPortal>(true).Where(i => distanceToMe(i) && distanceToPortal(i) && matchingSNO(i)).ToList();
@@ -230,7 +249,27 @@ namespace AutoFollow.Coroutines
                 Log.Verbose("Following {0} through portal {0} CurrentDistance={1} DistanceRequired={2} ",
                     player.HeroName, match.Name, match.Distance, 8f);
 
-                await MoveToAndInteract(match);
+                await MoveToAndInteract(match);                
+                return true;
+            }
+
+            return false;
+        }
+
+        public static async Task<bool> FindExitPortal()
+        {
+            //Id=1471427315 MinimapTextureSnoId=102320 NameHash=1938876095 IsPointOfInterest=False IsPortalEntrance=False IsPortalExit=True IsWaypoint=False Location=x="372" y="1030" z="2"  Distance=101            
+
+            if (AutoFollow.CurrentLeader.IsInSameWorld && AutoFollow.CurrentLeader.IsInRift)
+                return false;
+
+            var marker = Data.Markers.FirstOrDefault(m => m.MinimapTextureSnoId == 102320 && m.IsPortalExit);
+            if (marker != null)
+            {
+                Log.Verbose("Exit Marker found! Id={0} Distance={1}",
+                    marker.Id, marker.Position.Distance(Player.Instance.Position));
+
+                await MoveTo(marker.Position, "Exit Marker", 15f);
                 return true;
             }
 

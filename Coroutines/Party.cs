@@ -93,9 +93,11 @@ namespace AutoFollow.Coroutines
 
         public async static Task<bool> WaitForPlayersToLeaveGame()
         {
-            if (Player.IsInParty && Player.IsPartyleader && AutoFollow.ClientMessages.Any(f => f.Value.IsInGame) || !GameUI.ChangeQuestButton.IsEnabled)
+            if (Player.IsInParty && Player.IsPartyleader && AutoFollow.CurrentParty.Any(m => m.IsInGame) || !GameUI.ChangeQuestButton.IsEnabled)
             {
                 Log.Info("Waiting for party members to leave game");
+                EventManager.FireEvent(new EventData(EventType.RequestPartyLeaveGame));
+                await Coroutine.Sleep(5000);
                 return true;
             }
             return false;
@@ -129,12 +131,12 @@ namespace AutoFollow.Coroutines
                 return true;
             }
 
-            if (ZetaDia.IsInGame && Player.IsFollower && Player.Instance.IsInGame && !AutoFollow.CurrentLeader.IsInGame && Player.IsInParty && AutoFollow.CurrentLeader.BNetPartyMembers > 1)
-            {
-                Log.Warn("Leader is waiting for me to leave game!", AutoFollow.CurrentLeader.IsInSameGame);
-                await SafeLeaveGame.Execute();
-                return true;
-            }
+            //if (ZetaDia.IsInGame && Player.IsFollower && Player.Instance.IsInGame && !AutoFollow.CurrentLeader.IsInGame && !AutoFollow.CurrentLeader.IsLoadingWorld && Player.IsInParty && AutoFollow.CurrentLeader.BNetPartyMembers > 1)
+            //{
+            //    Log.Warn("Leader is waiting for me to leave game!", AutoFollow.CurrentLeader.IsInSameGame);
+            //    await SafeLeaveGame.Execute();
+            //    return true;
+            //}
 
             if (ZetaDia.IsInGame && Player.IsFollower && !AutoFollow.CurrentLeader.IsMe && !AutoFollow.CurrentLeader.IsInSameGame)
             {

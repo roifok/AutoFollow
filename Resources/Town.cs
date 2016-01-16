@@ -26,6 +26,7 @@ namespace AutoFollow.Coroutines.Resources
             public const int TheCollector = 178362;
             public const int TheMystic = 212511;
             public const int TheFence = 178388;
+            public const int Orek = 363744;
         }
 
         public static HashSet<int> VendorIds = new HashSet<int>
@@ -112,7 +113,13 @@ namespace AutoFollow.Coroutines.Resources
             public static DiaObject TheFence
             {
                 get { return ZetaDia.Actors.GetActorsOfType<DiaUnit>(true).FirstOrDefault(o => o.ActorSnoId == ActorIds.TheFence); }
-            }    
+            }
+
+            public static DiaObject Orek
+            {
+                get { return ZetaDia.Actors.GetActorsOfType<DiaUnit>(true).FirstOrDefault(o => o.ActorSnoId == ActorIds.Orek); }
+            }
+
         }
 
         /// <summary>
