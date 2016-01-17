@@ -1,5 +1,5 @@
 ﻿<Profile>
-  <Name>AutoFollow Powerlevel</Name>
+  <Name>AutoFollow Combat</Name>
   <GameParams act="OpenWorld" resumeFromSave="False" isPrivate="True" numGames="-1" />
   <Order>
     <AutoFollow questId="1" behavior="FollowerCombat" />
