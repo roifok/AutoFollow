@@ -4,9 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.ServiceModel;
 using System.Threading;
-using AutoFollow.Events;
+using System.Windows;
 using AutoFollow.Resources;
 using AutoFollow.UI.Settings;
+using EventManager = AutoFollow.Events.EventManager;
 
 namespace AutoFollow.Networking
 {
@@ -43,6 +44,7 @@ namespace AutoFollow.Networking
                 if (!ClientInitialized && AutoFollow.Enabled)
                 {
                     var serverPort = AutoFollowSettings.Instance.ServerPort;
+
                     Server.ServerUri = new Uri(Server.ServerUri.AbsoluteUri.Replace(Server._basePort.ToString(), serverPort.ToString()));
 
                     Log.Info("Initializing Client Service connection to {0} Attempt={1}", Server.ServerUri.AbsoluteUri + "Follow", ConnectionFailures);
@@ -83,6 +85,20 @@ namespace AutoFollow.Networking
             }
         }
 
+        public static void ShutdownClient()
+        {
+            try
+            {
+                _httpFactory.Abort();
+                _httpProxy = null;
+            }
+            catch (Exception)
+            {
+                _httpFactory = null;
+            }
+            
+        }
+
         public static bool IsValid
         {
             get { return ClientInitialized; }
@@ -98,27 +114,7 @@ namespace AutoFollow.Networking
             
             if (Server.ServiceHost != null && Server.ServiceHost.State != CommunicationState.Closed)
             {
-                try
-                {                    
-                    if (Server.ServiceHost.State == CommunicationState.Faulted)
-                    {
-                        Log.Info("Aborting Faulted Server Service");
-                        Server.ServiceHost.Abort();
-                        return;
-                    }
-
-                    Log.Info("Closing Server Service");
-                    Server.ServiceHost.Close();                                                                               
-                }
-                catch(CommunicationObjectFaultedException ex)
-                {
-                    Log.Debug("Client tried to close server connection but it is faulted.");
-                }
-                finally
-                {
-                    Server.ServiceHost = null;
-                }
-
+                Server.ShutdownServer();
             }
 
             if(!IsValid)
@@ -145,7 +141,7 @@ namespace AutoFollow.Networking
 
                 UpdateDataAsClient(messageWrapper);
 
-                Log.Debug("Communicating with {0} other bots.", AutoFollow.NumberOfConnectedBots);
+                Log.Debug("Communicating with {0} other bots. ServerMessage={0}", AutoFollow.NumberOfConnectedBots, messageWrapper);
 
                 foreach (var e in messageWrapper.PrimaryMessage.Events)
                 {

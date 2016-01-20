@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Configuration;
 using System.Globalization;
 using System.IO;
 using System.Runtime.CompilerServices;
+using AutoFollow.Networking;
 using AutoFollow.Resources;
 using JetBrains.Annotations;
 using Zeta.Common.Xml;
@@ -29,6 +31,13 @@ namespace AutoFollow.UI.Settings
 
         public AutoFollowSettings() : base(StoragePath)
         {
+            UILoader.OnWindowClosed += SettingsWindow_Closed;
+        }
+
+        private void SettingsWindow_Closed()
+        {
+            if (ServerPort != Server.ServerUri.Port || BindAddress != Server.ServerUri.OriginalString)
+                Service.UpdateUri();
         }
 
         public static AutoFollowSettings Instance

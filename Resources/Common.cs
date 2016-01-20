@@ -12,9 +12,7 @@ namespace AutoFollow.Resources
         public static RunStatus SafeLeaveGame()
         {
             if (!ZetaDia.IsInGame)
-            {
                 return RunStatus.Success;
-            }
 
             if (ZetaDia.IsLoadingWorld)
                 return RunStatus.Running;
@@ -34,13 +32,18 @@ namespace AutoFollow.Resources
 
         /// <summary>
         /// Strips out a name from color encoded UI string e.g. 
-        /// {c:ff6969ff}Corrupted Angel{/c}
         /// </summary>
         public static string CleanString(string s)
         {
             try
             {
-                var regex = new Regex(@"[^/w/}/>\s]+(?=\{\/c\})");
+                //(?<=(\}|\>\W))\S+((?=\{\/c\})|\Z)
+                //http://regexstorm.net/tester
+                //{c:ff6969ff}<Test> Name{/c}
+                //{c:ff6969ff}Name{/c}
+                //<Test> Name
+                //var regex = new Regex(@"[^/w/}/>\s]+(?=\{\/c\})");
+                var regex = new Regex(@"(?<=(\}|\>\W))\S+((?=\{\/c\})|\Z)");
                 var match = regex.Match(s); 
                 if(match.Success)
                     return  match.Value.Trim();

@@ -178,5 +178,26 @@ namespace AutoFollow.Networking
 
             return BotsLastSeenTime.Count(r => DateTime.UtcNow.Subtract(r.Value).TotalMilliseconds <= 10 && r.Key != Player.CurrentMessage.OwnerId);
         }
+
+        public static void UpdateUri()
+        {
+            try
+            {
+                Server.ServerUri = new Uri("http://" + AutoFollowSettings.Instance.BindAddress + ":" + AutoFollowSettings.Instance.ServerPort);
+
+                Log.Info("Networking address set to: {0}", Server.ServerUri);
+
+                if (Server.ServiceHost != null && Server.ServiceHost.State != CommunicationState.Closed)
+                    Server.ShutdownServer();
+
+                if (ConnectionMode == ConnectionMode.Client)
+                    Client.ShutdownClient();
+            }
+            catch (Exception ex)
+            {
+                Log.Info("Error in UpdateUri: {0}", ex);
+            }
+
+        }
     }
 }

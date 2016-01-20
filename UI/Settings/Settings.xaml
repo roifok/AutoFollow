@@ -2,60 +2,86 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:behaviors="clr-namespace:AutoFollow.UI.Components.Behaviors"
              mc:Ignorable="d" Foreground="{DynamicResource TextBrush}" 
-             Height="356" Width="300" Background="Gray">
+             d:DesignHeight="360" d:DesignWidth="300" Background="Gray">
     <UserControl.Resources>
-        <!--<ControlTemplate x:Key="SliderEditable" TargetType="{x:Type Slider}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="3*" />
-                    <ColumnDefinition MinWidth="35" MaxWidth="{TemplateBinding Tag}" Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition />
-                </Grid.RowDefinitions>
-                <Slider Grid.Row="1" Value="{Binding Value, RelativeSource={RelativeSource TemplatedParent}}" Delay="{TemplateBinding Delay}" Interval="{TemplateBinding Interval}" IsEnabled="{TemplateBinding IsEnabled}" IsMoveToPointEnabled="True" IsSnapToTickEnabled="{TemplateBinding IsSnapToTickEnabled}" LargeChange="{TemplateBinding LargeChange}" Orientation="{TemplateBinding Orientation}" SmallChange="{TemplateBinding SmallChange}" TickFrequency="{TemplateBinding TickFrequency}" TickPlacement="{TemplateBinding TickPlacement}" Ticks="{TemplateBinding Ticks}" ToolTip="{TemplateBinding ToolTip}" Maximum="{TemplateBinding Maximum}" Minimum="{TemplateBinding Minimum}" HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="0,0,2,0" Style="{x:Null}" x:Name="MySlider" />
-                <TextBox Grid.Column="1" Grid.Row="1" ut:SelectTextOnFocus.Active="True" ut:InputBindingBehavior.UpdatePropertySourceWhenEnterPressed="TextBox.Text" 
-                     Text="{Binding Value, 
-                Converter={StaticResource intToStringConverter}, 
-                UpdateSourceTrigger=Default, 
-                RelativeSource={RelativeSource TemplatedParent}}" HorizontalAlignment="Stretch" Margin="0,2,2,2" TextAlignment="Center" IsReadOnly="False" />
-            </Grid>
-        </ControlTemplate>-->
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="..\Template.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
         <UniformGrid Columns="1">
             <GroupBox Header="Networking">
-                <StackPanel>
-                    <WrapPanel>
-                        <TextBlock Width="80" Margin="5,6" HorizontalAlignment="Right" Text="Bind Address" VerticalAlignment="Center"/>
-                        <TextBox Margin="5,5" HorizontalAlignment="Left" ToolTip="IP Address used to communicate" Text="{Binding Path=BindAddress, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Width="150" BorderBrush="DarkGray"  />
-                    </WrapPanel>
-                    <WrapPanel>
-                        <TextBlock Width="80" Margin="5,6" HorizontalAlignment="Right" Text="Server Port" VerticalAlignment="Center"/>
-                        <TextBox Margin="5,5" HorizontalAlignment="Left" ToolTip="Port to communicate on" Text="{Binding Path=ServerPort, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Width="50" BorderBrush="DarkGray"  />
-                    </WrapPanel>
-                    <WrapPanel>
-                        <TextBlock Margin="5,5" HorizontalAlignment="Right" Text="Update Interval" VerticalAlignment="Center"/>
-                        <TextBox Margin="5,5" HorizontalAlignment="Left" ToolTip="How fast bots will send updates to each other about their position etc" VerticalAlignment="Center" Text="{Binding Path=UpdateInterval, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="30"/>
-                        <TextBlock Margin="0,5" HorizontalAlignment="Left" Text="ms" VerticalAlignment="Center"/>
-                    </WrapPanel>
-                </StackPanel>
+                <Grid Margin="10, 5" Style="{x:Null}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>                        
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="26*" />
+                        <ColumnDefinition Width="41*" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Width="80" Margin="0,0" HorizontalAlignment="Left" Text="Bind Address" />
+                    <TextBox Grid.Row="0" Grid.Column="1" Margin="0,3" HorizontalAlignment="Left" 
+                             ToolTip="IP Address used to communicate" 
+                             Text="{Binding Path=BindAddress, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" 
+                             behaviors:InputBindingBehavior.UpdatePropertySourceWhenEnterPressed="TextBox.Text" 
+                             VerticalAlignment="Center" Width="150" BorderBrush="DarkGray"  />
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" VerticalAlignment="Center"  Width="80" Margin="0,0" HorizontalAlignment="Left" Text="Server Port" />
+                    <TextBox Grid.Row="1" Grid.Column="1" Margin="0,3" HorizontalAlignment="Left" 
+                             ToolTip="Port to communicate on" 
+                             Text="{Binding Path=ServerPort, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" 
+                             behaviors:InputBindingBehavior.UpdatePropertySourceWhenEnterPressed="TextBox.Text" 
+                             VerticalAlignment="Center" Width="50" BorderBrush="DarkGray"  />
+                    
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" VerticalAlignment="Center">Update Speed</TextBlock>
+                    <Slider Grid.Row="2" Grid.Column="1" Template="{DynamicResource SliderEditable}" 
+                            ToolTip="How fast bots will send updates to each other about their position etc"
+                            Interval="1" Maximum="2000" Minimum="100" 
+                            SmallChange="1" TickFrequency="100" IsSnapToTickEnabled="True"
+                            TickPlacement="BottomRight" Value="{Binding UpdateInterval}" 
+                            HorizontalAlignment="Stretch" Margin="0,3,0,3" />
+
+                </Grid>                
             </GroupBox>
             <GroupBox Header="Coodination">
-                <StackPanel>
-                    <WrapPanel>
-                        <TextBlock Margin="5,5" HorizontalAlignment="Right" Text="Teleport Distance" VerticalAlignment="Center" ToolTip="How far away bots need to be from leader before teleporting"/>
-                        <TextBox Margin="5,5" HorizontalAlignment="Left" ToolTip="How far away bots need to be from leader before teleporting" Text="{Binding Path=TeleportDistance, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Width="40" BorderBrush="DarkGray"  />
-                    </WrapPanel>
-                    <WrapPanel>
-                        <TextBlock Margin="5,5" HorizontalAlignment="Right" Text="Follow Distance" VerticalAlignment="Center" ToolTip="This determines how close the bots will get to the leader when following."/>
-                        <TextBox Margin="5,5" HorizontalAlignment="Left" ToolTip="This determines how close the bots will get to the leader when following." Text="{Binding Path=FollowDistance, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Width="40" BorderBrush="DarkGray"  />
-                    </WrapPanel>                    
-                </StackPanel>
+                <Grid Margin="10, 5" Style="{x:Null}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="26*" />
+                        <ColumnDefinition Width="41*" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center">Follow Distance</TextBlock>
+                    <Slider Grid.Row="0" Grid.Column="1" Template="{DynamicResource SliderEditable}" 
+                            ToolTip="This determines how close the bots will get to the leader when following."
+                            Interval="1" Maximum="150" Minimum="5" 
+                            SmallChange="1" TickFrequency="5" IsSnapToTickEnabled="True"
+                            TickPlacement="BottomRight" Value="{Binding FollowDistance}" 
+                            HorizontalAlignment="Stretch" Margin="0,3,0,3" />
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" VerticalAlignment="Center">Teleport Distance</TextBlock>
+                    <Slider Grid.Row="1" Grid.Column="1" Template="{DynamicResource SliderEditable}" 
+                            ToolTip="How far away bots need to be from leader before teleporting"
+                            Interval="1" Maximum="750" Minimum="150" 
+                            SmallChange="1" TickFrequency="25" IsSnapToTickEnabled="True"
+                            TickPlacement="BottomRight" Value="{Binding TeleportDistance}" 
+                            HorizontalAlignment="Stretch" Margin="0,3,0,3" />
+
+                </Grid>
             </GroupBox>
             <GroupBox Header="Misc">
                 <UniformGrid Columns="1">

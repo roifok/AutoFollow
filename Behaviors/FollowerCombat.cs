@@ -13,6 +13,7 @@ using AutoFollow.UI.Settings;
 using Buddy.Coroutines;
 using Zeta.Bot;
 using Zeta.Bot.Coroutines;
+using Zeta.Bot.Logic;
 using Zeta.Common;
 using Zeta.Game;
 using Zeta.Game.Internals;
@@ -77,6 +78,11 @@ namespace AutoFollow.Behaviors
             return true;
         }
 
+        public override void OnPulse()
+        {
+            StayCloseToPlayer(AutoFollow.CurrentLeader);
+        }
+
         public override async Task<bool> InGameTask()
         {
             if (await base.InGameTask())
@@ -96,11 +102,16 @@ namespace AutoFollow.Behaviors
                 return true;
             }
 
+            Log.Info("InGameTask");
+
             if (await Party.LeaveWhenInWrongGame())
                 return true;
 
             if (await Questing.UpgradeGems())
                 return false;
+
+            if (AutoFollow.CurrentLeader.IsVendoring && !Player.Instance.IsVendoring)
+                BrainBehavior.ForceTownrun("Townrun with Leader");
 
             if (await Coordination.WaitForGreaterRiftInProgress())
                 return true;
@@ -132,15 +143,30 @@ namespace AutoFollow.Behaviors
             return false;
         }
 
+        /// <summary>
+        /// Turn combat (Trinity) on and off while the follower is far away from the leader.        
+        /// </summary>
+        public void StayCloseToPlayer(Message player)
+        {
+            if (player.Distance > Math.Max(AutoFollowSettings.Instance.FollowDistance, 40f) && !Player.Instance.IsInTown)
+            {
+                Combat.State = CombatState.Pulsing;
+            }
+            else
+            {
+                Combat.State = CombatState.Enabled;
+            }
+        }
+
         public async Task<bool> AttackWithPlayer(Message player)
         {
-            if(player.IsInCombat && player.CurrentTarget != null && player.Distance < 150f && 
+            if (player.IsInCombat && player.CurrentTarget != null && player.Distance < 150f && 
                 player.CurrentTarget.Distance < 150f && ZetaDia.Me.IsInCombat && Data.Monsters.Count(m => m.Distance <= 30f) < 10)
             {
                 Log.Info("Moving to attack {0}'s target - {1} Distance={2}", 
                     player.HeroName, player.CurrentTarget.Name, player.CurrentTarget.Distance);
 
-                await Movement.MoveTo(player.CurrentTarget, player.CurrentTarget.Name, 10f, () => 
+                await Movement.MoveTo(() => AutoFollow.GetCurrentMessage(player.AcdId).CurrentTarget, player.CurrentTarget.Name, 10f, () => 
                     ZetaDia.Me.IsInCombat || !ZetaDia.Me.Movement.IsMoving);
 
                 return true;

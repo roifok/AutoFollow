@@ -11,6 +11,7 @@ namespace AutoFollow.Resources
     {
         int AcdId { get; set; }
         Vector3 Position { get; set; }
-
+        int WorldSnoId { get; set; }
     }
 }
+

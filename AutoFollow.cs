@@ -43,7 +43,7 @@ namespace AutoFollow
         }
 
         public static InterfaceLoader<IBehavior> Behaviors;
-        public static Version PluginVersion = new Version(1, 0, 6);
+        public static Version PluginVersion = new Version(1, 0, 8);
         internal static bool Enabled;
         internal static Message ServerMessage = new Message();
         internal static Dictionary<int, Message> ClientMessages = new Dictionary<int, Message>();
@@ -278,7 +278,16 @@ namespace AutoFollow
 
         #endregion
 
+        public static Message GetCurrentMessage(int acdId)
+        {
+            return AutoFollow.CurrentParty.FirstOrDefault(p => p.AcdId == acdId);
+        }
 
+        public static Vector3 GetCurrentPosition(int acdId)
+        {
+            var message = AutoFollow.CurrentParty.FirstOrDefault(p => p.AcdId == acdId);
+            return message != null ? message.Position : Vector3.Zero;
+        }
 
     }
 }

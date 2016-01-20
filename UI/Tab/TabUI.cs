@@ -57,7 +57,7 @@ namespace AutoFollow.UI
                     };
 
                     var path = Path.Combine("Tab", "Tab.xaml");
-                    var mainControl = UILoader.GetControl(path);
+                    var mainControl = UILoader.GetControl<UserControl>(path);
                     ViewModel = new TabViewModel();
                     mainControl.DataContext = ViewModel;
 

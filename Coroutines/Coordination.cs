@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoFollow.Coroutines.Resources;
+using AutoFollow.Events;
 using AutoFollow.Resources;
 using Buddy.Coroutines;
 using Zeta.Bot;
@@ -33,6 +34,21 @@ namespace AutoFollow.Coroutines
                 return true;
             }
             return false;            
+        }
+
+        public async static Task<bool> WaitAfterChangingWorlds()
+        {
+            var secsSinceWorldChanged = DateTime.UtcNow.Subtract(ChangeMonitor.LastWorldChange).TotalSeconds;
+            if (secsSinceWorldChanged < 10)
+            {
+                var allFollowersNearby = AutoFollow.CurrentFollowers.All(f => f.IsInSameWorld && f.Distance < 50f);
+                if (!allFollowersNearby && !Data.Monsters.Any(m => m.Distance < 30f))
+                {
+                    await Coroutine.Sleep(1000);
+                    return true;
+                }
+            }
+            return false;
         }
 
         private static DateTime? _startedWaiting;

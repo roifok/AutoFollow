@@ -18,13 +18,39 @@ namespace AutoFollow.Networking
         public delegate void ServiceDelegate();
 
         public static int _basePort = 10920;
+
         public static Uri ServerUri = new Uri("http://" + AutoFollowSettings.Instance.BindAddress + ":" + AutoFollowSettings.Instance.ServerPort);
+
         public static ServiceHost ServiceHost;
         public static DateTime LastServerUpdate = DateTime.MinValue;
         internal static ConcurrentQueue<Message> Inbox = new ConcurrentQueue<Message>();
         public static DateTime LastFailTime = DateTime.MinValue;
         public static bool ServerInitialized { get; private set; }
         public static int ServerStartAttempts { get; set; }
+
+        public static void ShutdownServer()
+        {
+            try
+            {
+                if (Server.ServiceHost.State == CommunicationState.Faulted)
+                {
+                    Log.Info("Aborting Faulted Server Service");
+                    Server.ServiceHost.Abort();
+                    return;
+                }
+
+                Log.Info("Closing Server Service");
+                Server.ServiceHost.Close();
+            }
+            catch (CommunicationObjectFaultedException ex)
+            {
+                Log.Debug("Client tried to close server connection but it is faulted.");
+            }
+            finally
+            {
+                Server.ServiceHost = null;
+            }
+        }
 
         public static bool IsValid
         {

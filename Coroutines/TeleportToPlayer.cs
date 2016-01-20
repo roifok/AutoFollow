@@ -35,12 +35,12 @@ namespace AutoFollow.Coroutines
                 return false;
             }
 
-            if (Data.Monsters.Any(m => m.Distance < 60f))
-            {
-                Log.Info("Cant teleport because there are Monsters nearby! Please kill them first!");
-                await Coroutine.Sleep(5000);
-                await Coroutine.Yield();
-            }
+            //if (Data.Monsters.Any(m => m.Distance < 60f))
+            //{
+            //    Log.Info("Cant teleport because there are Monsters nearby! Please kill them first!");
+            //    await Coroutine.Sleep(5000);
+            //    await Coroutine.Yield();
+            //}
 
             if (!_teleportTimer.IsRunning)
                 _teleportTimer.Restart();
@@ -54,11 +54,11 @@ namespace AutoFollow.Coroutines
                 playerMessage.HeroName, playerMessage.IsInSameGame, playerMessage.IsInSameWorld);
 
             ZetaDia.Me.TeleportToPlayerByIndex(playerMessage.Index);
-            await Coroutine.Sleep(1000);
+            await Coroutine.Sleep(250);
 
             while (ZetaDia.IsLoadingWorld || ZetaDia.Me.LoopingAnimationEndTime != 0)
             {
-                await Coroutine.Sleep(500);
+                await Coroutine.Sleep(250);
                 await Coroutine.Yield();
             }
 

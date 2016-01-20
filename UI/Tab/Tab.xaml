@@ -39,11 +39,12 @@
                         <Label>Server URI:</Label>
                         <Label Content="{Binding ServerURI, FallbackValue=Unknown}" />
                     </WrapPanel>
-                    <StackPanel>
+                    <UniformGrid>
                         <Button Command="{Binding OpenSettingsCommand}">Open Settings</Button>
+                        <!--<Button Command="{Binding Pause All Bots}">Pause All</Button>-->
                         <!--<Button Command="{Binding TestCommand}">Test</Button>-->
-                        <Button Command="{Binding InvitePlayerCommand}">Invite Player</Button>
-                    </StackPanel>
+                        <!--<Button Command="{Binding InvitePlayerCommand}">Invite Player</Button>-->
+                    </UniformGrid>
                 </StackPanel>
             </UniformGrid>
         </Grid>

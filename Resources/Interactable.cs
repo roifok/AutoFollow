@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using Zeta.Common;
@@ -53,6 +54,7 @@ namespace AutoFollow.Resources
             get { return GizmoType == GizmoType.Portal && Marker != null && Marker.IsPortalExit; }
         }
 
+        [IgnoreDataMember]
         public MinimapMarker Marker
         {
             get { return Data.Markers.FirstOrDefault(m => m.Position.Distance(ActorPosition) < 5f); }

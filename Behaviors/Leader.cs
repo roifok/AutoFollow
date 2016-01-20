@@ -70,6 +70,9 @@ namespace AutoFollow.Behaviors
             if (await Coordination.WaitBeforeStartingRift())
                 return true;
 
+            if (await Coordination.WaitAfterChangingWorlds())
+                return true;
+
             return false;
         }
 

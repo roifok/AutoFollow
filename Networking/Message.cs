@@ -224,9 +224,9 @@ namespace AutoFollow.Networking
         {
             get
             {
-                return !string.IsNullOrEmpty(HeroName) 
-                    && (!IsInGame || IsLoadingWorld || GameId.FactoryId != 0)
-                    && DateTime.UtcNow.Subtract(LastUpdated).TotalSeconds < 10;
+                return !string.IsNullOrEmpty(HeroName)
+                       && (!IsInGame || IsLoadingWorld || GameId.FactoryId != 0);
+                //&& DateTime.UtcNow.Subtract(LastUpdated).TotalSeconds < 10;
             }
         }
 

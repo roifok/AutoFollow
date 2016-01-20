@@ -60,13 +60,18 @@ namespace AutoFollow.Coroutines
             if ((RiftHelper.IsInRift || player.IsInRift) && RiftHelper.IsGreaterRiftStarted)
                 return false;
 
-            if (Player.IsFollower && player.WorldSnoId == Player.Instance.Message.WorldSnoId && player.IsInSameGame && !player.IsInCombat && player.Distance > AutoFollowSettings.Instance.TeleportDistance)
+            if (ShouldTeleportToPlayer(player))
             {
                 Log.Info("{0} is getting quite far away... attempting teleport!", player.HeroName);
                 await TeleportToPlayer.Execute(player);
                 return true;
             }
             return false;
+        }
+
+        private static bool ShouldTeleportToPlayer(Message player)
+        {
+            return Player.IsFollower && player.WorldSnoId == Player.Instance.Message.WorldSnoId && player.IsInSameGame && !player.IsInCombat && player.Distance > AutoFollowSettings.Instance.TeleportDistance;
         }
 
         public async static Task<bool> StartGameWhenPartyReady()
@@ -82,7 +87,7 @@ namespace AutoFollow.Coroutines
 
         public async static Task<bool> LeavePartyUnknownPlayersInGame()
         {
-            if (AutoFollow.NumberOfConnectedBots == 0 && !GameUI.ChangeQuestButton.IsEnabled)
+            if (AutoFollow.NumberOfConnectedBots == 0 && !GameUI.ChangeQuestButton.IsEnabled && AutoFollowSettings.Instance.AvoidUnknownPlayers)
             {
                 Log.Info("Unknown players in the party and no connected bots, leaving party.");
                 GameUI.SafeClick(GameUI.OutOfGameLeavePartyButton, ClickDelay.NoDelay, "Leave Party Button", 1000);
@@ -191,7 +196,7 @@ namespace AutoFollow.Coroutines
 
         public static async Task<bool> InviteFollower(Message follower)
         {
-            if (DateTime.UtcNow.Subtract(_lastInviteAttempt).TotalSeconds < 5)
+            if (DateTime.UtcNow.Subtract(_lastInviteAttempt).TotalSeconds < 1)
                 return false;
 
             if (ZetaDia.Service.Party.CurrentPartyLockReasonFlags != PartyLockReasonFlag.None)
@@ -212,35 +217,36 @@ namespace AutoFollow.Coroutines
 
             var stackPanel = GameUI.SocialFriendsListStackPanel;
             var stackPanelItems = stackPanel.GetStackPanelItems();
-
             if (!stackPanelItems.Any())
             {
-                stackPanel = GameUI.SocialLocalPlayersStackPanel;
-                stackPanelItems = stackPanel.GetStackPanelItems();
-
-                if (!stackPanelItems.Any())
-                {
-                    Log.Info("No friends or local players were found!");
-                    return false;
-                }
+                Log.Info("No friends or local players were found!");
+                return false;              
             }
 
             foreach (var item in stackPanelItems)
             {
-                var text = item.TextElement.Text;                
-                var isBattleTag = Message.IsBattleTag(Common.CleanString(text), follower.BattleTagEncrypted);
+                Log.Info("{0}", item.TextElement.Text);
+                var name = Common.CleanString(item.TextElement.Text);                
+                var isBattleTag = Message.IsBattleTag(name, follower.BattleTagEncrypted);
 
                 if (isBattleTag)
                 {
                     Log.Info("Found follower on friends list!");
                     var inviteButton = item.TextElement.GetSiblingByName("PartyInviteButton");
                     inviteButton.Click();
-                    await Coroutine.Sleep(250);
+                    _lastInviteAttempt = DateTime.UtcNow;
+                    await Coroutine.Sleep(100);
+                    return true;
+                }
+                else
+                {
+                    Log.Info("{0} not a match!", name);
                 }
             }
 
+            Log.Info("Unable to find inviter requester on friends list!");
             _lastInviteAttempt = DateTime.UtcNow;
-            return true;        
+            return false;        
         }
 
         private static DateTime _lastInviteRequestTime = DateTime.MinValue;

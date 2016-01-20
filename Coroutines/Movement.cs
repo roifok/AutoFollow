@@ -40,6 +40,12 @@ namespace AutoFollow.Coroutines
                 if (ZetaDia.Me.IsDead || Navigator.StuckHandler.IsStuck)
                     break;
 
+                if (Navigation.IsBlocked)
+                {
+                    Log.Verbose("Movement Failed, It looks like we're blocked!", name, distance);
+                    break;
+                }
+                    
                 Log.Verbose("Moving to {0} Distance={1}", name, distance);
                 //await CommonCoroutines.MoveTo(location, name);
                 //NavigateTo(location, name);
@@ -54,13 +60,26 @@ namespace AutoFollow.Coroutines
             return true;
         }
 
-        public async static Task<bool> MoveTo(ITargetable message, string destinationName, float range, Func<bool> stopCondition)
+        /// <summary>
+        /// Moves to a moving target, updatse the destination during movement.
+        /// </summary>
+        /// <param name="targetableProducer">returns an updated ITargetable object</param>
+        /// <param name="destinationName">friendly name of destination for logging purposes</param>
+        /// <param name="range">acceptable distance to destination</param>
+        /// <param name="stopCondition">optional condition that would cause movement to abort</param>
+        /// <returns></returns>
+        public async static Task<bool> MoveTo(Func<ITargetable> targetableProducer, string destinationName, float range, Func<bool> stopCondition)
         {
-            var distance = 0f;
-            var location = message.Position;
-            var name = string.IsNullOrEmpty(destinationName) ? location.ToString() : destinationName;
+            if (targetableProducer == null)
+                return false;
 
-            Navigator.PlayerMover.MoveTowards(location);
+            var target = targetableProducer();
+            var distance = 0f;
+            var name = string.IsNullOrEmpty(destinationName) ? "Unknown" : destinationName;
+            var destination = target.Position;
+            var acdId = target.AcdId;
+
+            Navigator.PlayerMover.MoveTowards(destination);
 
             while (ZetaDia.IsInGame)
             {
@@ -70,18 +89,37 @@ namespace AutoFollow.Coroutines
                 if (ZetaDia.Me.IsDead || Navigator.StuckHandler.IsStuck)
                     break;
 
-                var actor = Data.Players.FirstOrDefault(p => p.ACDId == message.AcdId);
-                if (actor != null)
+                if (Navigation.IsBlocked)
                 {
-                    location = actor.Position;
+                    Log.Verbose("Movement Failed, It looks like we're blocked!", name, distance);
+                    break;
                 }
 
-                distance = location.Distance(ZetaDia.Me.Position);
+                target = targetableProducer();
+                var actor = Data.Players.FirstOrDefault(p => p.ACDId == acdId);
+
+                if (target == null && actor == null)
+                {
+                    Log.Verbose("Movement failed, Target not found", name, distance);
+                    return false;
+                }
+
+                if (target.WorldSnoId != Player.Instance.CurrentWorldSnoId)
+                {
+                    Log.Verbose("Movement Failed, Target is in a different world", name, distance);
+                    return false;
+                }
+
+                destination = actor != null ? actor.Position : target.Position;
+
+                distance = destination.Distance(ZetaDia.Me.Position);
                 if (distance <= range)
                     break;
 
-                Log.Verbose("Moving to {0} Distance={1}", name, distance);
-                await Navigator.MoveTo(location, name);
+                
+                Log.Verbose("Moving to {0} Distance={1} (Dynamic)", name, distance);
+
+                await Navigator.MoveTo(destination, name);
                 await Coroutine.Yield();
             }
 
@@ -213,7 +251,7 @@ namespace AutoFollow.Coroutines
                 Log.Verbose("Moving to Player {0} CurrentDistance={1} DistanceRequired={2} ",
                     player.HeroName, player.Distance, range);
                 
-                await MoveTo(player, player.HeroName, range, () => !player.IsInSameWorld);
+                await MoveTo(() => AutoFollow.GetCurrentMessage(player.AcdId), player.HeroName, range, () => !player.IsInSameWorld);
                 return true;
             }
 
@@ -260,7 +298,7 @@ namespace AutoFollow.Coroutines
         {
             //Id=1471427315 MinimapTextureSnoId=102320 NameHash=1938876095 IsPointOfInterest=False IsPortalEntrance=False IsPortalExit=True IsWaypoint=False Location=x="372" y="1030" z="2"  Distance=101            
 
-            if (AutoFollow.CurrentLeader.IsInSameWorld && AutoFollow.CurrentLeader.IsInRift)
+            if (AutoFollow.CurrentLeader.IsInSameWorld && AutoFollow.CurrentLeader.InGreaterRift)
                 return false;
 
             var marker = Data.Markers.FirstOrDefault(m => m.MinimapTextureSnoId == 102320 && m.IsPortalExit);
@@ -343,7 +381,6 @@ namespace AutoFollow.Coroutines
             await MoveToAndInteract(riftEntrancePortal);
             return true;
         }
-
     }
 }
 

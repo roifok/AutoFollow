@@ -102,6 +102,7 @@ namespace AutoFollow.Behaviors
             EventManager.InTrouble -= OnInTrouble;
             EventManager.UsedPortal -= OnUsedPortal;
             EventManager.InviteRequest -= OnInviteRequest;
+            EventManager.RequestPartyLeaveGame -= OnRequestPartyLeaveGame;
 
             Pulsator.OnPulse -= Pulsator_OnPulse;
             Log.Info("Stopped {0}", Name);
@@ -140,16 +141,17 @@ namespace AutoFollow.Behaviors
 
         private void Pulsator_OnPulse(object sender, EventArgs e)
         {
+            if (!TreeHooks.Instance.Hooks.Any(h => h.Value.Contains(InGameHook)))
+            {
+                InsertHooks();
+            }
+
             OnPulse();
         }
 
         public virtual void OnPulse()
         {
-            if (!TreeHooks.Instance.Hooks.Any(h => h.Value.Contains(InGameHook)))
-            {
-                //Log.Info("InGameHook not found");
-                InsertHooks();
-            }
+
         }
 
         public virtual void OnActivated()

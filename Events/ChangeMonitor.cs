@@ -30,6 +30,8 @@ namespace AutoFollow.Events
             GameEvents.OnWorldTransferStart += GameEvents_OnWorldTransferStart;
         }
 
+        public static DateTime LastWorldChange = DateTime.MinValue;
+
         private static void GameEvents_OnWorldTransferStart(object sender, EventArgs e)
         {
             if (ZetaDia.IsInTown) 
@@ -102,6 +104,8 @@ namespace AutoFollow.Events
 
         private static void GameEvents_OnWorldChanged(object sender, EventArgs e)
         {
+            LastWorldChange = DateTime.UtcNow;
+
             var portal = Data.Portals.OrderByDescending(p => p.Distance).FirstOrDefault();
             if (portal != null)
             {
