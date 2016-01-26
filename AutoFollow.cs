@@ -22,6 +22,7 @@ using Zeta.Game;
 using Zeta.TreeSharp;
 using EventManager = AutoFollow.Events.EventManager;
 using System.IO;
+using System.Xml.Linq;
 using System.Xml.XPath;
 
 namespace AutoFollow
@@ -43,7 +44,7 @@ namespace AutoFollow
         }
 
         public static InterfaceLoader<IBehavior> Behaviors;
-        public static Version PluginVersion = new Version(1, 0, 8);
+        public static Version PluginVersion = new Version(1, 0, 10);
         internal static bool Enabled;
         internal static Message ServerMessage = new Message();
         internal static Dictionary<int, Message> ClientMessages = new Dictionary<int, Message>();
@@ -60,31 +61,72 @@ namespace AutoFollow
         private static IBehavior _currentBehavior;
         public static IBehavior CurrentBehavior
         {
-            get { return _currentBehavior; }
+            get { return AutoFollow._currentBehavior; }
             set
             {
-                if (value == null || _currentBehavior == value)
+                if (value == null || AutoFollow._currentBehavior == value)
                     return;
 
-                if (_currentBehavior != null)
+                if (AutoFollow._currentBehavior != null)
                 {
-                    _currentBehavior.Deactivate();
-                    Log.Warn("Changing behavior type from {0} to {1}", _currentBehavior.Name, value.Name);
+                    AutoFollow._currentBehavior.Deactivate();
+                    Log.Warn("Changing behavior type from {0} to {1}", AutoFollow._currentBehavior.Name, value.Name);
+
+                    // Important: need to restart profile or behavior hooks will still run even after being removed.
+                    ProfileManager.Load(ProfileManager.CurrentProfile.Path);
                 }
 
-                _currentBehavior = value;
-                _currentBehavior.Activate();
+                AutoFollow._currentBehavior = value;
+                AutoFollow._currentBehavior.Activate();
             }
         }
 
         /// <summary>
-        /// Updates this bots information.
         /// Called by service communication thread.
         /// </summary>
         public void ServiceOnUpdatePreview()
         {
+
+        }
+
+        internal static void Pulse()
+        {
+            if (!Enabled)
+                return;
+
+            if (ZetaDia.IsLoadingWorld)
+                return;
+
+            if (!Service.IsConnected)
+            {
+                Service.Connect();
+                CommunicationThread.ThreadStart();
+            }
+
+            if (ZetaDia.IsInGame)
+            {
+                InGamePulse();
+            }
+            else
+            {
+                OutOfGamePulse();
+            }
+
+            GameUI.SafeCheckClickButtons();
+        }
+
+        internal static void OutOfGamePulse()
+        {
             ChangeMonitor.CheckForChanges();
-            Player.Instance.Update();
+            Player.UpdateOutOfGame();
+            EventManager.Update();
+            SelectBehavior();
+        }
+
+        internal static void InGamePulse()
+        {
+            ChangeMonitor.CheckForChanges();
+            Player.Update();
             SelectBehavior();
         }
 
@@ -101,7 +143,13 @@ namespace AutoFollow
 
             _lastSelectedBehavior = DateTime.UtcNow;
 
-            // Check if our tag has been started within profile.
+            if (ProfileManager.CurrentProfile == null)
+            {
+                CurrentBehavior = DefaultBehavior;
+                return;
+            }
+
+            // Assign from tag that has been reached in profile.
             if (AutoFollowTag.Current != null && AutoFollowTag.Current.CurrentBehavior != null)
             {
                 if (CurrentBehavior == AutoFollowTag.Current.CurrentBehavior)
@@ -111,27 +159,52 @@ namespace AutoFollow
                 return;
             }
 
-            // Check if profile contains our tag.       
-            if (ProfileHasTag("AutoFollow"))
+            // Assign from tag within profile before tag has been reached.
+            var profileTag = ProfileUtils.GetProfileTag("AutoFollow");
+            if (profileTag != null)
             {
-                Log.Verbose("AutoFollow Tag was found in profile");
-                CurrentBehavior = FollowerBehavior;
+                var behaviorAttr = profileTag.Attribute("behavior");
+                if (behaviorAttr != null && !string.IsNullOrEmpty(behaviorAttr.Value))
+                {
+                    AssignBehaviorByName(behaviorAttr.Value);
+                    return;
+                }
+
+                CurrentBehavior = DefaultBehavior;
                 return;
             }
 
+            //// Check if our tag has been started within profile.
+            //if (AutoFollowTag.Current != null && AutoFollowTag.Current.CurrentBehavior != null)
+            //{
+            //    if (CurrentBehavior == AutoFollowTag.Current.CurrentBehavior)
+            //        return;
+
+            //    CurrentBehavior = AutoFollowTag.Current.CurrentBehavior;
+            //    return;
+            //}
+
+            // Check if profile contains our tag.       
+            //if (ProfileHasTag("AutoFollow"))
+            //{
+            //    Log.Verbose("AutoFollow Tag was found in profile");
+            //    CurrentBehavior = FollowerBehavior;
+            //    return;
+            //}
+
+            //var profileTag = GetProfileTag("AutoFollow");
+            //if (profileTag == null)
+            //{
+            //    if (profileTag.HasAttributes)
+            //    {
+            //        var behavior = profileTag.Attribute("behavior");
+            //        if (behavior.Value.ToLower().Contains("leadermanual"));
+            //    }
+            //    var attr = 
+            //}
+
             CurrentBehavior = LeaderBehavior;
         }
-
-        public static bool ProfileHasTag(string tagName)
-        {
-            var profile = ProfileManager.CurrentProfile;
-            if (profile != null && profile.Element != null)
-            {
-                return profile.Element.XPathSelectElement("descendant::" + tagName) != null;
-            }
-            return false;
-        }
-
 
         /// <summary>
         /// Find a leader amongst the connected bots.
@@ -157,6 +230,25 @@ namespace AutoFollow
             return leader;
         }
 
+        public static void AssignBehaviorByName(string name)
+        {
+            if (!string.IsNullOrEmpty(name))
+            {
+                IBehavior behavior;
+                if (AutoFollow.Behaviors.Items.TryGetValue(name, out behavior) && CurrentBehavior != behavior)
+                {
+                    Log.Info("Loading behavior: {0}", name);
+                    CurrentBehavior = behavior;
+                }
+            }
+            else
+            {
+                Log.Info("Requested behavior '{0}' was not found", name);
+                CurrentBehavior = AutoFollow.DefaultBehavior;
+                BotMain.Stop();
+            }
+        }
+
         public static void DisablePlugin()
         {
             Enabled = false;
@@ -169,7 +261,7 @@ namespace AutoFollow
 
         public Version Version
         {
-            get { return PluginVersion; }
+            get { return AutoFollow.PluginVersion; }
         }
 
         public string Author
@@ -200,13 +292,23 @@ namespace AutoFollow
             BotMain.OnStop += BotMain_OnStop;
             CurrentBehavior = DefaultBehavior;
             EventManager.Enable();
-            Service.OnUpdatePreview += ServiceOnUpdatePreview;
             BotHistory.Enable();
             TabUi.InstallTab();
+            ChangeMonitor.Enable();
+
+            Service.Connect();
+            CommunicationThread.ThreadStart();
 
             // When start button is clicked, hooks are cleared,
             TreeHooks.Instance.OnHooksCleared += OnHooksCleared;
         }
+
+        //private void OnProfileLoaded(object sender, EventArgs eventArgs)
+        //{
+        //    if (!Enabled) return;
+
+        //    SelectBehavior();
+        //}
 
         private void OnHooksCleared(object sender, EventArgs e)
         {
@@ -225,25 +327,18 @@ namespace AutoFollow
             BotMain.OnStart -= BotMain_OnStart;
             BotMain.OnStop -=  BotMain_OnStop;
             EventManager.Disable();
+            EventManager.OnPulseOutOfGame += Pulse;
             Service.OnUpdatePreview -= ServiceOnUpdatePreview;
             BotHistory.Disable();
             TabUi.RemoveTab();
+            ChangeMonitor.Disable();
         }
 
         public void OnPulse()
         {
-            if (ZetaDia.IsLoadingWorld)
-                return;
-
-            if (!Service.IsConnected)
-            {
-                Service.Connect();
-                CommunicationThread.ThreadStart();
-            }            
-
-            GameUI.SafeCheckClickButtons();
-            //ServiceOnUpdatePreview();
+            Pulse();
         }
+
 
         private void BotMain_OnStart(IBot bot)
         {
@@ -253,6 +348,7 @@ namespace AutoFollow
                 CommunicationThread.ThreadStart();
             }
 
+            SelectBehavior();
             CurrentBehavior.Activate();
         }
 
@@ -278,16 +374,18 @@ namespace AutoFollow
 
         #endregion
 
-        public static Message GetCurrentMessage(int acdId)
+        public static Message GetUpdatedMessage(Message message)
         {
-            return AutoFollow.CurrentParty.FirstOrDefault(p => p.AcdId == acdId);
+            return CurrentParty.FirstOrDefault(p => p.HeroId == message.HeroId);
         }
 
-        public static Vector3 GetCurrentPosition(int acdId)
+        public static Vector3 GetUpdatedPosition(Message message)
         {
-            var message = AutoFollow.CurrentParty.FirstOrDefault(p => p.AcdId == acdId);
-            return message != null ? message.Position : Vector3.Zero;
+            var partyMember = GetUpdatedMessage(message);
+            return partyMember != null ? partyMember.Position : Vector3.Zero;
         }
 
     }
 }
+
+

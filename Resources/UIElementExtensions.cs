@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Zeta.Game.Internals;
@@ -38,9 +39,16 @@ namespace AutoFollow.Resources
 
             foreach (var child in UIElement.GetChildren(element))
             {
+                if (!child.IsValid)
+                {
+                    Log.Info("FindDecedentsWithText() Encountered Invalid Child");    
+                }
+
                 var childResults = FindDecedentsWithText(child, text);
                 if (childResults != null && childResults.Any())
+                {
                     elements.AddRange(childResults);
+                }                    
             }
 
             return elements;
@@ -142,11 +150,54 @@ namespace AutoFollow.Resources
 
         public static void LogElement(this UIElement element)
         {
-            if (element == null)
+            if (element == null || !element.IsValid)
                 return;
 
+            bool? isVisible = null;
+            try
+            {
+                isVisible = element.IsVisible;
+            }
+            catch (Exception) { }
+            string name = null;
+            try
+            {      
+                name = element.Name;
+            }
+            catch (Exception) { }
+            string text = null;
+            try
+            {      
+                text = element.Text;
+            }
+            catch (Exception) { }
+            ulong? hash = null;
+            try
+            {      
+                hash = element.Hash;
+            }
+            catch (Exception) { }
+            bool? isEnabled = null;
+            try
+            {
+                isEnabled = element.IsEnabled;
+            }
+            catch (Exception) { }
+            bool? hasText = null;
+            try
+            {                
+                hasText = element.HasText;
+            }
+            catch (Exception) { }
+
             Log.Info("Element Name={1}, IsVisible={0}, Text={2}, Hash={3}, IsEnabled={4}, HasText={5}",
-                element.IsVisible, element.Name, element.Text, element.Hash, element.IsEnabled, element.HasText);
+                isVisible != null ? isVisible.ToString() : "NULL",
+                name != null ? name.ToString() : "NULL",
+                text != null ? text.ToString() : "NULL",
+                hash != null ? hash.ToString() : "NULL",
+                isEnabled != null ? isEnabled.ToString() : "NULL",
+                hasText != null ? hasText.ToString() : "NULL");
+
         }
 
         public static bool SafeClick(this UIElement element)

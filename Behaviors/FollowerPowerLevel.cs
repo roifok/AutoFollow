@@ -1,20 +1,7 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using AutoFollow.Behaviors.Structures;
 using AutoFollow.Coroutines;
-using AutoFollow.Coroutines.Resources;
-using AutoFollow.Networking;
 using AutoFollow.Resources;
-using Zeta.Bot;
-using Zeta.Common;
-using Zeta.Game;
-using Zeta.Game.Internals;
-using Zeta.Game.Internals.Service;
-using Zeta.TreeSharp;
-using Action = Zeta.TreeSharp.Action;
 
 namespace AutoFollow.Behaviors
 {
@@ -46,13 +33,12 @@ namespace AutoFollow.Behaviors
             if (await Party.StartGameWhenPartyReady())
                 return true;
 
-            if (await Party.JoinLeadersGameInprogress())
+            if (await Party.JoinGameOrLeaveParty())
                 return true;
 
             if (await Party.QuickJoinLeader())
                 return true;
 
-            Log.Verbose("Waiting... (Out of Game)");
             return true;
         }
 
@@ -61,7 +47,7 @@ namespace AutoFollow.Behaviors
             if (await base.InGameTask())
                 return true;
 
-            if (await Party.TeleportWhenInDifferentWorld(AutoFollow.CurrentLeader))
+            if (await Coordination.TeleportWhenInDifferentWorld(AutoFollow.CurrentLeader))
                 return true;
 
             return false;

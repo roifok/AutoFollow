@@ -9,7 +9,13 @@ namespace AutoFollow.Events
     [Serializable]
     public class EventData : EventArgs
     {
-        public EventData(EventType type, object oldValue = null, object newValue = null)
+
+        public EventData(EventType type, bool breakExecution) : this(type, null, null, breakExecution)
+        {
+
+        }
+
+        public EventData(EventType type, object oldValue = null, object newValue = null, bool breakExecution = false)
         {
             Type = type;
             Time = DateTime.UtcNow;
@@ -20,6 +26,7 @@ namespace AutoFollow.Events
             OldValue = oldValue;
             NewValue = newValue;
             Id = Time.GetHashCode() ^ (int)Type ^ OwnerId;
+            BreakExecution = breakExecution;
         }
 
         public DateTime Time { get; private set; }
@@ -42,6 +49,8 @@ namespace AutoFollow.Events
             get { return DateTime.UtcNow.Subtract(Time); }
         }
 
+        public bool BreakExecution { get; private set; }
+
         public override int GetHashCode()
         {
             return Id;
@@ -54,9 +63,9 @@ namespace AutoFollow.Events
 
         public override string ToString()
         {
-            return string.Format("{0} EventData >> {1} ({2}) {3} {4:0.#}s ago Old={5} New={6}", 
+            return string.Format("{0} EventData >> {1} ({2}) {3} {4:0.#}s ago Old={5} New={6} BreakExecution={7}", 
                 IsLeaderEvent ? "Leader" : "Follower", OwnerHeroName, OwnerId, 
-                Type, DateTime.UtcNow.Subtract(Time).TotalSeconds, OldValue, NewValue);
+                Type, DateTime.UtcNow.Subtract(Time).TotalSeconds, OldValue, NewValue, BreakExecution);
         }
 
 

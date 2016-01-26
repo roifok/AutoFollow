@@ -29,8 +29,8 @@ namespace AutoFollow.Behaviors
         public static DateTime LastActivated { get; set; }
         public static bool IsActive { get; set; }
 
-        private static Composite InGameHook;
-        private static Composite OutGameHook;
+        private static Composite _inGameHook;
+        private static Composite _outGameHook;
 
         private readonly Data Data = new Data();
 
@@ -56,8 +56,8 @@ namespace AutoFollow.Behaviors
 
             Log.Info("Activated {0}", Name);
 
-            OutGameHook = new ActionRunCoroutine(ret => OutOfGameTask());
-            InGameHook = new ActionRunCoroutine(ret => InGameTask());          
+            _outGameHook = new ActionRunCoroutine(ret => OutOfGameTask());
+            _inGameHook = new ActionRunCoroutine(ret => InGameTask());          
             TreeHooks.Instance.OnHooksCleared += Instance_OnHooksCleared;
             InsertHooks();
 
@@ -69,7 +69,7 @@ namespace AutoFollow.Behaviors
             EventManager.InTrouble += OnInTrouble;
             EventManager.UsedPortal += OnUsedPortal;
             EventManager.InviteRequest += OnInviteRequest;
-            EventManager.RequestPartyLeaveGame += OnRequestPartyLeaveGame;
+            EventManager.LeavingGame += OnLeavingGame;
 
             Pulsator.OnPulse += Pulsator_OnPulse;
             LastActivated = DateTime.UtcNow;
@@ -84,14 +84,14 @@ namespace AutoFollow.Behaviors
 
         private static void InsertHooks()
         {
-            TreeHooks.Instance.InsertHook("BotBehavior", 0, InGameHook);
-            TreeHooks.Instance.InsertHook("OutOfGame", 0, OutGameHook);
+            TreeHooks.Instance.InsertHook("BotBehavior", 0, _inGameHook);
+            TreeHooks.Instance.InsertHook("OutOfGame", 0, _outGameHook);
         }
 
         public void Deactivate()
         {                               
-            TreeHooks.Instance.RemoveHook("BotBehavior", InGameHook);
-            TreeHooks.Instance.RemoveHook("OutOfGame", OutGameHook);
+            TreeHooks.Instance.RemoveHook("BotBehavior", _inGameHook);
+            TreeHooks.Instance.RemoveHook("OutOfGame", _outGameHook);
             TreeHooks.Instance.OnHooksCleared -= Instance_OnHooksCleared;
 
             EventManager.EngagedElite -= OnEngagedElite;
@@ -102,7 +102,7 @@ namespace AutoFollow.Behaviors
             EventManager.InTrouble -= OnInTrouble;
             EventManager.UsedPortal -= OnUsedPortal;
             EventManager.InviteRequest -= OnInviteRequest;
-            EventManager.RequestPartyLeaveGame -= OnRequestPartyLeaveGame;
+            EventManager.LeavingGame -= OnLeavingGame;
 
             Pulsator.OnPulse -= Pulsator_OnPulse;
             Log.Info("Stopped {0}", Name);
@@ -112,36 +112,82 @@ namespace AutoFollow.Behaviors
 
         public virtual async Task<bool> OutOfGameTask()
         {
+            if (!AutoFollow.Enabled)
+                return false;
+
+            // Pulse does fire while out of game. Need to be very careful how waits are handled.
+            // Don't use long Coroutine.Sleeps out of game as it will prevent player updates for the duration.
+            AutoFollow.Pulse();            
+
+            if (Service.IsConnected && AutoFollow.NumberOfConnectedBots == 0)
+            {
+                Log.Info("Waiting for bots to connect...");
+                await Coroutine.Sleep(500);
+                return true;
+            }
+
+            if (DateTime.UtcNow < Coordination.WaitUntil)
+            {
+                Log.Debug("Waiting... (Generic OOC) Remaining={0}s", Coordination.WaitUntil.Subtract(DateTime.UtcNow).TotalSeconds);
+                await Coroutine.Sleep(500);
+                return true;
+            }
+
             if (!IsGameReady || ZetaDia.IsInGame || Party.IsLocked || !ZetaDia.Service.IsValid || !ZetaDia.Service.Hero.IsValid)
             {
                 Log.Verbose("Waiting... (Invalid State)");
+                await Coroutine.Sleep(500);
                 return true;
             }
 
             GameUI.SafeCheckClickButtons();
-                        
-            if(AutoFollow.CurrentBehavior.GetType() == typeof(BaseBehavior))
+
+            if (AutoFollow.CurrentBehavior.GetType() == typeof (BaseBehavior) && !ProfileUtils.ProfileIsYarKickstart)
+            {
                 return true;
+            }                
 
             return false;
         }
 
         public virtual async Task<bool> InGameTask()
         {
+            if (!AutoFollow.Enabled)
+                return false;
+
             if (!IsGameReady || !ZetaDia.IsInGame || Party.IsLocked)
             {
                 Log.Verbose("Waiting (Invalid State)");
                 return true;
             }
 
-            //Log.Verbose("Base InGameTask");
+            if (DateTime.UtcNow < Coordination.WaitUntil)
+            {
+                Log.Debug("Waiting... (Generic IC) Remaining={0}s", Coordination.WaitUntil.Subtract(DateTime.UtcNow).TotalSeconds);
+                await Coroutine.Sleep(500);
+                return true;
+            }
+
+            if (!AutoFollow.CurrentLeader.IsValid)
+            {
+                if (!AutoFollow.CurrentParty.Any(m => m.IsLeader))
+                {
+                    Log.Info("There is currently no leader");
+                }
+                else
+                {
+                    Log.Debug("Leader message was invalid");
+                }
+                return true;
+            }
+
             GameUI.SafeCheckClickButtons();
             return false;
         }
 
         private void Pulsator_OnPulse(object sender, EventArgs e)
         {
-            if (!TreeHooks.Instance.Hooks.Any(h => h.Value.Contains(InGameHook)))
+            if (!TreeHooks.Instance.Hooks.Any(h => h.Value.Contains(_inGameHook)))
             {
                 InsertHooks();
             }
@@ -204,7 +250,7 @@ namespace AutoFollow.Behaviors
             return false;
         }
 
-        public virtual async Task<bool> OnRequestPartyLeaveGame(Message sender, EventData e)
+        public virtual async Task<bool> OnLeavingGame(Message sender, EventData e)
         {
             return false;
         }

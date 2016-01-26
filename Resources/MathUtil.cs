@@ -1460,8 +1460,8 @@ namespace AutoFollow.Resources
         /// The value is derived from 2^(-53) = 1.1102230246251565e-16, where IEEE 754 binary64 &quot;double precision&quot; floating point numbers have a significand precision that utilize 53 bits.
         ///
         /// This number has the following properties:
-        ///     (1 - NegativeMachineEpsilon) &lt; 1 and
-        ///     (1 + NegativeMachineEpsilon) == 1
+        /// (1 - NegativeMachineEpsilon) &lt; 1 and
+        /// (1 + NegativeMachineEpsilon) == 1
         /// </summary>
         public const double NegativeMachineEpsilon = 1.1102230246251565e-16D; //Math.Pow(2, -53);
 
@@ -1470,8 +1470,8 @@ namespace AutoFollow.Resources
         /// The value is derived from 2 * 2^(-53) = 2.2204460492503131e-16, where IEEE 754 binary64 &quot;double precision&quot; floating point numbers have a significand precision that utilize 53 bits.
         ///
         /// This number has the following properties:
-        ///     (1 - PositiveDoublePrecision) &lt; 1 and
-        ///     (1 + PositiveDoublePrecision) &gt; 1
+        /// (1 - PositiveDoublePrecision) &lt; 1 and
+        /// (1 + PositiveDoublePrecision) &gt; 1
         /// </summary>
         public const double PositiveMachineEpsilon = 2D * NegativeMachineEpsilon;
 
@@ -1479,8 +1479,8 @@ namespace AutoFollow.Resources
         /// The smallest positive number that when SUBTRACTED from 1D yields a result different from 1D.
         ///
         /// This number has the following properties:
-        ///     (1 - NegativeMachineEpsilon) &lt; 1 and
-        ///     (1 + NegativeMachineEpsilon) == 1
+        /// (1 - NegativeMachineEpsilon) &lt; 1 and
+        /// (1 + NegativeMachineEpsilon) == 1
         /// </summary>
         public static readonly double MeasuredNegativeMachineEpsilon = MeasureNegativeMachineEpsilon();
 
@@ -1504,8 +1504,8 @@ namespace AutoFollow.Resources
         /// The smallest positive number that when ADDED to 1D yields a result different from 1D.
         ///
         /// This number has the following properties:
-        ///     (1 - PositiveDoublePrecision) &lt; 1 and
-        ///     (1 + PositiveDoublePrecision) &gt; 1
+        /// (1 - PositiveDoublePrecision) &lt; 1 and
+        /// (1 + PositiveDoublePrecision) &gt; 1
         /// </summary>
         public static readonly double MeasuredPositiveMachineEpsilon = MeasurePositiveMachineEpsilon();
 

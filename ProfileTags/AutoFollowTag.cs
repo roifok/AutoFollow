@@ -39,34 +39,12 @@ namespace AutoFollow.ProfileTags
 
         public override void OnStart()
         {
-            if (!string.IsNullOrEmpty(behaviorName))
-            {
-                IBehavior behavior;
-                if (AutoFollow.Behaviors.Items.TryGetValue(behaviorName, out behavior))
-                {
-                    Log.Info("AutoFollowTag started with mode: {0}", behaviorName);
-                    CurrentBehavior = behavior;
-                }
-            }
-            else
-            {
-                Log.Info("Requested behavior '{0}' was not found", behaviorName);
-                CurrentBehavior = AutoFollow.DefaultBehavior;
-                BotMain.Stop();
-            }
-
+            AutoFollow.AssignBehaviorByName(behaviorName);
             base.OnStart();
         }
 
         private async Task<bool> AutoFollowTagTask()
         {
-            //if (!ZetaDia.IsInGame)
-            //    return false;
-
-            //if (ZetaDia.IsLoadingWorld)
-            //    return false;
-
-            //await Coroutine.Sleep(1000);
             return false;
         }
 

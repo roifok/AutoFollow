@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using AutoFollow.UI.Settings;
 
 namespace AutoFollow.Resources
 {
@@ -87,7 +86,7 @@ namespace AutoFollow.Resources
 
         public static void Verbose(string message, params object[] args)
         {
-            if (!AutoFollowSettings.Instance.DebugLogging)
+            if (!Settings.Misc.DebugLogging)
                 return;
 
             var msg = ClassTag + string.Format(message, args);
@@ -101,7 +100,7 @@ namespace AutoFollow.Resources
 
         public static void Verbose(string message)
         {
-            if (!AutoFollowSettings.Instance.DebugLogging)
+            if (!Settings.Misc.DebugLogging)
                 return;
 
             var msg = ClassTag + message;
@@ -115,7 +114,7 @@ namespace AutoFollow.Resources
 
         public static void Debug(string message, params object[] args)
         {
-            if (!AutoFollowSettings.Instance.DebugLogging)
+            if (!Settings.Misc.DebugLogging)
                 return;
 
             var msg = ClassTag + string.Format(message, args);
@@ -129,7 +128,7 @@ namespace AutoFollow.Resources
 
         public static void Debug(string message)
         {
-            if (!AutoFollowSettings.Instance.DebugLogging)
+            if (!Settings.Misc.DebugLogging)
                 return;
 
             var msg = ClassTag + message;

@@ -6,7 +6,6 @@ using System.Net.NetworkInformation;
 using System.ServiceModel;
 using AutoFollow.Events;
 using AutoFollow.Resources;
-using AutoFollow.UI.Settings;
 using Zeta.Common;
 
 namespace AutoFollow.Networking
@@ -19,7 +18,7 @@ namespace AutoFollow.Networking
 
         public static int _basePort = 10920;
 
-        public static Uri ServerUri = new Uri("http://" + AutoFollowSettings.Instance.BindAddress + ":" + AutoFollowSettings.Instance.ServerPort);
+        public static Uri ServerUri = new Uri("http://" + Settings.Network.BindAddress + ":" + Settings.Network.ServerPort);
 
         public static ServiceHost ServiceHost;
         public static DateTime LastServerUpdate = DateTime.MinValue;
@@ -32,6 +31,9 @@ namespace AutoFollow.Networking
         {
             try
             {
+                if (Server.ServiceHost == null)
+                    return;
+
                 if (Server.ServiceHost.State == CommunicationState.Faulted)
                 {
                     Log.Info("Aborting Faulted Server Service");
@@ -74,6 +76,12 @@ namespace AutoFollow.Networking
             if (!AutoFollow.Enabled)
                 return;
 
+            if (Service.ConnectionMode != ConnectionMode.Server)
+                return;
+
+            if (DateTime.UtcNow < DontAttemptServerModeUntil)
+                return;
+
             if (DateTime.UtcNow.Subtract(LastFailTime).TotalSeconds < 5)
                 return;
 
@@ -82,8 +90,8 @@ namespace AutoFollow.Networking
             try
             {
                 var portIsTaken = true;
-                ServerUri = new Uri(ServerUri.AbsoluteUri.Replace(_basePort.ToString(), AutoFollowSettings.Instance.ServerPort.ToString()));
-                _basePort = AutoFollowSettings.Instance.ServerPort;
+                ServerUri = new Uri(ServerUri.AbsoluteUri.Replace(_basePort.ToString(), Settings.Network.ServerPort.ToString()));
+                _basePort = Settings.Network.ServerPort;
                 var serverPort = _basePort;
 
                 while (portIsTaken && AutoFollow.Enabled)
@@ -114,7 +122,10 @@ namespace AutoFollow.Networking
             {
                 Log.Verbose("Address already in use. Attempt={0}", ServerStartAttempts);
                 Log.Debug(ex.ToString());
+                DontAttemptServerModeUntil = DateTime.UtcNow.Add(TimeSpan.FromMinutes(1));
                 LastFailTime = DateTime.UtcNow;
+                Server.ShutdownServer();
+                Client.ShutdownClient();
                 Service.ConnectionMode = ConnectionMode.Client;
             }
             catch (Exception ex)
@@ -128,9 +139,9 @@ namespace AutoFollow.Networking
             {
                 Service.ConnectionMode = ConnectionMode.Client;
             }
-
-
         }
+
+        public static DateTime DontAttemptServerModeUntil = DateTime.MinValue;
 
         /// <summary>
         /// Updates the Server message
@@ -143,23 +154,29 @@ namespace AutoFollow.Networking
             if (!IsValid)
             {
                 Log.Info("Server is Invalid", Service.ConnectionMode);
+                ShutdownServer();
                 ServerInitialize();
                 return;
             }
 
-            if (AutoFollow.ServerMessage.GetMillisecondsSinceLastUpdate() < AutoFollowSettings.Instance.UpdateInterval)
+            if (DateTime.UtcNow.Subtract(LastServerUpdate).TotalMilliseconds < Settings.Network.UpdateInterval)
                 return;
 
-            AutoFollow.SelectBehavior();
-
             ProcessClientMessages();
+            UpdateDataAsServer();
 
-            if (Player.Instance.Message.IsServer && Service.IsConnected)
-            {
-                UpdateDataAsServer();
+            Log.Debug("Communicating with {0} other bots:", AutoFollow.NumberOfConnectedBots);
+
+            if (DateTime.UtcNow.Subtract(LastSummaryTime).TotalSeconds > 2)
+            {                
+                Log.Debug("{0}", AutoFollow.ServerMessage.ShortSummary);
+
+                foreach (var otherMessage in AutoFollow.ClientMessages.Values)
+                {
+                    Log.Debug("{0}", otherMessage.ShortSummary);
+                }
+                LastSummaryTime = DateTime.UtcNow;
             }
-
-            AutoFollow.ServerMessage = Player.Instance.Message;
 
             if (OnServerUpdated != null)
                 OnServerUpdated.Invoke(AutoFollow.ClientMessages);
@@ -167,9 +184,11 @@ namespace AutoFollow.Networking
             LastServerUpdate = DateTime.UtcNow;
         }
 
+        public static DateTime LastSummaryTime { get; set; }
+
         private static void UpdateDataAsServer()
         {
-            var serverMessage = Player.Instance.Message;
+            var serverMessage = Player.CurrentMessage;
             serverMessage.LeaderId = AutoFollow.SelectLeader().OwnerId;
             AutoFollow.ClientMessages.ForEach(cm => cm.Value.LeaderId = serverMessage.LeaderId);
             AutoFollow.CurrentParty = new List<Message>(AutoFollow.ClientMessages.Values) {serverMessage};
@@ -250,7 +269,7 @@ namespace AutoFollow.Networking
 
             // Clean up old messages
             var toRemove = (from message in AutoFollow.ClientMessages
-                            where DateTime.UtcNow.Subtract(message.Value.LastUpdated).TotalSeconds >= 10
+                            where DateTime.UtcNow.Subtract(message.Value.LastUpdated).TotalSeconds >= 5
                             select message.Key).ToList();
 
             toRemove.ForEach(key => AutoFollow.ClientMessages.Remove(key));

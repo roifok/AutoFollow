@@ -13,7 +13,6 @@ using AutoFollow.Coroutines.Resources;
 using AutoFollow.Networking;
 using AutoFollow.Resources;
 using AutoFollow.UI.Components.Controls;
-using AutoFollow.UI.Settings;
 using Buddy.Overlay.Commands;
 using JetBrains.Annotations;
 using Zeta.Bot;
@@ -21,6 +20,7 @@ using Zeta.Common;
 using Zeta.Game;
 using Zeta.Game.Internals;
 using Zeta.Game.Internals.Actors;
+using Message = AutoFollow.Networking.Message;
 
 namespace AutoFollow.UI.Tab 
 {
@@ -50,7 +50,7 @@ namespace AutoFollow.UI.Tab
             ConnectionMode = Service.ConnectionMode;
             IsConnected = Service.IsConnected;
             ConnectedBots = AutoFollow.NumberOfConnectedBots;
-            UpdateInterval = AutoFollowSettings.Instance.UpdateInterval;
+            UpdateInterval = Settings.Network.UpdateInterval;
             LastUpdateMs = DateTime.UtcNow.Subtract(_lastUpdate).TotalMilliseconds;
             ServerURI = Server.ServerUri;
             _lastUpdate = DateTime.UtcNow;
@@ -181,13 +181,66 @@ namespace AutoFollow.UI.Tab
                     try
                     {
 
-                        //Log.Info("Test button clicked!");
-                        //var partyInvite = GameUI.PartyInviteDialog;
+                        Log.Info("Test button clicked!");
+
+                        ////Root.NormalLayer.BattleNetCampaign_main.LayoutRoot.Slot4
+                        //var slot4 = UIElement.FromName("Root.NormalLayer.BattleNetCampaign_main.LayoutRoot.Slot4");
+                        //if (slot4.IsVisible)
+                        //{
+                        //    Log.Info("Portait 4 Found!");
+
+                        //    var el = slot4.FindDecedentsWithText("sparkle").FirstOrDefault();
+                        //    if (el != null)
+                        //    {
+                        //        //Log.Info("Portait 4 Name found on element! {0}", );
+                        //        el.LogElement();
+                        //    }
+
+                        //}
+
+                        var s1 = UIElement.FromName("Root.NormalLayer.BattleNetCampaign_main.LayoutRoot.Slot1.LayoutRoot.Portrait.text");
+                        s1.LogElement();
+                        var s2 = UIElement.FromName("Root.NormalLayer.BattleNetCampaign_main.LayoutRoot.Slot2.LayoutRoot.Portrait.text");
+                        s2.LogElement();
+                        var s3 = UIElement.FromName("Root.NormalLayer.BattleNetCampaign_main.LayoutRoot.Slot3.LayoutRoot.Portrait.text");
+                        s3.LogElement();
+                        var s4 = UIElement.FromName("Root.NormalLayer.BattleNetCampaign_main.LayoutRoot.Slot4.LayoutRoot.Portrait.text");
+                        s4.LogElement();
+
+
+                        //var message = AutoFollow.CurrentLeader;
+
+                        //if (!ZetaDia.Service.IsInGame && ZetaDia.Service.Party.NumPartyMembers > 1)
+                        //{
+                        //    var slot1NameElement = GameUI.PartySlot1Name;
+                        //    if (slot1NameElement.IsVisible && slot1NameElement.HasText && Message.IsBattleTag(Common.CleanString(slot1NameElement.Text), message.BattleTagEncrypted))
+                        //    {
+                        //        Log.Warn("Leader is in slot 1 of our party");
+                        //    }
+                        //    var slot2NameElement = GameUI.PartySlot1Name;
+                        //    if (slot2NameElement.IsVisible && slot2NameElement.HasText && Message.IsBattleTag(Common.CleanString(slot2NameElement.Text), message.BattleTagEncrypted))
+                        //    {
+                        //        Log.Warn("Leader is in slot 2 of our party");
+                        //    }
+                        //    var slot3NameElement = GameUI.PartySlot1Name;
+                        //    if (slot3NameElement.IsVisible && slot3NameElement.HasText && Message.IsBattleTag(Common.CleanString(slot3NameElement.Text), message.BattleTagEncrypted))
+                        //    {
+                        //        Log.Warn("Leader is in slot 3 of our party");
+                        //    }
+                        //    var slot4NameElement = GameUI.PartySlot1Name;
+                        //    if (slot4NameElement.IsVisible && slot4NameElement.HasText && Message.IsBattleTag(Common.CleanString(slot4NameElement.Text), message.BattleTagEncrypted))
+                        //    {
+                        //        Log.Warn("Leader is in slot 4 of our party");
+                        //    }
+                        //}
+
+
+                    //var partyInvite = GameUI.PartyInviteDialog;
                         //if (partyInvite.IsVisible)
                         //{
                         //    Log.Info("We have a pending request dialog!");
 
-                        //    var el = partyInvite.FindDecedentsWithText("d3dex1").FirstOrDefault();
+                        //    var el = partyInvite.FindDecedentsWithText("").FirstOrDefault();
                         //    if (el != null)
                         //    {
                         //        Log.Info("Element found {0} {1} {2}", el.Text, el.Hash, el.Name);
@@ -198,9 +251,7 @@ namespace AutoFollow.UI.Tab
                         //    if (name != null)
                         //    {
                         //        Log.Info("PlayerName is {0}", name.Text);
-                        //    }
-                            
-
+                        //    }                            
                         //}
 
                         //if (!GameUI.FriendsListContent.IsVisible)

@@ -6,7 +6,7 @@ using System.ServiceModel;
 using System.Threading;
 using System.Windows;
 using AutoFollow.Resources;
-using AutoFollow.UI.Settings;
+using Zeta.Common;
 using EventManager = AutoFollow.Events.EventManager;
 
 namespace AutoFollow.Networking
@@ -17,7 +17,7 @@ namespace AutoFollow.Networking
         private static IService _httpProxy;
         public static bool ClientInitialized { get; private set; }
         public static DateTime LastUnexpectedException = DateTime.MinValue;
-        public static int ConnectionFailures { get; set; }
+        public static int ConnectionAttempts { get; set; }
         public static DateTime LastExpectedException = DateTime.MinValue;
         public static int ExpectedExceptionCount { get; set; }
         public static DateTime LastClientUpdate = DateTime.MinValue;
@@ -34,29 +34,30 @@ namespace AutoFollow.Networking
             if (!AutoFollow.Enabled)
                 return;
 
-            if (DateTime.UtcNow.Subtract(LastUnexpectedException).TotalSeconds < 5)
+            if (DateTime.UtcNow.Subtract(LastUnexpectedException).TotalSeconds < 1)
                 return;
 
-            ConnectionFailures++;
+            ConnectionAttempts++;
 
             try
             {
                 if (!ClientInitialized && AutoFollow.Enabled)
                 {
-                    var serverPort = AutoFollowSettings.Instance.ServerPort;
+                    var serverPort = Settings.Network.ServerPort;
 
                     Server.ServerUri = new Uri(Server.ServerUri.AbsoluteUri.Replace(Server._basePort.ToString(), serverPort.ToString()));
 
-                    Log.Info("Initializing Client Service connection to {0} Attempt={1}", Server.ServerUri.AbsoluteUri + "Follow", ConnectionFailures);
+                    Log.Info("Initializing Client Service connection to {0} Attempt={1}", Server.ServerUri.AbsoluteUri + "Follow", ConnectionAttempts);
 
                     var binding = new BasicHttpBinding
                     {
                         OpenTimeout = TimeSpan.FromMilliseconds(5000),
                         SendTimeout = TimeSpan.FromMilliseconds(5000),
-                        CloseTimeout = TimeSpan.FromMilliseconds(5000),
+                        CloseTimeout = TimeSpan.FromMilliseconds(500),
                         MaxBufferSize = int.MaxValue,
                         MaxReceivedMessageSize = int.MaxValue,
                         MaxBufferPoolSize = int.MaxValue,
+                        TransferMode = TransferMode.Streamed
                     };
 
                     binding.Security.Transport.ClientCredentialType = HttpClientCredentialType.None;
@@ -66,7 +67,6 @@ namespace AutoFollow.Networking
                     _httpFactory = new ChannelFactory<IService>(binding, endPointAddress);
                     _httpProxy = _httpFactory.CreateChannel();
                  
-
                     if (OnClientInitialized != null)
                         OnClientInitialized.Invoke();
 
@@ -75,11 +75,15 @@ namespace AutoFollow.Networking
             }
             catch (Exception ex)
             {
-                Log.Info("Exception in ClientInitialize() {0} Attempt={1}", ex, ConnectionFailures);
+                Log.Info("Exception in ClientInitialize() {0} Attempt={1}", ex, ConnectionAttempts);
                 LastUnexpectedException = DateTime.UtcNow;
             }
+            finally 
+            {
+               // _httpFactory.Close();
+            }
 
-            if (ConnectionFailures > 5 && !ClientInitialized)
+            if (ConnectionAttempts > 5 && !ClientInitialized)
             {
                 Service.ConnectionMode = ConnectionMode.Server;
             }
@@ -89,19 +93,24 @@ namespace AutoFollow.Networking
         {
             try
             {
-                _httpFactory.Abort();
+                if (_httpFactory != null && (_httpFactory.State != CommunicationState.Closed || _httpFactory.State != CommunicationState.Closing))
+                {
+                    _httpFactory.Close();
+                }
                 _httpProxy = null;
+                
             }
             catch (Exception)
             {
                 _httpFactory = null;
+                _httpProxy = null;
             }
-            
+            ClientInitialized = false;
         }
 
         public static bool IsValid
         {
-            get { return ClientInitialized; }
+            get { return ClientInitialized && _httpProxy != null; }
         }
 
         /// <summary>
@@ -117,31 +126,87 @@ namespace AutoFollow.Networking
                 Server.ShutdownServer();
             }
 
-            if(!IsValid)
-                ClientInitialize();
+            if (!Client.IsValid)
+            {
+                Log.Info("Client is not valid");
+                //switch (_httpFactory.State)
+                //{
+                //    case CommunicationState.Faulted:
+                //    case CommunicationState.Closing:  
+                //}
 
+                if (_httpProxy != null)
+                {
+                    Log.Info("Shutting down Client");
+                    ShutdownClient();
+                }
+                else
+                {
+                    Log.Info("Initializing Client");
+                    ClientInitialize();
+                    Thread.Sleep(250);
+                }
+                //Log.Info("_httpFactory.State={0}", _httpFactory.State);
+
+                //if(_httpFactory.State != CommunicationState.Closing)
+                    
+
+                //else if (_httpFactory.State != CommunicationState.Closed)
+                //{
+                //    Log.Info("Waiting for _httpFactory to close");
+                //    return;
+                //}
+
+                if (!Client.IsValid || _httpProxy == null || _httpFactory.State != CommunicationState.Closed)
+                {
+                    Log.Info("Waiting for client connection to be valid");
+                    return;
+                }
+                    
+            }
+                
             try
             {
                 var elapsed = DateTime.UtcNow.Subtract(LastClientUpdate).TotalMilliseconds;
-                if (elapsed < 250 || elapsed < AutoFollowSettings.Instance.UpdateInterval)
+                if (elapsed < 25 || elapsed < Settings.Network.UpdateInterval)
                     return;
 
-                if (DateTime.UtcNow.Subtract(LastUnexpectedException).TotalSeconds < 5)
+                if (DateTime.UtcNow.Subtract(LastUnexpectedException).TotalSeconds < 2)
                     return;
 
-                if (DateTime.UtcNow.Subtract(LastExpectedException).TotalSeconds < 2)
+                if (DateTime.UtcNow.Subtract(LastExpectedException).TotalSeconds < 1)
+                    return;
+
+                if (_httpProxy == null)
                     return;
 
                 _httpProxy.SendMessageToServer(new MessageWrapper
                 {
-                    PrimaryMessage = Player.Instance.Message
+                    PrimaryMessage = Player.CurrentMessage
                 });
 
                 var messageWrapper = _httpProxy.GetMessageFromServer();
 
+                if (messageWrapper.PrimaryMessage == null)
+                {
+                    Log.Debug("Unable to get a message from Server", AutoFollow.NumberOfConnectedBots);
+                    return;
+                }
+
                 UpdateDataAsClient(messageWrapper);
 
-                Log.Debug("Communicating with {0} other bots. ServerMessage={0}", AutoFollow.NumberOfConnectedBots, messageWrapper);
+                Log.Debug("Communicating with {0} other bots:", AutoFollow.NumberOfConnectedBots);
+
+                if (DateTime.UtcNow.Subtract(LastSummaryTime).TotalSeconds > 2)
+                {
+                    Log.Debug("{0}", messageWrapper.PrimaryMessage.ShortSummary);
+
+                    foreach (var otherMessage in messageWrapper.OtherMessages)
+                    {
+                        Log.Debug("{0}", otherMessage.ShortSummary);
+                    }
+                    LastSummaryTime = DateTime.UtcNow;
+                }
 
                 foreach (var e in messageWrapper.PrimaryMessage.Events)
                 {
@@ -152,13 +217,16 @@ namespace AutoFollow.Networking
                 if (OnClientUpdated != null)
                     OnClientUpdated.Invoke(AutoFollow.ServerMessage);
 
-                ConnectionFailures = 0;
+                ConnectionAttempts = 0;
                 ExpectedExceptionCount = 0;
             }
             catch (EndpointNotFoundException ex)
             {
-                if(!_firstConnectionAttempt)
-                    Log.Info("EndpointNotFoundException: Could not get an update from the leader using {0}. Is the leader running? ({1})", _httpFactory.Endpoint.Address.Uri.AbsoluteUri, ex.Message);
+                if (!_firstConnectionAttempt)
+                {
+                    Log.Info("Lost Connection to server...");
+                    Log.Debug("EndpointNotFoundException: Could not get an update from the leader using {0}. Is the leader running? ({1})", _httpFactory.Endpoint.Address.Uri.AbsoluteUri, ex.Message);
+                }
 
                 ClientInitialized = false;
                 Service.ConnectionMode = ConnectionMode.Server;
@@ -182,10 +250,10 @@ namespace AutoFollow.Networking
                 ClientInitialized = false;
                 LastUnexpectedException = DateTime.UtcNow;
                 Log.Info(ex.ToString());
-                ConnectionFailures++;
+                ConnectionAttempts++;
             }            
 
-            if (ConnectionFailures > 3)
+            if (ConnectionAttempts > 3)
             {
                 Service.ConnectionMode = ConnectionMode.Server;
             }
@@ -198,6 +266,8 @@ namespace AutoFollow.Networking
             _firstConnectionAttempt = false;
         }
 
+        public static DateTime LastSummaryTime = DateTime.MinValue;
+
         private static void UpdateDataAsClient(MessageWrapper messageWrapper)
         {
             AutoFollow.CurrentParty = new List<Message>(messageWrapper.OtherMessages) {messageWrapper.PrimaryMessage};
@@ -207,7 +277,7 @@ namespace AutoFollow.Networking
             AutoFollow.NumberOfConnectedBots = Service.GetSmoothedConnectedBotCount(AutoFollow.CurrentParty);
             AutoFollow.ServerMessage = messageWrapper.PrimaryMessage;
             EventManager.Add(AutoFollow.ServerMessage.Events);
-            AutoFollow.SelectBehavior();
+            //AutoFollow.SelectBehavior();
             LastClientUpdate = DateTime.UtcNow;
         }
     }

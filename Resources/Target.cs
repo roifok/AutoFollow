@@ -12,6 +12,9 @@ namespace AutoFollow.Resources
     [Serializable]
     public class Target : ITargetable
     {
+        public Target()
+        {
+        }
         public Target(DiaObject actor)
         {
             if (!Data.IsValid(actor))
@@ -20,7 +23,7 @@ namespace AutoFollow.Resources
             Id = actor.ActorSnoId;
             AcdId = actor.ACDId;
             Name = actor.Name;
-            WorldSnoId = Player.Instance.CurrentWorldSnoId;
+            WorldSnoId = Player.CurrentWorldSnoId;
 
             var quality = actor.CommonData.MonsterQualityLevel;
             if (!Enum.IsDefined(typeof(MonsterQuality), quality) || (int) quality == -1)
@@ -37,9 +40,9 @@ namespace AutoFollow.Resources
         public Vector3 Position { get; set; }
         public int WorldSnoId { get; set; }
 
-        public double Distance
+        public float Distance
         {
-            get { return Position.Distance(ZetaDia.Me.Position); }
+            get { return Player.Position.Distance(Position); }
         }
 
         public override string ToString()

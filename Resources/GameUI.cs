@@ -73,6 +73,45 @@ namespace AutoFollow.Coroutines.Resources
         //12614685561186959926 Root.TopLayer.BattleNetNotifications_main.Invite To Party Notification.PartyPlayer
         private const ulong PartyInviteFromPlayerNameHash = 12614685561186959926;
 
+        //[20C79320] Mouseover: 0x7B1FD584DA74FA94, Name: Root.NormalLayer.BattleNetFriendsList_main.LayoutRoot.OverlayContainer.FriendsListContent.CloseButton
+        private const ulong FriendsListCloseButtonHash = 12614685561186959926;
+
+        // Party Elements
+        //[19C011B0] Mouseover: 0x292FBCA81FBB17D0, Name: Root.NormalLayer.BattleNetCampaign_main.LayoutRoot.Slot4.LayoutRoot.Portrait.icon
+        //[19BE2270] Mouseover: 0x24F157EFB9C1744A, Name: Root.NormalLayer.BattleNetCampaign_main.LayoutRoot.Slot2.LayoutRoot.Portrait.icon
+        //[21F01860] Mouseover: 0xB8FFA01E0B671FF9, Name: Root.NormalLayer.BattleNetCampaign_main.LayoutRoot.Slot1.LayoutRoot.Portrait.icon
+        //[20D499F0] Mouseover: 0xA244FA241202C777, Name: Root.NormalLayer.BattleNetCampaign_main.LayoutRoot.Slot3.LayoutRoot.Portrait.icon
+        //Name	"Root.NormalLayer.BattleNetCampaign_main.LayoutRoot.Slot4.LayoutRoot.Portrait.HardcoreGlow"	string
+        //Name	"Root.NormalLayer.BattleNetCampaign_main.LayoutRoot.Slot4.LayoutRoot.Portrait.InvitePending"	string
+        //Name	"Root.NormalLayer.BattleNetCampaign_main.LayoutRoot.Slot4.LayoutRoot.Portrait.Banner"	string
+        //Name	"Root.NormalLayer.BattleNetCampaign_main.LayoutRoot.Slot4.LayoutRoot.Portrait.Background"	string
+        //Name	"Root.NormalLayer.BattleNetCampaign_main.LayoutRoot.Slot4.LayoutRoot.Portrait.icon"	string
+        //Name	"Root.NormalLayer.BattleNetCampaign_main.LayoutRoot.Slot4.LayoutRoot.Portrait.Frame"	string
+        //Name	"Root.NormalLayer.BattleNetCampaign_main.LayoutRoot.Slot4.LayoutRoot.Portrait.Shadow"	string
+        //Name	"Root.NormalLayer.BattleNetCampaign_main.LayoutRoot.Slot4.LayoutRoot.Portrait.HealthBar"	string
+        //Name	"Root.NormalLayer.BattleNetCampaign_main.LayoutRoot.Slot4.LayoutRoot.Portrait.hpbar"	string
+        //Name	"Root.NormalLayer.BattleNetCampaign_main.LayoutRoot.Slot4.LayoutRoot.Portrait.leaderIcon"	string
+        //Name	"Root.NormalLayer.BattleNetCampaign_main.LayoutRoot.Slot4.LayoutRoot.Portrait.busy"	string
+        //Name	"Root.NormalLayer.BattleNetCampaign_main.LayoutRoot.Slot4.LayoutRoot.Portrait.BusyIndicator"	string
+        //Name	"Root.NormalLayer.BattleNetCampaign_main.LayoutRoot.Slot4.LayoutRoot.Portrait.townportal"	string
+        //Name	"Root.NormalLayer.BattleNetCampaign_main.LayoutRoot.Slot4.LayoutRoot.Portrait.waypoint_poi"	string
+        //Name	"Root.NormalLayer.BattleNetCampaign_main.LayoutRoot.Slot4.LayoutRoot.Portrait.gamemode"	string
+        //Name	"Root.NormalLayer.BattleNetCampaign_main.LayoutRoot.Slot4.LayoutRoot.Portrait.accept_state"	string
+        //Name	"Root.NormalLayer.BattleNetCampaign_main.LayoutRoot.Slot4.LayoutRoot.Portrait.pendingState"	string
+
+        //Name	"Root.NormalLayer.BattleNetCampaign_main.LayoutRoot.Slot4.LayoutRoot.Portrait.text"	string
+        //Hash	5131118202711950686	ulong
+
+        //Name	"Root.NormalLayer.BattleNetCampaign_main.LayoutRoot.Slot4.LayoutRoot.Portrait.level"	string
+        //Name	"Root.NormalLayer.BattleNetCampaign_main.LayoutRoot.Slot4.LayoutRoot.Portrait.alt_level"	string
+        //Name	"Root.NormalLayer.BattleNetCampaign_main.LayoutRoot.Slot4.LayoutRoot.Portrait.chapteroptin"	string
+        //Name	"Root.NormalLayer.BattleNetCampaign_main.LayoutRoot.Slot4.LayoutRoot.Portrait.width_maintainer"	string
+        //Name	"Root.NormalLayer.BattleNetCampaign_main.LayoutRoot.Slot4.LayoutRoot.Portrait.follower_stack"	string
+
+        private const ulong PartySlot1NameHash = 13984795047861911535;
+        private const ulong PartySlot2NameHash = 11785348285336962668;
+        private const ulong PartySlot3NameHash = 11880506788337294737;
+        private const ulong PartySlot4NameHash = 5131118202711950686;
 
         internal const int ClickThreadSleepInterval = 125;
         private static DateTime _lastCheckedUiButtons = DateTime.MinValue;
@@ -98,6 +137,31 @@ namespace AutoFollow.Coroutines.Resources
 
                 return false;
             }
+        }
+
+        public static UIElement PartySlot1Name
+        {
+            get { return UIElement.FromHash(PartySlot1NameHash); }
+        }
+
+        public static UIElement PartySlot2Name
+        {
+            get { return UIElement.FromHash(PartySlot2NameHash); }
+        }
+
+        public static UIElement PartySlot3Name
+        {
+            get { return UIElement.FromHash(PartySlot3NameHash); }
+        }
+
+        public static UIElement PartySlot4Name
+        {
+            get { return UIElement.FromHash(PartySlot4NameHash); }
+        }
+
+        public static UIElement FriendsListCloseButton
+        {
+            get { return UIElement.FromHash(FriendsListCloseButtonHash); }
         }
 
         public static UIElement FriendsListContent

@@ -18,6 +18,9 @@ namespace AutoFollow.Events
         UsedPortal,
         Died,
         InviteRequest,
-        RequestPartyLeaveGame
+        LeavingGame,
+        GoingToTown,
+        StartingTownRun,
     }
 }
+

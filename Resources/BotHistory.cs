@@ -42,14 +42,14 @@ namespace AutoFollow.Resources
         /// </summary>
         public static void TrackPortals()
         {
-            var portals = Data.Portals.Where(p => p.Distance <= 16f).ToList();
+            var portals = Data.Portals.Where(p => p.Distance <= 60f).ToList();
 
             foreach (var p in portals)
             {
-                if (PortalHistory.ContainsKey(p.Position))
+                if (PortalHistory.ContainsKey(p.Position) && p.Distance <= 30f)
                 {
                     Log.Verbose("Updating Last Seen Time for Portal - {0} ({1})", p.Name, p.ActorSnoId);
-                    PortalHistory[p.Position].LastSeenTime = DateTime.UtcNow;
+                    PortalHistory[p.Position].LastTimeCloseTo = DateTime.UtcNow;
                 }                    
             }
 

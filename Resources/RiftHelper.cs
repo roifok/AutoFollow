@@ -37,14 +37,14 @@ namespace AutoFollow.Resources
             IsLockedOutOfRift = false;
         }
 
-        private static DateTime LastUpdateTime = DateTime.MinValue;
+        private static DateTime _lastUpdateTime = DateTime.MinValue;
 
         private static void Update(bool force = false)
         {
-            if (!force && DateTime.UtcNow.Subtract(LastUpdateTime).TotalMilliseconds < 250)
+            if (!force && DateTime.UtcNow.Subtract(_lastUpdateTime).TotalMilliseconds < 250)
                 return;
 
-            LastUpdateTime = DateTime.UtcNow;
+            _lastUpdateTime = DateTime.UtcNow;
 
             var currentRift = ZetaDia.CurrentRift;
             if (currentRift == null)
@@ -53,29 +53,24 @@ namespace AutoFollow.Resources
             RiftQuest = new RiftQuest();
 
             var currentWorldId = ZetaDia.CurrentWorldSnoId;
-            var isInRift = RiftWorldIds.Contains(currentWorldId);    
-            var isStarted = currentRift.IsStarted;
-            var type = currentRift.Type;
-            var currentDepth = GetDepthByWorldId(currentWorldId);
 
-            if (!IsLockedOutOfRift && !IsStarted && isStarted && type == RiftType.Greater && !isInRift)
-                IsLockedOutOfRift = true;
-
-            if (isInRift && type == RiftType.Greater)
-                IsLockedOutOfRift = false;
-            
             CurrentRift = currentRift;
-            IsInRift = isInRift;
+            IsInRift = RiftWorldIds.Contains(currentWorldId); ;
             CurrentWorldId = currentWorldId;
-            IsStarted = isStarted;
-            Type = type;
-            CurrentDepth = currentDepth;
-            IsGreaterRiftStarted = isStarted && type == RiftType.Greater;
+            IsStarted = currentRift.IsStarted;
+            Type = currentRift.Type; ;
+            CurrentDepth = GetDepthByWorldId(currentWorldId); ;
+            IsGreaterRiftStarted = IsStarted && Type == RiftType.Greater;
+            IsInGreaterRift = IsInRift && Type == RiftType.Greater;
+
+            IsLockedOutOfRift = !ZetaDia.Me.IsParticipatingInTieredLootRun && IsGreaterRiftStarted;
 
             IsGreaterRiftProfile = Player.CurrentMessage != null && 
                 Player.CurrentMessage.ProfileTagName != null && 
                 Player.CurrentMessage.ProfileTagName.ToLower().Contains("greater");
         }
+
+        public static bool IsInGreaterRift { get; set; }
 
         public static RiftQuest RiftQuest { get; set; }
 

@@ -5,10 +5,7 @@ using AutoFollow.Coroutines.Resources;
 using AutoFollow.Events;
 using AutoFollow.Networking;
 using AutoFollow.Resources;
-using AutoFollow.UI.Settings;
 using Buddy.Coroutines;
-using Zeta.Bot.Navigation;
-using Zeta.Common;
 using Zeta.Game;
 using Zeta.Game.Internals;
 using Zeta.Game.Internals.Service;
@@ -17,7 +14,13 @@ namespace AutoFollow.Coroutines
 {
     public class Party
     {
-        public static bool IsLocked 
+        private static UIElement _leaderQuickJoinElement;
+        private static DateTime _lastAttemptQuickJoin;
+        private static DateTime _lastInviteAttempt = DateTime.MinValue;
+        private static DateTime _lastInviteRequestTime = DateTime.MinValue;
+        private static DateTime _lastLeaveGameAttempt = DateTime.MinValue;
+
+        public static bool IsLocked
         {
             get
             {
@@ -30,132 +33,161 @@ namespace AutoFollow.Coroutines
             }
         }
 
-        public async static Task<bool> JoinLeadersGameInprogress()
+        /// <summary>
+        /// Handle being in a party lobby.
+        /// </summary>
+        public static async Task<bool> JoinGameOrLeaveParty()
         {
-            if (!Player.IsPartyleader && Player.IsInParty && !ZetaDia.IsInGame && GameUI.PlayGameButton.IsEnabled && AutoFollow.CurrentLeader.IsInGame)
+            if (!ZetaDia.Service.Party.IsPartyLeader && Player.IsInParty && !ZetaDia.IsInGame)
             {
-                Log.Info("We're in party, leader already in game, joining game!");
-                GameUI.SafeClick(GameUI.PlayGameButton, ClickDelay.Delay, "Join Game", 3000, true);
-                return true;
+                if (!IsLeaderInParty())
+                {
+                    Log.Info("Leaving party, leader is not in this group!");
+                    GameUI.OutOfGameLeavePartyButton.Click();
+                    Coordination.WaitFor(TimeSpan.FromSeconds(2));
+                }
+                else if (GameUI.PlayGameButton.IsEnabled && AutoFollow.CurrentLeader.IsInGame)
+                {
+                    Log.Info("We're in party, leader already in game, joining game!");
+                    GameUI.PlayGameButton.Click();
+                    Coordination.WaitFor(TimeSpan.FromSeconds(2));
+                    return true;
+                }
+
             }
             return false;
         }
 
-        public async static Task<bool> TeleportWhenInDifferentWorld(Message player)
+        /// <summary>
+        /// Clicks the start game button once all players have left the game.
+        /// </summary>
+        public static async Task<bool> StartGameWhenPartyReady()
         {
-            if ((RiftHelper.IsInRift || player.IsInRift) && RiftHelper.IsGreaterRiftStarted)
-                return false;
-
-            if (Player.IsFollower && player.WorldSnoId != Player.Instance.Message.WorldSnoId && player.IsInSameGame && !player.IsInCombat)
-            {
-                Log.Info("{0} is in a different world... attempting teleport!", player.HeroName);
-                await TeleportToPlayer.Execute(player);
-                return true;
-            }
-            return false;
-        }
-
-        public async static Task<bool> TeleportWhenTooFarAway(Message player)
-        {
-            if ((RiftHelper.IsInRift || player.IsInRift) && RiftHelper.IsGreaterRiftStarted)
-                return false;
-
-            if (ShouldTeleportToPlayer(player))
-            {
-                Log.Info("{0} is getting quite far away... attempting teleport!", player.HeroName);
-                await TeleportToPlayer.Execute(player);
-                return true;
-            }
-            return false;
-        }
-
-        private static bool ShouldTeleportToPlayer(Message player)
-        {
-            return Player.IsFollower && player.WorldSnoId == Player.Instance.Message.WorldSnoId && player.IsInSameGame && !player.IsInCombat && player.Distance > AutoFollowSettings.Instance.TeleportDistance;
-        }
-
-        public async static Task<bool> StartGameWhenPartyReady()
-        {
-            if (Player.IsPartyleader && Player.NumPlayersInParty > 1 && Player.NumPlayersInParty == AutoFollow.NumberOfConnectedBots + 1 && GameUI.PlayGameButton.IsEnabled && Player.NumPlayersInParty == AutoFollow.CurrentParty.Count(p => !p.IsInGame))
+            if (ZetaDia.Service.Party.IsPartyLeader && Player.NumPlayersInParty > 1 &&
+                Player.NumPlayersInParty == AutoFollow.NumberOfConnectedBots + 1 && GameUI.PlayGameButton.IsEnabled &&
+                Player.NumPlayersInParty == AutoFollow.CurrentParty.Count(p => !p.IsInGame))
             {
                 Log.Warn("We're all here, starting game");
-                GameUI.SafeClick(GameUI.PlayGameButton, ClickDelay.Delay, "Join Game", 3000, true);
+                GameUI.PlayGameButton.Click();
+                Coordination.WaitFor(TimeSpan.FromSeconds(2));
                 return true;
             }
             return false;
         }
 
-        public async static Task<bool> LeavePartyUnknownPlayersInGame()
+        /// <summary>
+        /// Leave the party if there are strange people in it.
+        /// </summary>
+        public static async Task<bool> LeavePartyUnknownPlayersInGame()
         {
-            if (AutoFollow.NumberOfConnectedBots == 0 && !GameUI.ChangeQuestButton.IsEnabled && AutoFollowSettings.Instance.AvoidUnknownPlayers)
+            if (AutoFollow.NumberOfConnectedBots == 0 && !GameUI.ChangeQuestButton.IsEnabled &&
+                Settings.Misc.AvoidUnknownPlayers)
             {
                 Log.Info("Unknown players in the party and no connected bots, leaving party.");
-                GameUI.SafeClick(GameUI.OutOfGameLeavePartyButton, ClickDelay.NoDelay, "Leave Party Button", 1000);
+                GameUI.OutOfGameLeavePartyButton.Click();
+                Coordination.WaitFor(TimeSpan.FromSeconds(5));
                 return true;
             }
             return false;
         }
 
-        public async static Task<bool> WaitForPlayersToLeaveGame()
+        /// <summary>
+        /// Tell other bots to leave their game and wait for them to do so.
+        /// </summary>
+        public static async Task<bool> WaitForPlayersToLeaveGame()
         {
-            if (Player.IsInParty && Player.IsPartyleader && AutoFollow.CurrentParty.Any(m => m.IsInGame) || !GameUI.ChangeQuestButton.IsEnabled)
+            if (Player.IsInParty && !Player.IsInGame && (AutoFollow.CurrentParty.Any(m => m.IsInGame) || !GameUI.ChangeQuestButton.IsEnabled))
             {
                 Log.Info("Waiting for party members to leave game");
-                EventManager.FireEvent(new EventData(EventType.RequestPartyLeaveGame));
-                await Coroutine.Sleep(5000);
+                EventManager.FireEvent(new EventData(EventType.LeavingGame, null, null, true));
+                Coordination.WaitFor(TimeSpan.FromSeconds(5));
                 return true;
             }
+
             return false;
         }
 
-        public async static Task<bool> WaitToBecomePartyLeader()
-        {
-            if (ZetaDia.Service.IsValid && ZetaDia.Service.Hero.IsValid && !ZetaDia.IsInGame && !Player.IsPartyleader)
+        /// <summary>
+        /// If the bot designated as the leader is currently in the battle.net group/party.
+        /// </summary>
+        public static bool IsLeaderInParty()
+        {         
+            var message = AutoFollow.CurrentLeader;
+            if (ZetaDia.IsInGame)
             {
-                Log.Info("Waiting to become party leader");
-                return true;
+                return message.IsInSameGame;
             }
 
-            if (AutoFollow.CurrentFollowers.Any(f => f.IsInParty && f.IsInSameGame) && !Player.IsPartyleader)
+            if (!ZetaDia.Service.IsInGame && ZetaDia.Service.Party.NumPartyMembers > 1)
             {
-                Log.Info("Waiting to become party leader");
-                return true;
+                var slot1NameElement = GameUI.PartySlot1Name;
+                var cleanText1 = Common.CleanString(slot1NameElement.Text);
+                if (slot1NameElement.IsVisible && slot1NameElement.HasText && Message.IsBattleTag(cleanText1, message.BattleTagEncrypted))
+                {
+                    Log.Debug("Leader is in slot 1 of our party");
+                    return true;
+                }
+                var slot2NameElement = GameUI.PartySlot2Name;
+                var cleanText2 = Common.CleanString(slot2NameElement.Text);
+                if (slot2NameElement.IsVisible && slot2NameElement.HasText && Message.IsBattleTag(cleanText2, message.BattleTagEncrypted))
+                {
+                    Log.Debug("Leader is in slot 2 of our party");
+                    return true;
+                }
+                var slot3NameElement = GameUI.PartySlot3Name;
+                var cleanText3 = Common.CleanString(slot3NameElement.Text);
+                if (slot3NameElement.IsVisible && slot3NameElement.HasText && Message.IsBattleTag(cleanText3, message.BattleTagEncrypted))
+                {
+                    Log.Debug("Leader is in slot 3 of our party");
+                    return true;
+                }
+                var slot4NameElement = GameUI.PartySlot4Name;
+                var cleanText4 = Common.CleanString(slot4NameElement.Text);
+                if (slot4NameElement.IsVisible && slot4NameElement.HasText && Message.IsBattleTag(cleanText4, message.BattleTagEncrypted))
+                {
+                    Log.Debug("Leader is in slot 4 of our party");
+                    return true;
+                }
             }
-            return false;
+
+            Log.Debug("Leader is not in our party");
+            return false;          
         }
 
-        public async static Task<bool> LeaveWhenInWrongGame()
+        /// <summary>
+        /// Check if we're in the same game as the leader, and leave if they're different.
+        /// </summary>
+        public static async Task<bool> LeaveWhenInWrongGame()
         {
-            if(!ZetaDia.IsInGame || ZetaDia.IsLoadingWorld || DateTime.UtcNow.Subtract(Player.LastGameJoinedTime).Seconds < 5)
+            if (ZetaDia.IsLoadingWorld || DateTime.UtcNow.Subtract(ChangeMonitor.LastGameJoinedTime).Seconds < 5)
                 return false;
 
-            if (Player.IsFollower && Player.IsInParty && Player.IsPartyleader && !ZetaDia.IsInGame && GameUI.ElementIsVisible(GameUI.OutOfGameLeavePartyButton) && DateTime.UtcNow.Subtract(_lastAttemptQuickJoin) > TimeSpan.FromSeconds(10))
+            // Leaves party when out of game the d3-party leader and not the bot-leader.
+            // Disbands party if leader leaves it.
+            if (Player.IsFollower && Player.IsInParty && ZetaDia.Service.Party.IsPartyLeader && !ZetaDia.IsInGame &&
+                GameUI.ElementIsVisible(GameUI.OutOfGameLeavePartyButton) && ZetaDia.Service.Party.CurrentPartyLockReasonFlags == PartyLockReasonFlag.None && 
+                DateTime.UtcNow.Subtract(_lastAttemptQuickJoin) > TimeSpan.FromSeconds(10))
             {
                 Log.Info("We are a follower but leader of party - leaving party");
-                GameUI.SafeClick(GameUI.OutOfGameLeavePartyButton, ClickDelay.NoDelay, "Leave Party Button", 1000);
+                GameUI.OutOfGameLeavePartyButton.Click();
+                Coordination.WaitFor(TimeSpan.FromSeconds(5));
                 return true;
             }
 
-            //if (ZetaDia.IsInGame && Player.IsFollower && Player.Instance.IsInGame && !AutoFollow.CurrentLeader.IsInGame && !AutoFollow.CurrentLeader.IsLoadingWorld && Player.IsInParty && AutoFollow.CurrentLeader.BNetPartyMembers > 1)
-            //{
-            //    Log.Warn("Leader is waiting for me to leave game!", AutoFollow.CurrentLeader.IsInSameGame);
-            //    await SafeLeaveGame.Execute();
-            //    return true;
-            //}
-
-            if (ZetaDia.IsInGame && Player.IsFollower && !AutoFollow.CurrentLeader.IsMe && !AutoFollow.CurrentLeader.IsInSameGame)
+            if (ZetaDia.IsInGame && Player.IsFollower && !AutoFollow.CurrentLeader.IsMe && !AutoFollow.CurrentLeader.IsInSameGame && !AutoFollow.CurrentLeader.IsLoadingWorld)
             {
                 Log.Warn("Leader is in a different game, Leave Game!", AutoFollow.CurrentLeader.IsInSameGame);
-                await SafeLeaveGame.Execute();
+                await LeaveGame();
+                Coordination.WaitFor(TimeSpan.FromSeconds(5));
                 return true;
             }
 
             return false;
         }
 
-        private static UIElement _leaderQuickJoinElement;
-        private static DateTime _lastAttemptQuickJoin;
-
+        /// <summary>
+        /// Use the quickjoin links on the hero screen to join the leaders game.
+        /// </summary>
         public static async Task<bool> QuickJoinLeader()
         {
             if (DateTime.UtcNow.Subtract(_lastAttemptQuickJoin) > TimeSpan.FromSeconds(5) && !Player.IsInParty && AutoFollow.CurrentLeader.IsInGame && AutoFollow.CurrentLeader != null)
@@ -164,7 +196,7 @@ namespace AutoFollow.Coroutines
 
                 if (AutoFollow.NumberOfConnectedBots > 0 && Player.IsFollower && !AutoFollow.CurrentLeader.IsQuickJoinEnabled)
                 {
-                    Log.Info("Current leader doesn't have QuickJoin enabled!");
+                    Log.Debug("Current leader doesn't have QuickJoin enabled!");
                 }
 
                 if (!quickJoinElements.Any())
@@ -183,7 +215,8 @@ namespace AutoFollow.Coroutines
                 return true;
             }
 
-            if (_leaderQuickJoinElement != null && _leaderQuickJoinElement.IsValid && _leaderQuickJoinElement.IsVisible && !_leaderQuickJoinElement.IsEnabled)
+            if (_leaderQuickJoinElement != null && _leaderQuickJoinElement.IsValid && _leaderQuickJoinElement.IsVisible &&
+                !_leaderQuickJoinElement.IsEnabled)
             {
                 Log.Info("Quick Joining Game...");
                 return true;
@@ -192,8 +225,10 @@ namespace AutoFollow.Coroutines
             return false;
         }
 
-        private static DateTime _lastInviteAttempt = DateTime.MinValue;                
-
+        /// <summary>
+        /// Invites another bot to the current party.
+        /// </summary>
+        /// <param name="follower">the player to be invited</param>
         public static async Task<bool> InviteFollower(Message follower)
         {
             if (DateTime.UtcNow.Subtract(_lastInviteAttempt).TotalSeconds < 1)
@@ -220,13 +255,12 @@ namespace AutoFollow.Coroutines
             if (!stackPanelItems.Any())
             {
                 Log.Info("No friends or local players were found!");
-                return false;              
+                return false;
             }
 
             foreach (var item in stackPanelItems)
             {
-                Log.Info("{0}", item.TextElement.Text);
-                var name = Common.CleanString(item.TextElement.Text);                
+                var name = Common.CleanString(item.TextElement.Text);
                 var isBattleTag = Message.IsBattleTag(name, follower.BattleTagEncrypted);
 
                 if (isBattleTag)
@@ -235,34 +269,68 @@ namespace AutoFollow.Coroutines
                     var inviteButton = item.TextElement.GetSiblingByName("PartyInviteButton");
                     inviteButton.Click();
                     _lastInviteAttempt = DateTime.UtcNow;
-                    await Coroutine.Sleep(100);
+
+                    await Coroutine.Sleep(250);
+
+                    if (GameUI.FriendsListContent.IsVisible)
+                    {
+                        Log.Info("Closing Social Panel");
+                        GameUI.SocialFlyoutButton.Click();
+                        await Coroutine.Sleep(250);
+                    }
+
                     return true;
-                }
-                else
-                {
-                    Log.Info("{0} not a match!", name);
                 }
             }
 
-            Log.Info("Unable to find inviter requester on friends list!");
+            Log.Info("Unable to find invitation requester on friends list!");
             _lastInviteAttempt = DateTime.UtcNow;
-            return false;        
+            return false;
         }
 
-        private static DateTime _lastInviteRequestTime = DateTime.MinValue;
+        /// <summary>
+        /// Request leader send us an invite to their party.
+        /// </summary>
         public static async Task<bool> RequestPartyInvite()
+        {
+            if (AutoFollow.NumberOfConnectedBots == 0)
+                return false;
+
+            var timeSinceRequest = DateTime.UtcNow.Subtract(_lastInviteRequestTime).TotalSeconds;
+            if (timeSinceRequest < 5)
+            {
+                Log.Verbose("Waiting to join party.. Request Sent {0}s ago", timeSinceRequest);
+                return false;
+            }
+
+            if (!Player.IsInParty)
+            {
+                Log.Warn("Requesting party invite!", timeSinceRequest);
+                _lastInviteRequestTime = DateTime.UtcNow;
+                EventManager.FireEvent(new EventData(EventType.InviteRequest));
+                return true;
+            }
+                    
+            return false;
+        }
+
+        /// <summary>
+        /// Accept a party invite if its from a bot we are connected to.
+        /// </summary>
+        public static async Task<bool> AcceptPartyInvite()
         {
             var partyInviteOkButton = GameUI.PartyInviteOK;
             if (partyInviteOkButton != null && partyInviteOkButton.IsVisible && partyInviteOkButton.IsEnabled)
             {
                 var invitePlayerName = Common.CleanString(GameUI.PartyInviteFromPlayerName.Text);
-                var isLeadersBattleTag = Message.IsBattleTag(invitePlayerName, AutoFollow.CurrentLeader.BattleTagEncrypted);
+                var isLeadersBattleTag = Message.IsBattleTag(invitePlayerName,
+                    AutoFollow.CurrentLeader.BattleTagEncrypted);
                 if (!isLeadersBattleTag)
                 {
                     Log.Info("{0}", AutoFollow.CurrentLeader.BattleTagEncrypted);
                     Log.Warn("Party invite is from '{0}' who is not our leader, ignoring", invitePlayerName);
                     await Coroutine.Sleep(new Random().Next(1000, 10000));
-                    GameUI.PartyInviteCancelButton.Click();                    
+                    GameUI.PartyInviteCancelButton.Click();
                     return false;
                 }
 
@@ -272,17 +340,29 @@ namespace AutoFollow.Coroutines
                 return true;
             }
 
-            var timeSinceRequest = DateTime.UtcNow.Subtract(_lastInviteRequestTime).TotalSeconds;
-            if (timeSinceRequest < 10 && !Player.IsInParty)
-            {
-                Log.Verbose("Waiting to join party.. Request Sent {0}s ago", timeSinceRequest);
-                return false;
-            }
+            return false;
+        }
 
-            _lastInviteRequestTime = DateTime.UtcNow;
-            EventManager.FireEvent(new EventData(EventType.InviteRequest));
+        /// <summary>
+        /// Leave the current game.
+        /// </summary>
+        public static async Task<bool> LeaveGame()
+        {
+            if (!ZetaDia.IsInGame)
+                return true;
+
+            if (ZetaDia.IsLoadingWorld || GameUI.LeaveGameButton.IsVisible)
+                return false;
+
+            if (ZetaDia.Service.Party.CurrentPartyLockReasonFlags != PartyLockReasonFlag.None)
+                return false;
+
+            if (DateTime.UtcNow.Subtract(_lastLeaveGameAttempt).TotalSeconds < 5)
+                return false;
+
+            ZetaDia.Service.Party.LeaveGame(true);
+            _lastLeaveGameAttempt = DateTime.UtcNow;
             return true;
         }
     }
 }
-

@@ -9,7 +9,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Markup;
 using AutoFollow.Resources;
-using AutoFollow.UI.Settings;
 using Zeta.Bot;
 
 namespace AutoFollow.UI
@@ -38,9 +37,9 @@ namespace AutoFollow.UI
                 var mainControl = GetControl<UserControl>(path);
                 LoadResourceForWindow("Template.xaml", mainControl);
 
-                _configWindow.DataContext = AutoFollowSettings.Instance;            
+                _configWindow.DataContext = Settings.ViewModel;           
                 _configWindow.Content = mainControl;
-                _configWindow.Width = 300;
+                _configWindow.Width = 375;
                 _configWindow.Height = 380;
                 _configWindow.MinWidth = 300;
                 _configWindow.MinHeight = 380;
@@ -79,7 +78,7 @@ namespace AutoFollow.UI
             if (assemblyPath == null)
                 return null;
 
-            return Path.Combine(assemblyPath, "Plugins", "AutoFollow", "UI");
+            return Path.Combine(assemblyPath, "Plugins", "zAutoFollow", "UI");
         }
 
         private static void LoadResourceForWindow(string relativePath, UserControl control)
@@ -106,7 +105,6 @@ namespace AutoFollow.UI
 
         static void SettingsWindow_Closed(object sender, System.EventArgs e)
         {
-            AutoFollowSettings.Instance.Save();
             if (_configWindow != null)
             {
                 _configWindow.Closed -= SettingsWindow_Closed;

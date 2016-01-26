@@ -18,11 +18,12 @@ namespace AutoFollow.Resources
         public Interactable(DiaObject obj)
         {
             InternalName = obj.Name;
+            BaseInternalName = Common.GetBaseInternalName(obj.Name);
             ActorPosition = obj.Position;
             ActorSnoId = obj.ActorSnoId;
             AcdId = obj.ACDId;
             TimeFirstSeen = DateTime.UtcNow;
-            LastSeenTime = DateTime.UtcNow;
+            LastTimeCloseTo = DateTime.UtcNow;
             GizmoType = obj.CommonData.GizmoType;
             WorldSnoId = ZetaDia.CurrentWorldSnoId;
 
@@ -33,16 +34,14 @@ namespace AutoFollow.Resources
 
         public int AcdId { get; set; }
         public string InternalName { get; set; }
+        public string BaseInternalName { get; set; }
         public Vector3 ActorPosition { get; set; }
         public GizmoType GizmoType { get; set; }
         public DateTime TimeFirstSeen { get; set; }
         public int ActorSnoId { get; set; }
         public int MarkerHash { get; set; }
         public int WorldSnoId { get; set; }
-        public DateTime LastSeenTime { get; set; }
-
-        //public Interactable ExitPortal { get; set; }
-        //public Interactable EntryPortal { get; set; }
+        public DateTime LastTimeCloseTo { get; set; }
 
         public bool IsWorldEntryPoint
         {

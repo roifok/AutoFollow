@@ -9,9 +9,10 @@ namespace AutoFollow.Resources
 {
     public interface ITargetable
     {
-        int AcdId { get; set; }
-        Vector3 Position { get; set; }
-        int WorldSnoId { get; set; }
+        int AcdId { get; }
+        Vector3 Position { get; }
+        int WorldSnoId { get; }
+        float Distance { get; }
     }
 }
 

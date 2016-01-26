@@ -8,7 +8,6 @@ namespace AutoFollow.Resources
 {
     public class SimpleAES
     {
-        private readonly ICryptoTransform _decryptorTransform;
         private readonly ICryptoTransform _encryptorTransform;
         private readonly byte[] _key = { 123, 212, 19, 101, 24, 26, 85, 134, 114, 184, 27, 1, 37, 2, 222, 5, 241, 1, 175, 144, 6, 53, 8, 29, 24, 1, 17, 218, 125, 4, 53, 209};
         private readonly byte[] _vector = { 146, 64, 112, 111, 123, 1, 121, 119, 231, 221, 12, 112, 54, 7, 114, 82 };
@@ -18,7 +17,6 @@ namespace AutoFollow.Resources
         {
             var rm = new RijndaelManaged();
             _encryptorTransform = rm.CreateEncryptor(_key, _vector);
-            _decryptorTransform = rm.CreateDecryptor(_key, _vector);
             _utfEncoder = new UTF8Encoding();
         }
 
@@ -54,24 +52,6 @@ namespace AutoFollow.Resources
             cs.Close();
             memoryStream.Close();
             return encrypted;
-        }
-
-        public string DecryptString(string encryptedString)
-        {
-            return Decrypt(StrToByteArray(encryptedString));
-        }
-
-        public string Decrypt(byte[] encryptedValue)
-        {
-            var encryptedStream = new MemoryStream();
-            var decryptStream = new CryptoStream(encryptedStream, _decryptorTransform, CryptoStreamMode.Write);
-            decryptStream.Write(encryptedValue, 0, encryptedValue.Length);
-            decryptStream.FlushFinalBlock();
-            encryptedStream.Position = 0;
-            var decryptedBytes = new Byte[encryptedStream.Length];
-            encryptedStream.Read(decryptedBytes, 0, decryptedBytes.Length);
-            encryptedStream.Close();
-            return _utfEncoder.GetString(decryptedBytes);
         }
 
         public byte[] StrToByteArray(string str)

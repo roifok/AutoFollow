@@ -6,7 +6,7 @@
     <ProjectGuid>{0C725027-0F61-4392-A1D1-67ACA55691EF}</ProjectGuid>
     <OutputType>Library</OutputType>
     <NoStandardLibraries>false</NoStandardLibraries>
-    <AssemblyName>ClassLibrary</AssemblyName>
+    <AssemblyName>AutoFollow</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -51,6 +51,7 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Windows" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
@@ -61,6 +62,7 @@
   <ItemGroup>
     <Compile Include="AutoFollow.cs" />
     <Compile Include="Behaviors\BaseBehavior.cs" />
+    <Compile Include="Behaviors\LeaderManual.cs" />
     <Compile Include="Behaviors\FollowerCombat.cs" />
     <Compile Include="Behaviors\FollowerPowerLevel.cs" />
     <Compile Include="Behaviors\Leader.cs" />
@@ -71,9 +73,7 @@
     <Compile Include="Coroutines\Movement.cs" />
     <Compile Include="Coroutines\Party.cs" />
     <Compile Include="Coroutines\Questing.cs" />
-    <Compile Include="Coroutines\SafeLeaveGame.cs" />
-    <Compile Include="Coroutines\TeleportToPlayer.cs" />
-    <Compile Include="Events\ChangeMonitor.cs" />
+    <Compile Include="Events\Enable.cs" />
     <Compile Include="Events\EventData.cs" />
     <Compile Include="Events\EventDispatcher.cs" />
     <Compile Include="Events\EventManager.cs" />
@@ -90,7 +90,12 @@
     <Compile Include="Resources\AsyncEvent.cs" />
     <Compile Include="Resources\BotHistory.cs" />
     <Compile Include="Resources\CacheField.cs" />
-    <Compile Include="Resources\Combat.cs" />
+    <Compile Include="Resources\Filestore.cs" />
+    <Compile Include="Resources\FileUtils.cs" />
+    <Compile Include="Resources\JsonSerializer.cs" />
+    <Compile Include="Resources\MiscUtil.Reflection.cs" />
+    <Compile Include="Resources\ProfileUtils.cs" />
+    <Compile Include="Resources\Targetting.cs" />
     <Compile Include="Resources\Common.cs" />
     <Compile Include="Resources\Conditions.cs" />
     <Compile Include="Resources\CoroutineHelper.cs" />
@@ -118,7 +123,8 @@
     <Compile Include="UI\Components\Behaviors\SelectTextOnFocus.cs" />
     <Compile Include="UI\Components\Controls\InputBox.cs" />
     <Compile Include="UI\Components\Converters\IntToStringConverter.cs" />
-    <Compile Include="UI\Settings\Settings.cs" />
+    <Compile Include="UI\NotifyBase.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="UI\Tab\TabUI.cs" />
     <Compile Include="UI\Tab\TabViewModel.cs" />
     <Page Include="UI\Template.xaml">
@@ -129,6 +135,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="FollowerCombat.xml" />
+    <Content Include="LeaderManual.xml" />
     <Content Include="FollowerPowerLevel.xml" />
   </ItemGroup>
   <ItemGroup>
@@ -149,7 +156,7 @@
     <VisualStudio AllowExistingFolder="true" />
   </ProjectExtensions>
   <PropertyGroup>
-    <PostBuildEvent>SET TARGETDIR=C:\DB\DB-Current\Plugins\AutoFollow\
+    <PostBuildEvent>SET TARGETDIR=C:\DB\DB-Current\Plugins\zAutoFollow\
 
 rd "%25TARGETDIR%25" /S /Q
 xcopy "$(ProjectDir)*" "%25TARGETDIR%25" /Q /E /C /I /R /Y

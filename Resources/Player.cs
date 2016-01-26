@@ -1,6 +1,7 @@
 ﻿using System;
+using System.Linq;
+using AutoFollow.Events;
 using AutoFollow.Networking;
-using AutoFollow.UI.Settings;
 using Zeta.Bot;
 using Zeta.Bot.Logic;
 using Zeta.Common;
@@ -8,54 +9,91 @@ using Zeta.Game;
 using Zeta.Game.Internals;
 using Zeta.Game.Internals.Actors;
 using Zeta.Game.Internals.Service;
+using Zeta.Game.Internals.SNO;
 
 namespace AutoFollow.Resources
 {
-    public class Player
+    public static class Player
     {
-        public int Index { get; set; }
-        public int RActorId { get; set; }
-        public int AcdId { get; set; }
-        public double HitpointsCurrent { get; set; }
-        public double HitpointsMaxTotal { get; set; }
-        public double HitpointsCurrentPct { get; set; }
-
-        public Vector3 Position
-        {
-            get { return _position; }
-            set { _position = value; }
-        }
-
-        public int CurrentLevelAreaId { get; set; }
-        public int CurrentWorldSnoId { get; set; }
-        public int CurrentDynamicWorldId { get; set; }
-        public bool IsInTown { get; set; }
-        public bool IsInGame { get; set; }
-        public DateTime LastUpdate { get; set; }
-        public bool IsValid { get { return ZetaDia.Me.IsValid; } }
-        public bool IsVendoring { get; set; }
-        public ActorClass ActorClass { get; set; }
-        public int ActorId { get; set; }
-        public string HeroName { get; set; }
-        public bool IsInCombat { get; set; }
-        public GameId GameId { get; set; }
-        public bool IsLoadingWorld { get; set; }
-        public bool IsQuickJoinEnabled { get; set; }
-        public bool InGreaterRift { get; set; }
+        public static Target Target { get; set; }
+        public static int Index { get; set; }
+        public static int RActorId { get; set; }
+        public static int AcdId { get; set; }
+        public static double HitpointsCurrent { get; set; }
+        public static double HitpointsMaxTotal { get; set; }
+        public static double HitpointsCurrentPct { get; set; }
+        public static int HeroId { get; set; }
+        public static int ProfileActorSno { get; set; }
+        public static float ProfilePathPrecision { get; set; }    
+        public static string ProfileTagName { get; set; }
+        public static Vector3 Position { get; set; }
+        public static int CurrentLevelAreaId { get; set; }
+        public static int CurrentWorldSnoId { get; set; }
+        public static int CurrentDynamicWorldId { get; set; }
+        public static bool IsInTown { get; set; }
+        public static bool IsInGame { get; set; }
+        public static DateTime LastUpdate { get; set; }
+        public static bool IsValid { get { return ZetaDia.Me.IsValid; } }
+        public static bool IsVendoring { get; set; }
+        public static ActorClass ActorClass { get; set; }
+        public static int ActorId { get; set; }
+        public static string HeroName { get; set; }
+        public static bool IsInCombat { get; set; }
+        public static GameId GameId { get; set; }
+        public static bool IsLoadingWorld { get; set; }
+        public static bool IsQuickJoinEnabled { get; set; }
+        public static bool IsParticipatingInGreaterRift { get; set; }
+        public static bool IsInRift { get; set; }
+        public static Vector3 ProfilePosition { get; set; }
+        public static bool IsTryingToCastPortalSpell { get; set; }
+        public static bool IsCastingTownPortal { get; set; }
+        public static bool IsDead { get; set; }
+        public static DateTime LastCastTownPortal { get; set; }
+        public static bool IsIsInGreaterRift { get; set; }
+        public static int FreeBackPackSlots { get; set; }
+        public static int JewelUpgradesleft { get; set; }
+        public static GameId CurrentGameId { get; set; }
+        public static Interactable LastPortalUsed { get; set; }
+        public static Interactable LastEntryPortal { get; set; }
+        public static bool IsIdle { get; set; }
+        public static bool IsCasting { get; set; }
+        public static bool IsInBossEncounter { get; set; }
 
         public static int CachedLevelAreaId = -1;
         public static DateTime LastUpdatedLevelAreaId = DateTime.MinValue;
         private static bool _lastIsPartyLeader = false;
         private static DateTime _lastUpdateIsPartyLeaderMembers = DateTime.MinValue;
         private static int _lastNumPartyMembers = 0;
-        private static DateTime _lastUpdateNumPartyMembers = DateTime.MinValue;        
+        private static DateTime _lastUpdateNumPartyMembers = DateTime.MinValue;                
 
-        public Message Message = new Message();
-        private Vector3 _position;
+        public static Message CurrentMessage = new Message();
 
-        public static Message CurrentMessage
+        public static Vector3 GetProfilePosition()
         {
-            get { return Instance.Message; }            
+            if (!ZetaDia.IsInGame)
+                return Vector3.Zero;
+
+            if (ProfileManager.CurrentProfileBehavior == null)
+                return Vector3.Zero;
+
+            var currentBehavior = ProfileManager.CurrentProfileBehavior;
+
+            var pos = Vector3.Zero;
+
+            if (currentBehavior != null)
+            {
+                foreach (var pi in currentBehavior.GetType().GetProperties().ToList())
+                {
+                    if (pi.Name == "X")
+                        pos.X = (float)pi.GetValue(currentBehavior, null);
+                    if (pi.Name == "Y")
+                        pos.Y = (float)pi.GetValue(currentBehavior, null);
+                    if (pi.Name == "Z")
+                        pos.Z = (float)pi.GetValue(currentBehavior, null);
+                }
+            }
+
+            return pos;
         }
 
         public static int LevelAreaId
@@ -94,52 +132,37 @@ namespace AutoFollow.Resources
             }
         }
 
-        private static Player instance;
-        public static Player Instance
+        static Player()
         {
-            get
-            {
-                return instance ?? (instance = new Player());
-            }
-        }
-
-        public Player()
-        {
-            Log.Info("Creating Player Obj");
+            Log.Debug("Creating Player Obj");
             LastUpdate = DateTime.MinValue;
-            GameEvents.OnGameJoined += (s, e) => LastGameJoinedTime = DateTime.UtcNow;
-            //Update();
         }
 
-        public Player(int rActorId)
+        public static void UpdateOutOfGame()
         {
-            Log.Info("Creating Player Obj");
-            this.RActorId = rActorId;
-            //Update();
+            var hero = ZetaDia.Service.Hero;
+            HeroId = hero.HeroId;
+            HeroName = Common.CleanString(hero.Name);
+            IsLoadingWorld = ZetaDia.IsLoadingWorld || ZetaDia.IsPlayingCutscene;
+            ActorClass = ZetaDia.Service.Hero.Class;
+            IsInGame = false;
+            CurrentMessage = Message.GetMessage();            
         }
 
-        private static string lastLogMessage = "";
-
-        public void Update()
+        public static void Update()
         {
-            if (DateTime.UtcNow.Subtract(LastUpdate).TotalMilliseconds < 50)
+            if (DateTime.UtcNow.Subtract(LastUpdate).TotalMilliseconds < 25)
                 return;
 
-            if (instance != null)
-            {
-                Message = Message.GetMessage();
-            }
+            var shouldUpdate = ZetaDia.IsInGame && !ZetaDia.IsLoadingWorld && ZetaDia.Me != null;
 
-            if (!ZetaDia.IsInGame || ZetaDia.IsLoadingWorld || ZetaDia.Me == null)
-                return;
+            if (ZetaDia.Me != null && (!ZetaDia.Me.IsValid || !ZetaDia.Me.CommonData.IsValid || ZetaDia.Me.CommonData.IsDisposed))
+                shouldUpdate = false;
 
-            if (!ZetaDia.Me.IsValid || !ZetaDia.Me.CommonData.IsValid || ZetaDia.Me.CommonData.IsDisposed)
-                return;
+            if (!ZetaDia.IsInGame && (ZetaDia.PlayerData == null || !ZetaDia.PlayerData.IsValid))
+                shouldUpdate = false;
 
-            if (ZetaDia.PlayerData == null || !ZetaDia.PlayerData.IsValid)
-                return;
-
-            using (new MemoryHelper())
+            if (shouldUpdate)
             {
                 try
                 {
@@ -150,8 +173,7 @@ namespace AutoFollow.Resources
                     AcdId = ZetaDia.Me.ACDId;
                     HitpointsCurrent = ZetaDia.Me.HitpointsCurrent;
                     HitpointsMaxTotal = ZetaDia.Me.HitpointsMaxTotal;
-                    HitpointsCurrentPct = HitpointsMaxTotal > 0 ? ZetaDia.Me.HitpointsCurrent/ZetaDia.Me.HitpointsMaxTotal : 0;
-                    //TryUpdate(ref _position, () => ZetaDia.Me.Position);
+                    HitpointsCurrentPct = HitpointsMaxTotal > 0 ? ZetaDia.Me.HitpointsCurrent / ZetaDia.Me.HitpointsMaxTotal : 0;
                     Position = ZetaDia.Me.Position;
                     CurrentLevelAreaId = LevelAreaId;
                     CurrentWorldSnoId = ZetaDia.CurrentWorldSnoId;
@@ -159,20 +181,134 @@ namespace AutoFollow.Resources
                     IsInTown = ZetaDia.IsInTown;
                     IsVendoring = BrainBehavior.IsVendoring;
                     ActorId = ZetaDia.Me.ActorSnoId;
-                    ActorClass = ZetaDia.Me.ActorClass;
+                    ActorClass = ZetaDia.Service.Hero.Class;
                     HeroName = Common.CleanString(ZetaDia.Service.Hero.Name);
+                    HeroId = ZetaDia.PlayerData.HeroId;
                     CurrentGameId = ZetaDia.Service.CurrentGameId;
-                    IsInCombat = ZetaDia.Me.IsInCombat;
+                    IsInCombat = GetIsInCombat();
                     GameId = ZetaDia.Service.CurrentGameId;
-                    IsLoadingWorld = ZetaDia.IsLoadingWorld;
+                    IsLoadingWorld = ZetaDia.IsLoadingWorld || ZetaDia.IsPlayingCutscene;
                     IsQuickJoinEnabled = ZetaDia.SocialPreferences.QuickJoinEnabled;
-                    InGreaterRift = !ZetaDia.IsInTown && ZetaDia.Me.IsParticipatingInTieredLootRun;
+                    IsInRift = RiftHelper.IsInRift;
+                    IsIsInGreaterRift = RiftHelper.IsInGreaterRift;
+                    IsParticipatingInGreaterRift = !ZetaDia.IsInTown && ZetaDia.Me.IsParticipatingInTieredLootRun;
+                    IsTryingToCastPortalSpell = DateTime.UtcNow.Subtract(ChangeMonitor.LastCastPortalSpell).TotalSeconds < 10;
+                    IsIdle = ChangeMonitor.IsIdle;
+                    IsCasting = ZetaDia.Me.LoopingAnimationEndTime > 0;
+                    IsCastingTownPortal = IsCasting && DateTime.UtcNow.Subtract(ChangeMonitor.LastCastTownPortal).TotalSeconds < 5;
+                    Target = GetCurrentTarget();
+                    ProfilePosition = GetProfilePosition();
+                    ProfileActorSno = GetProfileActorSNO();
+                    ProfilePathPrecision = GetProfilePathPrecision();
+                    ProfileTagName = GetProfileTagname();
+                    IsInBossEncounter = ZetaDia.Me.IsInBossEncounter;
+                    JewelUpgradesleft = ZetaDia.Me.JewelUpgradesLeft;
+                    FreeBackPackSlots = ZetaDia.Me.Inventory.NumFreeBackpackSlots;
+                    IsDead = ZetaDia.Me.IsDead;
+                    LastCastTownPortal = ChangeMonitor.LastCastTownPortal;
                 }
                 catch (Exception ex)
                 {
                     Log.Verbose("Exception {0}", ex);
                 }
             }
+
+            CurrentMessage = Message.GetMessage();
+        }
+
+
+        public static string GetProfileTagname()
+        {
+            var name = string.Empty;
+
+            if (ProfileManager.CurrentProfileBehavior != null)
+            {
+                name = ProfileManager.CurrentProfileBehavior.GetType().ToString();
+            }
+
+            return name;
+        }
+
+        public static bool GetIsInCombat()
+        {
+            if (CombatTargeting.Instance == null)
+                return false;
+
+            if (CombatTargeting.Instance.FirstObject == null)
+                return false;
+
+            if (CombatTargeting.Instance.FirstObject == null)
+                return false;
+
+            if (ZetaDia.Me.IsInCombat)
+                return true;
+
+            if (CombatTargeting.Instance.FirstObject.IsValid && CombatTargeting.Instance.FirstObject.ActorType == ActorType.Monster)
+                return true;
+
+            return false;
+        }
+
+        public static float GetProfilePathPrecision()
+        {
+            var pathPrecision = 10f;
+
+            if (!ZetaDia.IsInGame)
+                return pathPrecision;
+
+            if (ProfileManager.CurrentProfileBehavior == null)
+                return pathPrecision;
+
+            var currentBehavior = ProfileManager.CurrentProfileBehavior;
+
+            if (currentBehavior == null)
+                return pathPrecision;
+            foreach (var pi in currentBehavior.GetType().GetProperties().ToList())
+            {
+                object val = null;
+                if (pi.Name == "PathPrecision")
+                    val = pi.GetValue(currentBehavior, null);
+
+                if (val is float)
+                    pathPrecision = (float)val;
+            }
+            return pathPrecision;
+        }
+
+        public static int GetProfileActorSNO()
+        {
+            if (!ZetaDia.IsInGame)
+                return -1;
+
+            if (ProfileManager.CurrentProfileBehavior == null)
+                return -1;
+
+            var currentBehavior = ProfileManager.CurrentProfileBehavior;
+
+            var id = -1;
+
+            if (currentBehavior == null)
+                return id;
+            foreach (var pi in currentBehavior.GetType().GetProperties().ToList().Where(pi => pi.Name.ToLowerInvariant() == "actorid"))
+            {
+                id = (int)pi.GetValue(currentBehavior, null);
+            }
+
+            return id;
+        }
+
+        public static Target GetCurrentTarget()
+        {
+            try
+            {
+                return new Target(CombatTargeting.Instance.Provider.GetObjectsByWeight().FirstOrDefault());
+            }
+            catch (Exception ex)
+            {
+                if (!ex.Message.StartsWith("Only part of a ReadProcessMemory"))
+                    throw;
+            }
+            return new Target();
         }
 
         //static void TryUpdate<T>(ref T property, Func<T> func)
@@ -190,15 +326,10 @@ namespace AutoFollow.Resources
         //    }
         //}
 
-        public bool UsePower(SNOPower power, Vector3 position)
-        {
-            return ZetaDia.Me.UsePower(power, position);
-        }
-
-        public override string ToString()
+        public static string GetString()
         {            
-            return String.Format("Player ({12} - {13}): RActorId={0} AcdId={1} HitpointsCurrent={2:0} HitpointsCurrentPct={3:0} HitpointsMaxTotal={4:0} Position={5} LevelAreaId={6} WorldSnoId={7} DynamicWorldId={8} IsInGame={9} IsInTown={10} IsVendoring: {11}",
-                this.RActorId, this.AcdId, this.HitpointsCurrent, this.HitpointsCurrentPct*100, this.HitpointsMaxTotal, this.Position, this.CurrentLevelAreaId, this.CurrentWorldSnoId, this.CurrentDynamicWorldId, this.IsInGame, this.IsInTown, this.IsVendoring, AutoFollow.CurrentBehaviorType, AutoFollow.CurrentBehavior.Category);
+            return string.Format("Player ({12} - {13}): RActorId={0} AcdId={1} HitpointsCurrent={2:0} HitpointsCurrentPct={3:0} HitpointsMaxTotal={4:0} Position={5} LevelAreaId={6} WorldSnoId={7} DynamicWorldId={8} IsInGame={9} IsInTown={10} IsVendoring: {11}",
+                RActorId, AcdId, HitpointsCurrent, HitpointsCurrentPct*100, HitpointsMaxTotal, Position, CurrentLevelAreaId, CurrentWorldSnoId, CurrentDynamicWorldId, IsInGame, IsInTown, IsVendoring, AutoFollow.CurrentBehaviorType, AutoFollow.CurrentBehavior.Category);
         }
 
         public static int BattleTagHash
@@ -236,43 +367,38 @@ namespace AutoFollow.Resources
             }
         }
 
-        public static DateTime LastGameJoinedTime { get; set; }
+        //public static bool IsPartyleader
+        //{
+        //    get
+        //    {
+        //        if (!ZetaDia.Service.IsValid)
+        //            return false;
+        //        if (!ZetaDia.Service.Hero.IsValid)
+        //            return false;
+        //        if (ZetaDia.IsLoadingWorld)
+        //            return false;
 
-        public static bool IsPartyleader
-        {
-            get
-            {
-                if (!ZetaDia.Service.IsValid)
-                    return false;
-                if (!ZetaDia.Service.Hero.IsValid)
-                    return false;
-                if (ZetaDia.IsLoadingWorld)
-                    return false;
+        //        if (DateTime.UtcNow.Subtract((DateTime) _lastUpdateIsPartyLeaderMembers).TotalSeconds < 5)
+        //            return _lastIsPartyLeader;
 
-                if (DateTime.UtcNow.Subtract((DateTime) _lastUpdateIsPartyLeaderMembers).TotalSeconds < 5)
-                    return _lastIsPartyLeader;
+        //        if (ZetaDia.Service.IsValid &&
+        //            ZetaDia.Service.Platform.IsValid &&
+        //            ZetaDia.Service.Platform.IsConnected &&
+        //            ZetaDia.Service.Hero.IsValid &&
+        //            ZetaDia.Service.Party.IsValid)
+        //        {
 
-                if (ZetaDia.Service.IsValid &&
-                    ZetaDia.Service.Platform.IsValid &&
-                    ZetaDia.Service.Platform.IsConnected &&
-                    ZetaDia.Service.Hero.IsValid &&
-                    ZetaDia.Service.Party.IsValid)
-                {
-
-                    _lastUpdateIsPartyLeaderMembers = DateTime.UtcNow;
-                    _lastIsPartyLeader = ZetaDia.Service.Party.IsPartyLeader;
-                    return _lastIsPartyLeader;
-                }
-                return false;
-            }
-        }
+        //            _lastUpdateIsPartyLeaderMembers = DateTime.UtcNow;
+        //            _lastIsPartyLeader = ZetaDia.Service.Party.IsPartyLeader;
+        //            return _lastIsPartyLeader;
+        //        }
+        //        return false;
+        //    }
+        //}
 
         public static bool IsInParty
         {
-            get
-            {
-                return NumPlayersInParty > 1;
-            }
+            get { return NumPlayersInParty > 1; }
         }
 
         public static bool IsClient
@@ -287,7 +413,7 @@ namespace AutoFollow.Resources
 
         public static bool IsLeader
         {
-            get { return AutoFollow.CurrentLeader != null && Instance.Message != null && Instance.Message.OwnerId == AutoFollow.CurrentLeader.OwnerId; }
+            get { return AutoFollow.CurrentLeader != null && CurrentMessage != null && CurrentMessage.OwnerId == AutoFollow.CurrentLeader.OwnerId; }
         }
 
         public static bool IsFollower
@@ -295,10 +421,5 @@ namespace AutoFollow.Resources
             get { return !IsLeader; }
         }
 
-
-        public GameId CurrentGameId { get; set; }
-
-        public static Interactable LastPortalUsed { get; set; }
-        public static Interactable LastEntryPortal { get; set; }
     }
 }
