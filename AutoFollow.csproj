@@ -73,7 +73,7 @@
     <Compile Include="Coroutines\Movement.cs" />
     <Compile Include="Coroutines\Party.cs" />
     <Compile Include="Coroutines\Questing.cs" />
-    <Compile Include="Events\Enable.cs" />
+    <Compile Include="Events\ChangeMonitor.cs" />
     <Compile Include="Events\EventData.cs" />
     <Compile Include="Events\EventDispatcher.cs" />
     <Compile Include="Events\EventManager.cs" />
