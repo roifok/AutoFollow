@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Adventurer.Coroutines;
+using Adventurer.Coroutines.RiftCoroutines;
 using AutoFollow.Coroutines.Resources;
 using AutoFollow.Resources;
 using Buddy.Coroutines;
@@ -15,12 +17,14 @@ namespace AutoFollow.Coroutines
     {
         private static DateTime LastRequestedGemUpgrade = DateTime.MinValue;
 
+        private static ICoroutine _gemUpgrader = new UpgradeGemsCoroutine();
+
         /// <summary>
         /// Send out a request to all plugins for someone to handle gem upgrading for us.
         /// </summary>
         public static async Task<bool> UpgradeGems()
         {
-            if (DateTime.UtcNow.Subtract(LastRequestedGemUpgrade).TotalMinutes < 1)
+            if (DateTime.UtcNow.Subtract(LastRequestedGemUpgrade).TotalSeconds < 10)
                 return false;
 
             if (RiftHelper.IsInRift && RiftHelper.RiftQuest.Step == RiftQuest.RiftStep.UrshiSpawned && RiftHelper.CurrentRift.IsCompleted)
@@ -29,7 +33,15 @@ namespace AutoFollow.Coroutines
                     await Coordination.TeleportToPlayer(AutoFollow.CurrentLeader);
 
                 Log.Warn("Rift is Completed; requesting gem upgrade from other plugins.");
-                PluginCommunicator.BroadcastGemUpgradRequest();
+
+                //PluginCommunicator.BroadcastGemUpgradRequest();
+                while (await _gemUpgrader.GetCoroutine() == false)
+                {
+                    await Coroutine.Yield();
+                }
+
+                _gemUpgrader.Reset();
+
                 await Coroutine.Sleep(5000);
                 LastRequestedGemUpgrade = DateTime.UtcNow;
                 return true;

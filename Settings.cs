@@ -48,6 +48,8 @@ namespace AutoFollow
                 Misc = _misc.Source
             };
 
+            ApplyNetworkRoleSettings();
+
             UILoader.OnWindowClosed += SettingsWindow_Closed;
         }
 
@@ -56,10 +58,30 @@ namespace AutoFollow
             if (Network.ServerPort != Server.ServerUri.Port || Network.BindAddress != Server.ServerUri.OriginalString)
                 Service.UpdateUri();
 
+            ApplyNetworkRoleSettings();
+
             _network.Save();
             _coordination.Save();
             _misc.Save();
-        }        
+        }
+
+        public static void ApplyNetworkRoleSettings()
+        {
+            if (Network.Role == NetworkSettings.NetworkRole.Client)
+            {
+                Service.ConnectionMode = ConnectionMode.Client;
+                Service.ForceConnectionMode = true;
+            }
+            else if (Network.Role == NetworkSettings.NetworkRole.Server)
+            {
+                Service.ConnectionMode = ConnectionMode.Server;
+                Service.ForceConnectionMode = true;
+            }
+            else
+            {
+                Service.ForceConnectionMode = false;
+            }
+        }
     }
 
     public class SettingsViewModel
@@ -75,6 +97,7 @@ namespace AutoFollow
         private string _bindAddress;
         private int _serverPort;
         private int _updateInterval;
+        private NetworkRole _role;
 
         [DataMember, Setting]
         [DefaultValue(10920)]
@@ -98,8 +121,31 @@ namespace AutoFollow
         {
             get { return _updateInterval; }
             set { if (value >= 10) SetField(ref _updateInterval, value); }
-        }      
+        }
+
+        public enum NetworkRole
+        {
+            None = 0,
+            Auto,
+            Client,
+            Server
+        }
+
+        [DataMember, Setting]
+        [DefaultValue(NetworkRole.Auto)]
+        public NetworkRole Role
+        {
+            get { return _role; }
+            set
+            {
+                if (value == NetworkRole.None)
+                    SetField(ref _role, NetworkRole.Auto);
+                else
+                    SetField(ref _role, value);
+            }
+        }
     }
+
 
     [DataContract]
     public class CoordinationSettings : NotifyBase
@@ -107,6 +153,7 @@ namespace AutoFollow
         private int _teleportDistance;
         private int _followDistance;
         private int _delayAfterJoinGame;
+        private int _catchUpDistance;
 
         [DataMember, Setting]
         [DefaultValue(300)]
@@ -122,6 +169,14 @@ namespace AutoFollow
         {
             get { return _followDistance; }
             set { if (value >= 3) SetField(ref _followDistance, value); }
+        }
+
+        [DataMember, Setting]
+        [DefaultValue(80)]
+        public int CatchUpDistance
+        {
+            get { return _catchUpDistance; }
+            set { if (value >= 40) SetField(ref _catchUpDistance, value); }
         }
 
         [DataMember, Setting]

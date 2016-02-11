@@ -113,6 +113,11 @@ namespace AutoFollow.Coroutines.Resources
         private const ulong PartySlot3NameHash = 11880506788337294737;
         private const ulong PartySlot4NameHash = 5131118202711950686;
 
+        //[21B16350] Mouseover: 0x712D458486D6F062, Name: Root.NormalLayer.deathmenu_dialog.dialog_main.button_accept_resurrection
+        private const ulong AcceptReviveButtonHash = 0x712D458486D6F062;
+
+
+
         internal const int ClickThreadSleepInterval = 125;
         private static DateTime _lastCheckedUiButtons = DateTime.MinValue;
         private static readonly Stopwatch clickTimer = new Stopwatch();
@@ -137,6 +142,11 @@ namespace AutoFollow.Coroutines.Resources
 
                 return false;
             }
+        }        
+
+        public static UIElement AcceptReviveButton
+        {
+            get { return UIElement.FromHash(AcceptReviveButtonHash); }
         }
 
         public static UIElement PartySlot1Name

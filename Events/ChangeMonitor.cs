@@ -47,6 +47,7 @@ namespace AutoFollow.Events
         public static DateTime LastGameLeftTime = DateTime.MinValue;
         public static DateTime LastWorldChange = DateTime.MinValue;
         public static DateTime LastLoadedProfileTime = DateTime.MinValue;
+        public static DateTime LastRiftGaurdianKilledTime = DateTime.MinValue;
 
         public static DateTime LastSeenLeaderTime;
         public static int LastSeenLeaderWorld;
@@ -301,8 +302,34 @@ namespace AutoFollow.Events
                 _inTrouble = inTrouble;
             }
 
+            if (RiftHelper.RiftQuest != null)
+            {
+                var riftGaurdianKilled = RiftHelper.RiftQuest.Step == RiftQuest.RiftStep.Cleared || RiftHelper.RiftQuest.Step == RiftQuest.RiftStep.UrshiSpawned;
+                if (riftGaurdianKilled != _riftGaurdianKilled)
+                {
+                    if (riftGaurdianKilled)
+                    {
+                        Log.Warn("So sad, that poor misunderstood greebly just wanted a hug.");
+                        EventManager.FireEvent(new EventData(EventType.KilledRiftGaurdian));
+                    }
+                    _riftGaurdianKilled = riftGaurdianKilled;
+                }
+            }
+
+            var riftGaurdianHiding = RiftHelper.CurrentRift.IsStarted && !RiftHelper.CurrentRift.HasGuardianSpawned;
+            if (riftGaurdianHiding != _riftGaurdianAlive)
+            {
+                if (!riftGaurdianHiding)
+                {
+                    Log.Warn("Whats this?");
+                    EventManager.FireEvent(new EventData(EventType.SpawnedRiftGaurdian));
+                }                    
+                _riftGaurdianAlive = riftGaurdianHiding;
+            }
+
             _lastPosition = ZetaDia.Me.Position;
         }
+
 
         private static void CheckForDeathGateUsage(Vector3 currentPosition, float distanceTravelled)
         {
@@ -393,6 +420,8 @@ namespace AutoFollow.Events
         };
 
         private static DiaPlayer _leaderActor;
+        private static bool _riftGaurdianAlive;
+        private static bool _riftGaurdianKilled;
 
 
         private static bool IsProfileBusy()

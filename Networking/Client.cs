@@ -83,7 +83,7 @@ namespace AutoFollow.Networking
                // _httpFactory.Close();
             }
 
-            if (ConnectionAttempts > 5 && !ClientInitialized)
+            if (ConnectionAttempts > 5 && !ClientInitialized && !Service.ForceConnectionMode)
             {
                 Service.ConnectionMode = ConnectionMode.Server;
             }
@@ -129,11 +129,6 @@ namespace AutoFollow.Networking
             if (!Client.IsValid)
             {
                 Log.Info("Client is not valid");
-                //switch (_httpFactory.State)
-                //{
-                //    case CommunicationState.Faulted:
-                //    case CommunicationState.Closing:  
-                //}
 
                 if (_httpProxy != null)
                 {
@@ -146,16 +141,6 @@ namespace AutoFollow.Networking
                     ClientInitialize();
                     Thread.Sleep(250);
                 }
-                //Log.Info("_httpFactory.State={0}", _httpFactory.State);
-
-                //if(_httpFactory.State != CommunicationState.Closing)
-                    
-
-                //else if (_httpFactory.State != CommunicationState.Closed)
-                //{
-                //    Log.Info("Waiting for _httpFactory to close");
-                //    return;
-                //}
 
                 if (!Client.IsValid || _httpProxy == null || _httpFactory.State != CommunicationState.Closed)
                 {
@@ -175,6 +160,9 @@ namespace AutoFollow.Networking
                     return;
 
                 if (DateTime.UtcNow.Subtract(LastExpectedException).TotalSeconds < 1)
+                    return;
+
+                if (DateTime.UtcNow < EarliestNextAttempt)
                     return;
 
                 if (_httpProxy == null)
@@ -228,8 +216,14 @@ namespace AutoFollow.Networking
                     Log.Debug("EndpointNotFoundException: Could not get an update from the leader using {0}. Is the leader running? ({1})", _httpFactory.Endpoint.Address.Uri.AbsoluteUri, ex.Message);
                 }
 
+                EarliestNextAttempt = DateTime.UtcNow.Add(TimeSpan.FromSeconds(5));
+
                 ClientInitialized = false;
-                Service.ConnectionMode = ConnectionMode.Server;
+
+                if (!Service.ForceConnectionMode)
+                {
+                    Service.ConnectionMode = ConnectionMode.Server;
+                }
             }
             catch (CommunicationException ex)
             {
@@ -251,20 +245,26 @@ namespace AutoFollow.Networking
                 LastUnexpectedException = DateTime.UtcNow;
                 Log.Info(ex.ToString());
                 ConnectionAttempts++;
-            }            
-
-            if (ConnectionAttempts > 3)
-            {
-                Service.ConnectionMode = ConnectionMode.Server;
+                EarliestNextAttempt = DateTime.UtcNow.Add(TimeSpan.FromSeconds(5));
             }
 
-            if (ExpectedExceptionCount > 20)
+            if (!Service.ForceConnectionMode)
             {
-                Service.ConnectionMode = ConnectionMode.Server;
+                if (ConnectionAttempts > 3)
+                {
+                    Service.ConnectionMode = ConnectionMode.Server;
+                }
+
+                if (ExpectedExceptionCount > 20)
+                {
+                    Service.ConnectionMode = ConnectionMode.Server;
+                }
             }
 
             _firstConnectionAttempt = false;
         }
+
+        public static DateTime EarliestNextAttempt = DateTime.MinValue;
 
         public static DateTime LastSummaryTime = DateTime.MinValue;
 
@@ -277,7 +277,6 @@ namespace AutoFollow.Networking
             AutoFollow.NumberOfConnectedBots = Service.GetSmoothedConnectedBotCount(AutoFollow.CurrentParty);
             AutoFollow.ServerMessage = messageWrapper.PrimaryMessage;
             EventManager.Add(AutoFollow.ServerMessage.Events);
-            //AutoFollow.SelectBehavior();
             LastClientUpdate = DateTime.UtcNow;
         }
     }

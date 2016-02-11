@@ -183,7 +183,7 @@ namespace AutoFollow.Coroutines
             var portalNearby = Data.Portals.Any(p => p.Distance < 50f);
 
             // Allow time for leader to resolve in new world.
-            if (!Player.IsInTown && portalNearby && _teleportTimer.ElapsedMilliseconds < 6000)
+            if (!Player.IsInTown && portalNearby && _teleportTimer.ElapsedMilliseconds < 6000 && !AutoFollow.CurrentLeader.IsInRift)
             {
                 Log.Debug("{0} is in a different world... waiting before teleport", playerMessage.HeroName);
                 return false;
@@ -319,11 +319,25 @@ namespace AutoFollow.Coroutines
                 return false;
 
             Log.Info("Lets use this nearby portal, what could go wrong? Id={0} Distance={1}",
-            nearbyPortal.Name, nearbyPortal.Distance);
+                nearbyPortal.Name, nearbyPortal.Distance);
 
             await Movement.MoveToAndInteract(nearbyPortal);
             return true;
         }
 
+        public static async Task<bool> TeleportToRiftGaurdianLoot(Message player)
+        {
+            if (AutoFollow.CurrentLeader.Distance < 150f && AutoFollow.CurrentLeader.IsInSameWorld)
+            {
+                Log.Info("Leader is too close to teleport");
+                return false;
+            }
+
+            if (await TeleportToPlayer(player))
+                return true;
+
+            return false;
+
+        }
     }
 }

@@ -24,7 +24,7 @@ namespace AutoFollow.Networking
         public static DateTime LastServerUpdate = DateTime.MinValue;
         internal static ConcurrentQueue<Message> Inbox = new ConcurrentQueue<Message>();
         public static DateTime LastFailTime = DateTime.MinValue;
-        public static bool ServerInitialized { get; private set; }
+        public static bool IsInitialized { get; private set; }
         public static int ServerStartAttempts { get; set; }
 
         public static void ShutdownServer()
@@ -113,20 +113,24 @@ namespace AutoFollow.Networking
                 ServiceHost.AddServiceEndpoint(typeof (IService), new BasicHttpBinding(), "Follow");
                 ServiceHost.Open();
 
-                ServerInitialized = true;
+                IsInitialized = true;
 
                 if (OnServerInitialized != null)
                     OnServerInitialized.Invoke();
             }
             catch (AddressAlreadyInUseException ex)
             {
-                Log.Verbose("Address already in use. Attempt={0}", ServerStartAttempts);
+                Log.Verbose("Address already in use. Waiting for 30 seconds. Attempt={0}", ServerStartAttempts);
                 Log.Debug(ex.ToString());
-                DontAttemptServerModeUntil = DateTime.UtcNow.Add(TimeSpan.FromMinutes(1));
+                DontAttemptServerModeUntil = DateTime.UtcNow.Add(TimeSpan.FromSeconds(30));
                 LastFailTime = DateTime.UtcNow;
                 Server.ShutdownServer();
                 Client.ShutdownClient();
-                Service.ConnectionMode = ConnectionMode.Client;
+
+                if (!Service.ForceConnectionMode)
+                {
+                    Service.ConnectionMode = ConnectionMode.Client;
+                }
             }
             catch (Exception ex)
             {
@@ -135,7 +139,7 @@ namespace AutoFollow.Networking
                 LastFailTime = DateTime.UtcNow;
             }
 
-            if (ServerStartAttempts > 5 && !IsValid)
+            if (!Service.ForceConnectionMode && ServerStartAttempts > 5 && !IsValid)
             {
                 Service.ConnectionMode = ConnectionMode.Client;
             }
@@ -215,7 +219,7 @@ namespace AutoFollow.Networking
             }
 
             CommunicationThread.ThreadShutdown();
-            ServerInitialized = false;
+            IsInitialized = false;
         }
 
         private static void ProcessClientMessages()

@@ -139,7 +139,7 @@ namespace AutoFollow.Coroutines
 
                 if (Targetting.RoutineWantsToClickGizmo())
                 {
-                    Log.Verbose("Movement Stopped, Combat routine wants to pick up an item.", name, distance);
+                    Log.Verbose("Movement Stopped, Combat routine wants to click on a gizmo.", name, distance);
                     return false;
                 }
 
@@ -293,7 +293,7 @@ namespace AutoFollow.Coroutines
                 Log.Verbose("Moving to Player {0} CurrentDistance={1} DistanceRequired={2} ",
                     player.HeroName, player.Distance, range);
 
-                await MoveTo(() => AutoFollow.GetUpdatedMessage(player), player.HeroName, range, t => !player.IsInSameWorld || t.Distance > Settings.Coordination.TeleportDistance);
+                await MoveTo(() => AutoFollow.GetUpdatedMessage(player), player.HeroName, range, t => !player.IsInSameWorld || t.Distance > Settings.Coordination.TeleportDistance && !RiftHelper.IsInGreaterRift);
                 return true;
             }
 

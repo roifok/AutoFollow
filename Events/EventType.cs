@@ -21,6 +21,8 @@ namespace AutoFollow.Events
         LeavingGame,
         GoingToTown,
         StartingTownRun,
+        KilledRiftGaurdian,
+        SpawnedRiftGaurdian
     }
 }
 

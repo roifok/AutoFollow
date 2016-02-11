@@ -103,6 +103,32 @@ namespace AutoFollow.Behaviors
             if (await Coordination.WaitAfterChangingWorlds())
                 return true;
 
+            if (await WaitForGemUpgraded())
+                return true;
+
+            return false;
+        }
+
+        public static async Task<bool> WaitForGemUpgraded()
+        {
+            if (RiftHelper.RiftQuest.Step == RiftQuest.RiftStep.UrshiSpawned) 
+            {                 
+                 if (Player.IsInTown)
+                 {
+                    Log.Warn("Go back to the rift.");
+                    await Questing.ReturnToGreaterRift();
+                    await Coroutine.Sleep(2000);
+                    return true;
+                 }
+
+                if (Data.NPCS.Urshi != null)
+                {
+                    Log.Warn("Waiting for gem upgrading.");
+                    //await Coroutine.Sleep(5000);
+                    await Questing.UpgradeGems();
+                    return true;
+                }
+            }
             return false;
         }
 
@@ -147,5 +173,17 @@ namespace AutoFollow.Behaviors
             }
             return true;
         }
+
+        public override async Task<bool> OnKilledRiftGaurdian(Message sender, EventData e)
+        {
+            if (e.IsMyEvent)
+            {
+                Log.Warn("I killed a rift gaurdian, all me.", e.OwnerHeroName);
+                Coordination.WaitFor(TimeSpan.FromSeconds(20));
+                return true;
+            }
+            return false;
+        }
+
     }
 }

@@ -44,6 +44,8 @@ namespace AutoFollow.Networking
             }
         }
 
+        public static bool ForceConnectionMode { get; set; }
+
         public MessageWrapper GetMessageFromServer()
         {
             try
@@ -88,7 +90,10 @@ namespace AutoFollow.Networking
             if (IsConnected)
                 return true;
 
-            if (Server.ServerStartAttempts > 20 && Client.ConnectionAttempts > 20)
+            var tooManyAutoAttempts = Server.ServerStartAttempts > 20 && Client.ConnectionAttempts > 20;
+            var tooManyClientAttempts = ForceConnectionMode && ConnectionMode == ConnectionMode.Client && Client.ConnectionAttempts > 100;
+            var tooManyServerAttempts = ForceConnectionMode && ConnectionMode == ConnectionMode.Server && Server.ServerStartAttempts > 40;
+            if (tooManyAutoAttempts || tooManyClientAttempts || tooManyServerAttempts)
             {
                 Log.Info("Failed to Connect too many times, Disabling Plugin");
                 AutoFollow.DisablePlugin();
@@ -140,6 +145,11 @@ namespace AutoFollow.Networking
                     }
                     else
                     {
+                        if (Server.IsValid && Server.IsInitialized)
+                        {
+                            Server.ShutdownServer();
+                        }
+
                         Client.ClientUpdate();
                     }
 

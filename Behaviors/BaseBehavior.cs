@@ -70,6 +70,8 @@ namespace AutoFollow.Behaviors
             EventManager.UsedPortal += OnUsedPortal;
             EventManager.InviteRequest += OnInviteRequest;
             EventManager.LeavingGame += OnLeavingGame;
+            EventManager.KilledRiftGaurdian += OnKilledRiftGaurdian;
+            EventManager.SpawnedRiftGaurdian += OnSpawnedRiftGaurdian;
 
             Pulsator.OnPulse += Pulsator_OnPulse;
             LastActivated = DateTime.UtcNow;
@@ -103,6 +105,8 @@ namespace AutoFollow.Behaviors
             EventManager.UsedPortal -= OnUsedPortal;
             EventManager.InviteRequest -= OnInviteRequest;
             EventManager.LeavingGame -= OnLeavingGame;
+            EventManager.KilledRiftGaurdian -= OnKilledRiftGaurdian;
+            EventManager.SpawnedRiftGaurdian -= OnSpawnedRiftGaurdian;
 
             Pulsator.OnPulse -= Pulsator_OnPulse;
             Log.Info("Stopped {0}", Name);
@@ -115,7 +119,7 @@ namespace AutoFollow.Behaviors
             if (!AutoFollow.Enabled)
                 return false;
 
-            // Pulse does fire while out of game. Need to be very careful how waits are handled.
+            // Pulse does not fire while out of game. Need to be very careful how waits are handled.
             // Don't use long Coroutine.Sleeps out of game as it will prevent player updates for the duration.
             AutoFollow.Pulse();            
 
@@ -254,7 +258,17 @@ namespace AutoFollow.Behaviors
         {
             return false;
         }
-        
+
+        public virtual async Task<bool> OnKilledRiftGaurdian(Message sender, EventData e)
+        {
+            return false;
+        }
+
+        public virtual async Task<bool> OnSpawnedRiftGaurdian(Message sender, EventData e)
+        {
+            return false;
+        }
+
         public static bool IsGameReady
         {
             get { return ZetaDia.Service.IsValid && ZetaDia.Service.Hero.IsValid && AutoFollow.Enabled && !ZetaDia.IsLoadingWorld; }

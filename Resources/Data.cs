@@ -57,6 +57,16 @@ namespace AutoFollow.Resources
             }
         }
 
+        public static class NPCS
+        {
+            public static DiaObject Urshi
+            {
+                get { return Actors.FirstOrDefault(a => a.ActorSnoId == UrshiSnoId); }
+            }
+        }
+
+        private const int UrshiSnoId = (int)SNOActor.P1_LR_TieredRift_Nephalem;
+
         public static Func<DiaObject, bool> IsValid = o => o != null && o.IsValid && o.CommonData != null && o.CommonData.IsValid && !o.CommonData.IsDisposed;
 
         public static int GetAcdIdByHeroId(int heroId)

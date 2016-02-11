@@ -4,13 +4,15 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:behaviors="clr-namespace:AutoFollow.UI.Components.Behaviors"
+            xmlns:converters="clr-namespace:AutoFollow.UI.Components.Converters"
              mc:Ignorable="d" Foreground="{DynamicResource TextBrush}" 
-             d:DesignHeight="360" d:DesignWidth="350" Background="Gray">
+             d:DesignHeight="450" d:DesignWidth="400" Background="Gray">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="..\Template.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            <converters:EnumBooleanConverter x:Key="EnumBooleanConverter" />
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
@@ -21,7 +23,7 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>                        
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition MinWidth="130" />
@@ -49,8 +51,22 @@
                             SmallChange="1" TickFrequency="100" IsSnapToTickEnabled="True"
                             TickPlacement="BottomRight" Value="{Binding Network.UpdateInterval}" 
                             HorizontalAlignment="Stretch" Margin="0,3,0,3" />
+                    
+                    <!--<Grid Grid.Row="3" ColumnSpan="2" Margin="5">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>-->
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Role:" FontWeight="Normal" TextAlignment="Left"/>
+                        <WrapPanel Grid.Row="3" Grid.Column="1" Margin="0,0,25,0" HorizontalAlignment="Left">
+                            <RadioButton GroupName="Role" Margin="0,0,10,0" Content="Auto" IsChecked="{Binding Path=Network.Role, Converter={StaticResource EnumBooleanConverter}, ConverterParameter=Auto}" />
+                            <RadioButton GroupName="Role" Margin="0,0,10,0" Content="Server" IsChecked="{Binding Path=Network.Role, Converter={StaticResource EnumBooleanConverter}, ConverterParameter=Server}" />
+                            <RadioButton GroupName="Role" Margin="0,0,10,0" Content="Client" IsChecked="{Binding Path=Network.Role, Converter={StaticResource EnumBooleanConverter}, ConverterParameter=Client}" />
+                        </WrapPanel>
+                    <!--</Grid>-->
 
-                </Grid>                
+                </Grid>
+
             </GroupBox>
             <GroupBox Header="Coordination">
                 <Grid Margin="10, 5" Style="{x:Null}">
@@ -58,6 +74,7 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>                        
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition MinWidth="130" />
@@ -83,31 +100,38 @@
                             HorizontalAlignment="Stretch" Margin="0,3,0,3" />
                     <TextBlock Grid.Row="1" Grid.Column="2" Margin="2,0,0,0" FontSize="10" VerticalAlignment="Center">yards</TextBlock>
 
-                    <TextBlock Grid.Row="2" Grid.Column="0" VerticalAlignment="Center">Leader Start Delay</TextBlock>
+                    <TextBlock Grid.Row="2" Grid.Column="0" VerticalAlignment="Center">Catch-Up Range</TextBlock>
                     <Slider Grid.Row="2" Grid.Column="1" Template="{DynamicResource SliderEditable}" 
+                            ToolTip="When outside this range from leader, followers will cycle combat on/off to catch up faster"
+                            Interval="1" Maximum="100" Minimum="40" 
+                            SmallChange="1" TickFrequency="25" IsSnapToTickEnabled="True"
+                            TickPlacement="BottomRight" Value="{Binding Coordination.CatchUpDistance}" 
+                            HorizontalAlignment="Stretch" Margin="0,3,0,3" />
+                    <TextBlock Grid.Row="2" Grid.Column="2" Margin="2,0,0,0" FontSize="10" VerticalAlignment="Center">yards</TextBlock>
+                    
+                    <TextBlock Grid.Row="3" Grid.Column="0" VerticalAlignment="Center">Leader Start Delay</TextBlock>
+                    <Slider Grid.Row="3" Grid.Column="1" Template="{DynamicResource SliderEditable}" 
                             ToolTip="How long leader will wait after creating a new game, before starting rift"
                             Interval="1" Maximum="300" Minimum="0" 
                             SmallChange="1" TickFrequency="10" IsSnapToTickEnabled="True"
                             TickPlacement="BottomRight" Value="{Binding Coordination.DelayAfterJoinGame}" 
                             HorizontalAlignment="Stretch" Margin="0,3,0,3" />
-                    <TextBlock Grid.Row="2" Grid.Column="2" Margin="2,0,0,0" FontSize="10" VerticalAlignment="Center">secs</TextBlock>
+                    <TextBlock Grid.Row="3" Grid.Column="2" Margin="2,0,0,0" FontSize="10" VerticalAlignment="Center">secs</TextBlock>
 
                 </Grid>
             </GroupBox>
             <GroupBox Header="Misc">
                 <UniformGrid Columns="1">
-                    <StackPanel>
-                        <WrapPanel>
-                            <CheckBox Margin="5,6,5,0" IsEnabled="True" ToolTip="Bots will leave any game/party that has players it's not connected to via DemonBuddy"  IsChecked="{Binding Path=Misc.AvoidUnknownPlayers, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" >
-                                <TextBlock Margin="1,1" Text="Avoid Unknown Players" ToolTip="Bots will leave any game/party that has players it's not connected to via DemonBuddy" />
-                            </CheckBox>
-                        </WrapPanel>
-                        <WrapPanel>
-                            <CheckBox Margin="5,6,5,0" IsEnabled="True" ToolTip="Spams the console with lots of information" IsChecked="{Binding Path=Misc.DebugLogging, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center">
-                                <TextBlock Margin="1,1" Text="Debug Logging" VerticalAlignment="Center" ToolTip="Spams the console with lots of information"/>
-                            </CheckBox>
-                        </WrapPanel>
-                    </StackPanel>
+                    <WrapPanel>
+                        <CheckBox Margin="5,6,5,0" IsEnabled="True" ToolTip="Bots will leave any game/party that has players it's not connected to via DemonBuddy"  IsChecked="{Binding Path=Misc.AvoidUnknownPlayers, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" >
+                            <TextBlock Margin="1,1" Text="Avoid Unknown Players" ToolTip="Bots will leave any game/party that has players it's not connected to via DemonBuddy" />
+                        </CheckBox>
+                    </WrapPanel>
+                    <WrapPanel>
+                        <CheckBox Margin="5,6,5,0" IsEnabled="True" ToolTip="Spams the console with lots of information" IsChecked="{Binding Path=Misc.DebugLogging, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center">
+                            <TextBlock Margin="1,1" Text="Debug Logging" VerticalAlignment="Center" ToolTip="Spams the console with lots of information"/>
+                        </CheckBox>
+                    </WrapPanel>
                 </UniformGrid>
             </GroupBox>
         </StackPanel>

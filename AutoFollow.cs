@@ -44,7 +44,7 @@ namespace AutoFollow
         }
 
         public static InterfaceLoader<IBehavior> Behaviors;
-        public static Version PluginVersion = new Version(1, 0, 10);
+        public static Version PluginVersion = new Version(1, 0, 12);
         internal static bool Enabled;
         internal static Message ServerMessage = new Message();
         internal static Dictionary<int, Message> ClientMessages = new Dictionary<int, Message>();
@@ -295,6 +295,9 @@ namespace AutoFollow
             BotHistory.Enable();
             TabUi.InstallTab();
             ChangeMonitor.Enable();
+
+            Server.ServerStartAttempts = 0;
+            Client.ConnectionAttempts = 0;
 
             Service.Connect();
             CommunicationThread.ThreadStart();

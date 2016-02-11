@@ -108,8 +108,8 @@ namespace AutoFollow.Behaviors
             if (await Coordination.TeleportWhenTooFarAway(AutoFollow.CurrentLeader))
                 return true;
 
-            if (await Coordination.UseNearbyPortalWhenIdle())
-                return true;
+            //if (await Coordination.UseNearbyPortalWhenIdle())
+            //    return true;
 
             if (await Movement.MoveToPlayer(AutoFollow.CurrentLeader, Settings.Coordination.FollowDistance))
                 return false;
@@ -128,7 +128,7 @@ namespace AutoFollow.Behaviors
         /// </summary>
         public void StayCloseToPlayer(Message player)
         {
-            if (player.Distance > Math.Max(Settings.Coordination.FollowDistance + 15f, 40f) && !Player.IsInTown && 
+            if (player.Distance > Settings.Coordination.CatchUpDistance && !Player.IsInTown && 
                 !Navigation.IsBlocked && !Navigator.StuckHandler.IsStuck && Player.HitpointsCurrentPct > 0.7 && !Targetting.RoutineWantsToAttackGoblin())
             {
                 Targetting.State = CombatState.Pulsing;
@@ -241,6 +241,31 @@ namespace AutoFollow.Behaviors
                     Common.CleanString(sender.CurrentTarget.Name),
                     sender.Position.ToString(),
                     ZetaDia.Me.Position.Distance(sender.CurrentTarget.Position));
+            }
+            return false;
+        }
+
+        public override async Task<bool> OnKilledRiftGaurdian(Message sender, EventData e)
+        {
+            if (e.IsLeaderEvent)
+            {
+                Log.Warn("{0} killed a rift gaurdian", e.OwnerHeroName);
+
+                if (GameUI.ReviveAtCheckpointButton.IsVisible && GameUI.ReviveAtCheckpointButton.IsEnabled)
+                {
+                    GameUI.ReviveAtCheckpointButton.Click();
+                    await Coroutine.Sleep(3000);
+                }
+
+                var timeout = DateTime.UtcNow + TimeSpan.FromSeconds(8);
+                while (Player.IsDead && DateTime.UtcNow < timeout)
+                {
+                    await Coroutine.Sleep(250);
+                    await Coroutine.Yield();
+                }
+
+                await Coordination.TeleportToRiftGaurdianLoot(sender);
+                return true;
             }
             return false;
         }

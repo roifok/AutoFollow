@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -22,12 +23,17 @@ namespace AutoFollow.Resources
             get { return Path.Combine(FileUtils.SettingsFolder, FilenameWithoutExtension + ".json"); }
         }
 
+        public delegate void SettingsLoadedEvent();
+        public event SettingsLoadedEvent Loaded = () => {};
+        public event SettingsLoadedEvent Saved= () => {};
+
         public void Load()
         {
             var json = FileUtils.ReadFromTextFile(SaveFilePath);
             if (!string.IsNullOrEmpty(json))
             {
-                 JsonSerializer.Deserialize(json, Source);
+                JsonSerializer.Deserialize(json, Source);                
+                Loaded();
             }
         }
 
@@ -36,6 +42,7 @@ namespace AutoFollow.Resources
             var result = JsonSerializer.Serialize(Source);
             FileUtils.WriteToTextFile(SaveFilePath, result);
             Log.Info("{0} saved.", FilenameWithoutExtension);
+            Saved();
         }
 
         public string FilenameWithoutExtension { get; set; }
