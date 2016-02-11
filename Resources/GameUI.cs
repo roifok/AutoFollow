@@ -570,9 +570,9 @@ namespace AutoFollow.Coroutines.Resources
 
                 lastSafeClickCheck = DateTime.UtcNow;
 
-                // Handled seperately out of game
-                if (ZetaDia.IsInGame)
-                    SafeClick(PartyInviteOK, ClickDelay.Delay, "Party Invite", 750, true);
+                //// Handled seperately out of game
+                //if (ZetaDia.IsInGame)
+                //    SafeClick(PartyInviteOK, ClickDelay.Delay, "Party Invite", 750, true);
 
                 SafeClick(GenericOK, ClickDelay.Delay, "Generic OK", 0, true);
                 SafeClick(BattleNetOK, ClickDelay.NoDelay, "Battle.Net OK", 1000, true);
