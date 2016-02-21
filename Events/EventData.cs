@@ -20,7 +20,7 @@ namespace AutoFollow.Events
             Type = type;
             Time = DateTime.UtcNow;
             OwnerId = Player.BattleTagHash;
-            OwnerHeroName = ZetaDia.Service.Hero.Name;
+            OwnerHeroAlias = Settings.Misc.HideHeroName ?  ZetaDia.Service.Hero.HeroId.ToString() : ZetaDia.Service.Hero.Name;
             IsLeaderEvent = !Player.IsFollower;
             IsFollowerEvent = Player.IsFollower;
             OldValue = oldValue;
@@ -34,7 +34,7 @@ namespace AutoFollow.Events
         public int OwnerId { get; private set; }
         public bool IsLeaderEvent { get; private set; }
         public bool IsFollowerEvent { get; private set; }
-        public string OwnerHeroName { get; private set; }
+        public string OwnerHeroAlias { get; private set; }
         public object OldValue { get; private set; }
         public object NewValue { get; private set; }
         public int Id { get; private set; }
@@ -64,7 +64,7 @@ namespace AutoFollow.Events
         public override string ToString()
         {
             return string.Format("{0} EventData >> {1} ({2}) {3} {4:0.#}s ago Old={5} New={6} BreakExecution={7}", 
-                IsLeaderEvent ? "Leader" : "Follower", OwnerHeroName, OwnerId, 
+                IsLeaderEvent ? "Leader" : "Follower", OwnerHeroAlias, OwnerId, 
                 Type, DateTime.UtcNow.Subtract(Time).TotalSeconds, OldValue, NewValue, BreakExecution);
         }
 

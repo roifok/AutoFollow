@@ -29,6 +29,9 @@ namespace AutoFollow.Networking
         }
 
         [DataMember]
+        public string HeroName { get; set; }
+
+        [DataMember]
         public List<EventData> Events { get; set; }
 
         [DataMember]
@@ -113,9 +116,6 @@ namespace AutoFollow.Networking
         public Target CurrentTarget { get; set; }
 
         [DataMember]
-        public string HeroName { get; set; }
-
-        [DataMember]
         public int HeroId { get; set; }
 
         [DataMember]
@@ -183,7 +183,7 @@ namespace AutoFollow.Networking
 
         public bool IsValid
         {
-            get { return !string.IsNullOrEmpty(HeroName) && (!IsInGame || IsLoadingWorld || GameId.FactoryId != 0); }
+            get { return !string.IsNullOrEmpty(HeroAlias) && (!IsInGame || IsLoadingWorld || GameId.FactoryId != 0); }
         }
 
         public bool IsLeader
@@ -283,7 +283,7 @@ namespace AutoFollow.Networking
                         WorldSnoId = Player.CurrentWorldSnoId,
                         IsVendoring = BrainBehavior.IsVendoring,
                         BattleTagEncrypted = GetMyEncryptedBattleTag(),
-                        HeroName = Player.HeroName,
+                        HeroName= Player.HeroName,
                         HeroId = Player.HeroId,
                         Events = EventManager.Events.Take(25).ToList(),
                         CurrentTarget = Player.Target,
@@ -368,7 +368,6 @@ namespace AutoFollow.Networking
             }
         }
 
-
         private static string GetMyEncryptedBattleTag()
         {
             return _myEncryptedBattleTag ??
@@ -391,7 +390,7 @@ namespace AutoFollow.Networking
                 ActorClass,
                 HitpointsMaxTotal,
                 HitpointsCurrent,
-                GameId,
+                "N/A", //GameId, // Possible identifying information.
                 LastUpdated,
                 IsVendoring,
                 IsLoadingWorld,
@@ -400,9 +399,9 @@ namespace AutoFollow.Networking
                 IsInParty,
                 OwnerId,
                 Events.Count,
-                HeroName,
+                HeroAlias,
                 CurrentTarget,
-                BattleTagEncrypted
+                "N/A" // BattleTagEncrypted // Possible identifying information.
                 );
         }
 
@@ -418,6 +417,11 @@ namespace AutoFollow.Networking
             get { return Player.Position.Distance(Position); }
         }
 
+        public string HeroAlias
+        {
+            get { return Settings.Misc.HideHeroName ? HeroId.ToString() : HeroName; }
+        }
+
         public string ShortSummary
         {
             get
@@ -425,7 +429,7 @@ namespace AutoFollow.Networking
                 return string.Format(
                     "[{0}] {1} ({2}) {3}{4}{5}{6}{7}{8}{9}{10} Age={11}ms Events={12}",
                     OwnerId,
-                    HeroName,
+                    HeroAlias,
                     ActorClass,
                     IsInGame ? "InGame " : "OutOfGame ",
                     IsLoadingWorld ? "IsLoading " : string.Empty,

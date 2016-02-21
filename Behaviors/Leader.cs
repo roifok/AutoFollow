@@ -136,7 +136,7 @@ namespace AutoFollow.Behaviors
         {
             if (e.IsFollowerEvent && !Data.Monsters.Any(m => m.Distance <= 80f) && sender.IsInSameWorld)
             {
-                Log.Info("My minion needs help! Teleporting to {0}. Distance={1}", sender.HeroName, sender.Distance);
+                Log.Info("My minion needs help! Teleporting to {0}. Distance={1}", sender.HeroAlias, sender.Distance);
                 await Coordination.TeleportToPlayer(sender);
             }
             return false;
@@ -146,7 +146,7 @@ namespace AutoFollow.Behaviors
         {
             if (e.IsFollowerEvent)
             {
-                Log.Info("My minion {0} changed world from {1} to {2}", sender.HeroName, e.OldValue, e.NewValue);
+                Log.Info("My minion {0} changed world from {1} to {2}", sender.HeroAlias, e.OldValue, e.NewValue);
             }
             return false;
         }
@@ -156,7 +156,7 @@ namespace AutoFollow.Behaviors
             if (e.IsFollowerEvent)
             {
                 Log.Info("My minion {0} is attacking a Unique! {1} at {2} DistanceFromMe={3}",
-                    sender.HeroName, sender.CurrentTarget.Name, sender.Position, ZetaDia.Me.Position.Distance(sender.CurrentTarget.Position));
+                    sender.HeroAlias, sender.CurrentTarget.Name, sender.Position, ZetaDia.Me.Position.Distance(sender.CurrentTarget.Position));
             }
             return true;
         }
@@ -165,7 +165,7 @@ namespace AutoFollow.Behaviors
         {
             if (e.IsFollowerEvent)
             {
-                Log.Info("My minion {0} is requesting a party invite!", sender.HeroName);
+                Log.Info("My minion {0} is requesting a party invite!", sender.HeroAlias);
                 await Party.InviteFollower(sender);
                 
                 if(DateTime.UtcNow.Subtract(Coordination.StartAllowedTime).TotalSeconds <= 30)
@@ -178,7 +178,7 @@ namespace AutoFollow.Behaviors
         {
             if (e.IsMyEvent)
             {
-                Log.Warn("I killed a rift gaurdian, all me.", e.OwnerHeroName);
+                Log.Warn("I killed a rift gaurdian, all me.", e.OwnerHeroAlias);
                 Coordination.WaitFor(TimeSpan.FromSeconds(20));
                 return true;
             }

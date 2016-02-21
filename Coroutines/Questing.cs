@@ -20,7 +20,7 @@ namespace AutoFollow.Coroutines
         private static ICoroutine _gemUpgrader = new UpgradeGemsCoroutine();
 
         /// <summary>
-        /// Send out a request to all plugins for someone to handle gem upgrading for us.
+        /// Run adventurer Gem Upgrade coroutine
         /// </summary>
         public static async Task<bool> UpgradeGems()
         {
@@ -34,7 +34,6 @@ namespace AutoFollow.Coroutines
 
                 Log.Warn("Rift is Completed; requesting gem upgrade from other plugins.");
 
-                //PluginCommunicator.BroadcastGemUpgradRequest();
                 while (await _gemUpgrader.GetCoroutine() == false)
                 {
                     await Coroutine.Yield();

@@ -42,9 +42,10 @@ namespace AutoFollow.Coroutines
             {
                 if (!IsLeaderInParty())
                 {
-                    Log.Info("Leaving party, leader is not in this group!");
-                    GameUI.OutOfGameLeavePartyButton.Click();
-                    Coordination.WaitFor(TimeSpan.FromSeconds(2));
+                    //todo add check to make sure bot is in the out of game party lobby screen
+                    //Log.Info("Leaving party, leader is not in this group!");
+                    //GameUI.OutOfGameLeavePartyButton.Click();
+                    //Coordination.WaitFor(TimeSpan.FromSeconds(2));
                 }
                 else if (GameUI.PlayGameButton.IsEnabled && AutoFollow.CurrentLeader.IsInGame)
                 {

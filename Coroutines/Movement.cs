@@ -104,6 +104,7 @@ namespace AutoFollow.Coroutines
                 //}
 
                 target = targetableProducer();
+
                 if (target == null && actor == null)
                 {
                     Log.Verbose("Movement failed, Target not found", name, distance);
@@ -291,14 +292,28 @@ namespace AutoFollow.Coroutines
             if (player.Distance > range)
             {
                 Log.Verbose("Moving to Player {0} CurrentDistance={1} DistanceRequired={2} ",
-                    player.HeroName, player.Distance, range);
+                    player.HeroAlias, player.Distance, range);
 
-                await MoveTo(() => AutoFollow.GetUpdatedMessage(player), player.HeroName, range, t => !player.IsInSameWorld || t.Distance > Settings.Coordination.TeleportDistance && !RiftHelper.IsInGreaterRift);
+                await MoveTo(() => AutoFollow.GetUpdatedMessage(player), player.HeroAlias, range,
+                    t =>
+                    {
+                        if (!player.IsInSameWorld)
+                            return true;
+
+                        if (t.Distance > Settings.Coordination.TeleportDistance && !RiftHelper.IsInGreaterRift)
+                            return true;
+
+                        if (t.Distance < Settings.Coordination.CatchUpDistance && Targetting.RoutineWantsToAttackUnit())
+                            return true;
+
+                        return false;
+                    });
+
                 return true;
             }
 
             Log.Debug("Player {0} is close enough CurrentDistance={1} DistanceRequired={2} ",
-                player.HeroName, player.Distance, range);
+                player.HeroAlias, player.Distance, range);
 
             return true;
         }
@@ -385,7 +400,7 @@ namespace AutoFollow.Coroutines
 //    if (player.IsInSameGame && player.IsInSameWorld && player.Distance > 8f)
 //    {
 //        Log.Verbose("Following {0} through portal {0} CurrentDistance={1} DistanceRequired={2} ",
-//            player.HeroName, match.Name, match.Distance, 8f);
+//            player.HeroAlias, match.Name, match.Distance, 8f);
 
 //        await MoveToAndInteract(match);                
 //        return true;

@@ -185,7 +185,7 @@ namespace AutoFollow.Coroutines
             // Allow time for leader to resolve in new world.
             if (!Player.IsInTown && portalNearby && _teleportTimer.ElapsedMilliseconds < 6000 && !AutoFollow.CurrentLeader.IsInRift)
             {
-                Log.Debug("{0} is in a different world... waiting before teleport", playerMessage.HeroName);
+                Log.Debug("{0} is in a different world... waiting before teleport", playerMessage.HeroAlias);
                 return false;
             }
                 
@@ -197,7 +197,7 @@ namespace AutoFollow.Coroutines
                 return false;
 
             Log.Warn("Teleporting to player {0} SameGame={1} SameWorld={2}",
-                playerMessage.HeroName, playerMessage.IsInSameGame, playerMessage.IsInSameWorld);
+                playerMessage.HeroAlias, playerMessage.IsInSameGame, playerMessage.IsInSameWorld);
 
             ZetaDia.Me.TeleportToPlayerByIndex(playerMessage.Index);
 
@@ -269,7 +269,7 @@ namespace AutoFollow.Coroutines
             if (Player.IsFollower && playerMessage.WorldSnoId == Player.CurrentMessage.WorldSnoId && playerMessage.IsInSameGame &&
                 !playerMessage.IsInCombat && playerMessage.Distance > Settings.Coordination.TeleportDistance)
             {
-                Log.Info("{0} is getting quite far away... attempting teleport!", playerMessage.HeroName);
+                Log.Info("{0} is getting quite far away... attempting teleport!", playerMessage.HeroAlias);
                 await Coordination.TeleportToPlayer(playerMessage);
                 return true;
             }
@@ -291,7 +291,7 @@ namespace AutoFollow.Coroutines
                 if (portalUsed != null)
                 {
                     Log.Info("Leader {0} appears to have used this portal here: '{1}' Dist={2}. Following.",
-                        AutoFollow.CurrentLeader.HeroName, portalUsed.Name, portalUsed.Distance);
+                        AutoFollow.CurrentLeader.HeroAlias, portalUsed.Name, portalUsed.Distance);
 
                     if(await Movement.MoveToAndInteract(portalUsed))
                         return true;

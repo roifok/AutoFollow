@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Zeta.Bot;
 using Zeta.Game;
+using Zeta.Game.Internals.Actors;
 using Zeta.Game.Internals.Actors.Gizmos;
 using Zeta.Game.Internals.SNO;
 
@@ -111,6 +112,12 @@ namespace AutoFollow.Resources
         {
             var combatTarget = CombatTargeting.Instance.Provider.GetObjectsByWeight().FirstOrDefault();
             return combatTarget != null && combatTarget is GizmoShrine && combatTarget.Distance < 50f;
+        }
+
+        public static bool RoutineWantsToAttackUnit()
+        {
+            var combatTarget = CombatTargeting.Instance.Provider.GetObjectsByWeight().FirstOrDefault();
+            return combatTarget != null && combatTarget is DiaUnit && combatTarget.Distance < 80f;
         }
 
     }

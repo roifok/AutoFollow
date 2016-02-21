@@ -44,7 +44,7 @@ namespace AutoFollow
         }
 
         public static InterfaceLoader<IBehavior> Behaviors;
-        public static Version PluginVersion = new Version(1, 0, 13);
+        public static Version PluginVersion = new Version(1, 0, 14);
         internal static bool Enabled;
         internal static Message ServerMessage = new Message();
         internal static Dictionary<int, Message> ClientMessages = new Dictionary<int, Message>();
@@ -224,7 +224,7 @@ namespace AutoFollow
 
             if (CurrentLeader.OwnerId != leader.OwnerId)
             {
-                Log.Warn("Selected new leader as {0} ({1})", leader.HeroName, leader.OwnerId);
+                Log.Warn("Selected new leader as {0} ({1})", leader.HeroAlias, leader.OwnerId);
             }
 
             return leader;

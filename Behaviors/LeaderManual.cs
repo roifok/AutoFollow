@@ -54,7 +54,7 @@ namespace AutoFollow.Behaviors
         {
             if (e.IsFollowerEvent)
             {
-                Log.Info("My minion {0} is requesting a party invite!", sender.HeroName);
+                Log.Info("My minion {0} is requesting a party invite!", sender.HeroAlias);
                 await Party.InviteFollower(sender);
             }
             return true;

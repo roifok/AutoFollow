@@ -145,7 +145,7 @@ namespace AutoFollow.Behaviors
         //        player.CurrentTarget.Distance < 150f && ZetaDia.Me.IsInCombat && Data.Monsters.Count(m => m.Distance <= 30f) < 10)
         //    {
         //        Log.Info("Moving to attack {0}'s target - {1} Distance={2}", 
-        //            player.HeroName, player.CurrentTarget.Name, player.CurrentTarget.Distance);
+        //            player.HeroAlias, player.CurrentTarget.Name, player.CurrentTarget.Distance);
 
         //        if(await Movement.MoveTo(() => AutoFollow.GetUpdatedMessage(player).CurrentTarget, player.CurrentTarget.Name, 10f, () => ZetaDia.Me.IsInCombat || !ZetaDia.Me.Movement.IsMoving))
         //            return true;                
@@ -170,7 +170,7 @@ namespace AutoFollow.Behaviors
                     return false;
                 }
 
-                Log.Info("Leader ({0}) used a portal ({1})", sender.HeroName, portal.InternalName);
+                Log.Info("Leader ({0}) used a portal ({1})", sender.HeroAlias, portal.InternalName);
                 await Coroutine.Sleep(2000);
 
                 if (AutoFollow.CurrentLeader.IsInSameWorld)
@@ -213,7 +213,7 @@ namespace AutoFollow.Behaviors
             if (e.IsLeaderEvent)
             {
                 Log.Info("Leader ({0}) changed world from {1} to {2}", 
-                    sender.HeroName, e.OldValue, e.NewValue);
+                    sender.HeroAlias, e.OldValue, e.NewValue);
             }
             return false;
         }
@@ -223,7 +223,7 @@ namespace AutoFollow.Behaviors
             if (e.IsLeaderEvent && Player.IsInGame)
             {
                 Log.Info("Leader ({0}) is leaving game, lets leave too!",
-                    sender.HeroName, e.OldValue, e.NewValue);
+                    sender.HeroAlias, e.OldValue, e.NewValue);
 
                 await Party.LeaveGame();
                 await Coroutine.Sleep(1000);
@@ -237,7 +237,7 @@ namespace AutoFollow.Behaviors
             if (e.IsLeaderEvent)
             {
                 Log.Info("Leader ({0}) is attacking a Unique! {1} at {2} DistanceFromMe={3}",
-                    Common.CleanString(sender.HeroName),
+                    Common.CleanString(sender.HeroAlias),
                     Common.CleanString(sender.CurrentTarget.Name),
                     sender.Position.ToString(),
                     ZetaDia.Me.Position.Distance(sender.CurrentTarget.Position));
@@ -249,7 +249,7 @@ namespace AutoFollow.Behaviors
         {
             if (e.IsLeaderEvent)
             {
-                Log.Warn("{0} killed a rift gaurdian", e.OwnerHeroName);
+                Log.Warn("{0} killed a rift gaurdian", e.OwnerHeroAlias);
 
                 if (GameUI.ReviveAtCheckpointButton.IsVisible && GameUI.ReviveAtCheckpointButton.IsEnabled)
                 {

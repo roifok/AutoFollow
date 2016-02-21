@@ -146,11 +146,6 @@ namespace AutoFollow.Behaviors
 
             GameUI.SafeCheckClickButtons();
 
-            if (AutoFollow.CurrentBehavior.GetType() == typeof (BaseBehavior) && !ProfileUtils.ProfileIsYarKickstart)
-            {
-                return true;
-            }                
-
             return false;
         }
 

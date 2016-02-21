@@ -44,6 +44,14 @@ namespace AutoFollow.Behaviors
             if (await Party.QuickJoinLeader())
                 return true;
 
+            if (await Party.AcceptPartyInvite())
+                return true;
+
+            if (await Party.RequestPartyInvite())
+                return true;
+
+            Log.Verbose("Waiting... (Out of Game)");
+            await Coroutine.Sleep(500);
             return true;
         }
 
@@ -62,7 +70,7 @@ namespace AutoFollow.Behaviors
         {
             if (e.IsLeaderEvent)
             {
-                Log.Warn("{0} killed a rift gaurdian", e.OwnerHeroName);
+                Log.Warn("{0} killed a rift gaurdian", e.OwnerHeroAlias);
 
                 if (GameUI.ReviveAtCheckpointButton.IsVisible && GameUI.ReviveAtCheckpointButton.IsEnabled)
                 {

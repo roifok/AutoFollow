@@ -345,7 +345,7 @@ namespace AutoFollow.Events
             while (EventQueue.Any())
             {
                 var e = EventQueue.Dequeue();
-                Log.Debug("Firing Queue Task Event {0} from {1}", e.EventData.Type, e.SenderMessage.HeroName);
+                Log.Debug("Firing Queue Task Event {0} from {1}", e.EventData.Type, e.SenderMessage.HeroAlias);
                 await e.AsyncEvent.InvokeAsync(e.SenderMessage, e.EventData);
             }
 
@@ -382,7 +382,7 @@ namespace AutoFollow.Events
                 if (Events.Contains(e))
                     return;
 
-                Log.Debug("Added event {0} from {1} to EventManager", e.Type, e.OwnerHeroName);
+                Log.Debug("Added event {0} from {1} to EventManager", e.Type, e.OwnerHeroAlias);
                 Events.Add(e);
             }
         }

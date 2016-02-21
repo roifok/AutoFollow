@@ -194,6 +194,7 @@ namespace AutoFollow
     {
         private bool _debugLogging;
         private bool _avoidUnknownPlayers;
+        private bool _hideHeroName;
 
         [DataMember, Setting]
         [DefaultValue(false)]
@@ -209,6 +210,14 @@ namespace AutoFollow
         {
             get { return _avoidUnknownPlayers; }
             set { SetField(ref _avoidUnknownPlayers, value); }
+        }
+
+        [DataMember, Setting]
+        [DefaultValue(true)]
+        public bool HideHeroName
+        {
+            get { return _hideHeroName; }
+            set { SetField(ref _hideHeroName, value); }
         }
 
     }

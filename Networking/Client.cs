@@ -199,7 +199,7 @@ namespace AutoFollow.Networking
                 foreach (var e in messageWrapper.PrimaryMessage.Events)
                 {
                     if(!EventManager.HasFired(e))
-                        Log.Verbose("Received new unfired event {0} from {1}", e.Type, e.OwnerHeroName);
+                        Log.Verbose("Received new unfired event {0} from {1}", e.Type, e.OwnerHeroAlias);
                 }
 
                 if (OnClientUpdated != null)

@@ -2,6 +2,7 @@ using System.IO;
 using System.Xml.Linq;
 using System.Xml.XPath;
 using Zeta.Bot;
+using Zeta.Game;
 
 namespace AutoFollow.Resources
 {
@@ -35,5 +36,21 @@ namespace AutoFollow.Resources
                 return fileNameWithoutExtension != null && fileNameWithoutExtension.ToLower().StartsWith("yar_kickstart");
             }
         }
+
+        public static string GetProfileAttribute(string tagName, string attrName)
+        {
+            var profileTag = GetProfileTag(tagName);
+            if (profileTag != null)
+            {
+                var behaviorAttr = profileTag.Attribute(attrName);
+                if (behaviorAttr != null && !string.IsNullOrEmpty(behaviorAttr.Value))
+                {
+                    return behaviorAttr.Value;
+                }
+            }
+            
+            return string.Empty;
+        }
     }
+
 }
