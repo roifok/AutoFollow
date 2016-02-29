@@ -172,11 +172,11 @@ namespace AutoFollow
         }
 
         [DataMember, Setting]
-        [DefaultValue(80)]
+        [DefaultValue(40)]
         public int CatchUpDistance
         {
             get { return _catchUpDistance; }
-            set { if (value >= 40) SetField(ref _catchUpDistance, value); }
+            set { if (value >= 10f) SetField(ref _catchUpDistance, value); }
         }
 
         [DataMember, Setting]

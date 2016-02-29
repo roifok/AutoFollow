@@ -108,11 +108,13 @@ namespace AutoFollow.Behaviors
             if (await Coordination.TeleportWhenTooFarAway(AutoFollow.CurrentLeader))
                 return true;
 
-            //if (await Coordination.UseNearbyPortalWhenIdle())
+            //if (await Combat.StandInFocussedPowerArea())
             //    return true;
 
             if (await Movement.MoveToPlayer(AutoFollow.CurrentLeader, Settings.Coordination.FollowDistance))
                 return false;
+
+            // ------- below wont be executed except if leader in different world.
 
             if (await Questing.ReturnToGreaterRift())
                 return true;

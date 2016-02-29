@@ -44,7 +44,7 @@ namespace AutoFollow
         }
 
         public static InterfaceLoader<IBehavior> Behaviors;
-        public static Version PluginVersion = new Version(1, 0, 14);
+        public static Version PluginVersion = new Version(1, 0, 15);
         internal static bool Enabled;
         internal static Message ServerMessage = new Message();
         internal static Dictionary<int, Message> ClientMessages = new Dictionary<int, Message>();
@@ -286,6 +286,8 @@ namespace AutoFollow
 
         public void OnEnabled()
         {
+            if (!Application.Current.CheckAccess()) return;
+
             Enabled = true;
             Log.Info(" v{0} Enabled", Version);
             BotMain.OnStart += BotMain_OnStart;
@@ -362,6 +364,8 @@ namespace AutoFollow
 
         public void OnInitialize()
         {
+            if (!Application.Current.CheckAccess()) return;
+
             Conditions.Initialize();
             Service.Initialize();
         }

@@ -317,14 +317,14 @@ namespace AutoFollow.Events
             }
 
             var riftGaurdianHiding = RiftHelper.CurrentRift.IsStarted && !RiftHelper.CurrentRift.HasGuardianSpawned;
-            if (riftGaurdianHiding != _riftGaurdianAlive)
+            if (riftGaurdianHiding != _riftGaurdianHiding)
             {
-                if (!riftGaurdianHiding)
+                if (!riftGaurdianHiding && RiftHelper.CurrentRift.IsStarted)
                 {
-                    Log.Warn("Whats this?");
+                    Log.Warn("Whats this, there's something lurking nearby?");
                     EventManager.FireEvent(new EventData(EventType.SpawnedRiftGaurdian));
                 }                    
-                _riftGaurdianAlive = riftGaurdianHiding;
+                _riftGaurdianHiding = riftGaurdianHiding;
             }
 
             _lastPosition = ZetaDia.Me.Position;
@@ -420,7 +420,7 @@ namespace AutoFollow.Events
         };
 
         private static DiaPlayer _leaderActor;
-        private static bool _riftGaurdianAlive;
+        private static bool _riftGaurdianHiding;
         private static bool _riftGaurdianKilled;
 
 

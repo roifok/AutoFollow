@@ -23,9 +23,9 @@ namespace AutoFollow.Resources
             get { return Path.Combine(FileUtils.SettingsFolder, FilenameWithoutExtension + ".json"); }
         }
 
-        public delegate void SettingsLoadedEvent();
-        public event SettingsLoadedEvent Loaded = () => {};
-        public event SettingsLoadedEvent Saved= () => {};
+        public delegate void FileStoreEvent();
+        public event FileStoreEvent Loaded = () => {};
+        public event FileStoreEvent Saved = () => {};
 
         public void Load()
         {
@@ -61,7 +61,7 @@ namespace AutoFollow.Resources
                 }
             }
 
-            // Create objects for all collections.
+            // Create empty collections, nulls are annoying.
             foreach (var property in typeof(TA).GetProperties())
             {
                 if (typeof (IEnumerable<>).IsAssignableFrom(property.PropertyType))

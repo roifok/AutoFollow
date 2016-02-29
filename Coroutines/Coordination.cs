@@ -7,6 +7,7 @@ using AutoFollow.Events;
 using AutoFollow.Networking;
 using AutoFollow.Resources;
 using Buddy.Coroutines;
+using Org.BouncyCastle.Utilities.Date;
 using Zeta.Bot;
 using Zeta.Bot.Logic;
 using Zeta.Game;
@@ -163,11 +164,17 @@ namespace AutoFollow.Coroutines
         {
             if (AutoFollow.CurrentLeader.IsVendoring && !Player.IsVendoring)
             {
-                BrainBehavior.ForceTownrun("Townrun with Leader");
-                return true;
+                if (DateTime.UtcNow.Subtract(_lastTownRunWithLeaderTime).TotalSeconds > 5)
+                {
+                    BrainBehavior.ForceTownrun("Townrun with Leader");
+                    _lastTownRunWithLeaderTime = DateTime.UtcNow;
+                    return true;
+                }
             }
             return false;
         }
+
+        private static DateTime _lastTownRunWithLeaderTime = DateTime.MinValue;
 
         /// <summary>
         /// Teleport to player if possible.

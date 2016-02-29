@@ -60,6 +60,9 @@
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
+    <Reference Include="Trinity">
+      <HintPath>..\Trinity 2x\Trunk\bin\Debug\Trinity.dll</HintPath>
+    </Reference>
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
@@ -72,6 +75,7 @@
     <Compile Include="Behaviors\Structures\BehaviorCategory.cs" />
     <Compile Include="Behaviors\Structures\BehaviorType.cs" />
     <Compile Include="Behaviors\Structures\IBehavior.cs" />
+    <Compile Include="Coroutines\Combat.cs" />
     <Compile Include="Coroutines\Coordination.cs" />
     <Compile Include="Coroutines\Movement.cs" />
     <Compile Include="Coroutines\Party.cs" />
@@ -93,7 +97,7 @@
     <Compile Include="Resources\AsyncEvent.cs" />
     <Compile Include="Resources\BotHistory.cs" />
     <Compile Include="Resources\CacheField.cs" />
-    <Compile Include="Resources\Filestore.cs" />
+    <Compile Include="Resources\FileStore.cs" />
     <Compile Include="Resources\FileUtils.cs" />
     <Compile Include="Resources\JsonSerializer.cs" />
     <Compile Include="Resources\MiscUtil.Reflection.cs" />

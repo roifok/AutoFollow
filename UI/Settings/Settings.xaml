@@ -103,7 +103,7 @@
                     <TextBlock Grid.Row="2" Grid.Column="0" VerticalAlignment="Center">Catch-Up Range</TextBlock>
                     <Slider Grid.Row="2" Grid.Column="1" Template="{DynamicResource SliderEditable}" 
                             ToolTip="When outside this range from leader, followers will cycle combat on/off to catch up faster"
-                            Interval="1" Maximum="100" Minimum="40" 
+                            Interval="1" Maximum="100" Minimum="10" 
                             SmallChange="1" TickFrequency="25" IsSnapToTickEnabled="True"
                             TickPlacement="BottomRight" Value="{Binding Coordination.CatchUpDistance}" 
                             HorizontalAlignment="Stretch" Margin="0,3,0,3" />
