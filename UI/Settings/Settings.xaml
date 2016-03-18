@@ -121,7 +121,7 @@
                 </Grid>
             </GroupBox>
             <GroupBox Header="Misc">
-                <UniformGrid Columns="1">
+                <UniformGrid Columns="2">
                  
                         <CheckBox Margin="5,6,5,0" IsEnabled="True" ToolTip="Bots will leave any game/party that has players it's not connected to via DemonBuddy"  IsChecked="{Binding Path=Misc.AvoidUnknownPlayers, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" >
                             <TextBlock Margin="1,1" Text="Avoid Unknown Players" ToolTip="Bots will leave any game/party that has players it's not connected to via DemonBuddy" />
@@ -134,7 +134,11 @@
                         <CheckBox Margin="5,6,5,0" IsEnabled="True" ToolTip="Replaces all logging of player name with the hero Id; useful to prevent identification when sharing logs." IsChecked="{Binding Path=Misc.HideHeroName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center">
                             <TextBlock Margin="1,1" Text="Hide Hero Names" VerticalAlignment="Center" ToolTip="Replaces all logging of player name with the hero Id; useful to prevent identification when sharing logs."/>
                         </CheckBox>
-                                 
+
+                        <!--<CheckBox Margin="5,6,5,0" IsEnabled="True" ToolTip="" IsChecked="{Binding Path=Misc.HideHeroName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center">
+                            <TextBlock Margin="1,1" Text="Accept rifts as 'Empowered'" VerticalAlignment="Center" ToolTip=""/>
+                        </CheckBox>-->
+
                 </UniformGrid>
             </GroupBox>
         </StackPanel>

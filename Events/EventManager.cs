@@ -212,10 +212,10 @@ namespace AutoFollow.Events
                     Log.Info("Firing {0} EventId={1}", e.ToString(), e.GetHashCode());
             }
 
-            if (!e.IsMyEvent)
-            {
+            //if (!e.IsMyEvent)
+            //{
                 FireEventByType(e, m);
-            }
+            //}
 
             lock (Synchronizer)
             {

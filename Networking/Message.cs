@@ -154,6 +154,9 @@ namespace AutoFollow.Networking
         [DataMember]
         public int PreviousWorldSnoId { get; set; }
 
+        [DataMember]
+        public bool IsCastingTownPortal { get; set; }
+
         public bool IsInSameGame
         {
             get
@@ -303,6 +306,7 @@ namespace AutoFollow.Networking
                         LastPortalUsed = Player.LastPortalUsed,
                         BehaviorType = AutoFollow.CurrentBehavior.Type,
                         IsInBossEncounter = Player.IsInBossEncounter,
+                        IsCastingTownPortal = Player.IsCastingTownPortal
                     };
                 }
                 else if (ZetaDia.IsInGame && ZetaDia.IsLoadingWorld)
@@ -444,5 +448,6 @@ namespace AutoFollow.Networking
                 );
             }
         }
+
     }
 }

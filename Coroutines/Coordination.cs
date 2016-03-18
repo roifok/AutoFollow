@@ -11,6 +11,8 @@ using Org.BouncyCastle.Utilities.Date;
 using Zeta.Bot;
 using Zeta.Bot.Logic;
 using Zeta.Game;
+using Zeta.Game.Internals.Actors;
+using Zeta.Game.Internals.SNO;
 
 namespace AutoFollow.Coroutines
 {
@@ -33,10 +35,10 @@ namespace AutoFollow.Coroutines
             get { return _waitUntil; }
         }
 
-        public static void WaitFor(TimeSpan time)
+        public static void WaitFor(TimeSpan time, Func<bool> condition = null)
         {
             var newTime = DateTime.UtcNow + time;
-            if (DateTime.UtcNow + time > _waitUntil)
+            if (DateTime.UtcNow + time > _waitUntil && (condition == null || !condition()))
                 _waitUntil = newTime;
         }
 
@@ -83,6 +85,25 @@ namespace AutoFollow.Coroutines
             return false;
         }
 
+        ///// <summary>
+        ///// Waits after killing rift gaurdian until all bots are nearby
+        ///// </summary>
+        //public static async Task<bool> WaitAfterKillingRiftGaurdian(int durationSeconds = 10)
+        //{
+        //    var secsSinceWorldChanged = DateTime.UtcNow.Subtract(ChangeMonitor.LastRiftGaurdianKilledTime).TotalSeconds;
+        //    if (secsSinceWorldChanged < durationSeconds)
+        //    {
+        //        var allFollowersNearby = AutoFollow.CurrentFollowers.All(f => f.IsInSameWorld && f.Distance < 50f);
+        //        if (!allFollowersNearby && !Data.Monsters.Any(m => m.Distance < 30f))
+        //        {
+        //            await Coroutine.Sleep(1000);
+        //            return true;
+        //        }
+        //    }
+        //    return false;
+        //}
+
+
         /// <summary>
         /// Prevents a greater rift from being started until all bots are ready.
         /// </summary>
@@ -92,14 +113,15 @@ namespace AutoFollow.Coroutines
                 return false;
 
             if (AutoFollow.CurrentFollowers.Any(f => f.IsVendoring))
-            {
-                Log.Info("Waiting for followers to finish vendoring.");
-
+            {                
                 var obelisk = Town.Actors.RiftObelisk;
                 if (obelisk != null)
+                {
                     await Movement.MoveTo(obelisk.Position);
+                }
 
-                await Coroutine.Sleep(30000);
+                Log.Info("Waiting for followers to finish vendoring.");
+                await Coroutine.Wait(30000, () => !AutoFollow.CurrentFollowers.All(f => f.IsVendoring));
                 return false;
             }
 
@@ -112,7 +134,7 @@ namespace AutoFollow.Coroutines
                 {
                     _startedWaiting = DateTime.UtcNow;
                     Log.Info("Waiting for bots to connect/join.");
-                    await Coroutine.Sleep(8000);
+                    await Coroutine.Sleep(2000);
                     return true;
                 }
 
@@ -120,16 +142,17 @@ namespace AutoFollow.Coroutines
                 if (secondsWaiting < 60)
                 {
                     Log.Info("Waiting for bots to connect/join. Waited {0} seconds", secondsWaiting);
-                    await Coroutine.Sleep(8000);
+                    await Coroutine.Sleep(2000);
                     return true;
                 }
 
-                Log.Info("Waited for {0}s bots to connect.. starting without them.", secondsWaiting);
-                await Coroutine.Sleep(5000);
+                Log.Info("Waited for {0}s for bots to connect.. starting without them.", secondsWaiting);
+                await Coroutine.Sleep(2000);
                 _startedWaiting = null;
                 _ignoreOtherBotsUntilTime = DateTime.UtcNow.AddMinutes(2);
             }
 
+            await Coroutine.Wait(20000, () => AutoFollow.CurrentFollowers.All(f => f.IsInSameWorld));
             return false;
         }
 
@@ -253,6 +276,9 @@ namespace AutoFollow.Coroutines
             if (player.WorldSnoId <= 0 || Player.CurrentWorldSnoId <= 0)
                 return false;
 
+            if (Player.IsInTown && BrainBehavior.IsVendoring)
+                return false;
+
             if ((RiftHelper.IsInRift || player.IsInRift) && RiftHelper.IsGreaterRiftStarted)
                 return false;
 
@@ -295,7 +321,7 @@ namespace AutoFollow.Coroutines
             if (leaderWasLastInMyCurrentWorld)
             {
                 var portalUsed = Data.Portals.Where(p => p.Position.Distance(lastWorldPosition) < 25f).OrderBy(p => p.Position.Distance(lastWorldPosition)).FirstOrDefault();
-                if (portalUsed != null)
+                if (portalUsed != null && portalUsed.CommonData.GizmoType != GizmoType.HearthPortal)
                 {
                     Log.Info("Leader {0} appears to have used this portal here: '{1}' Dist={2}. Following.",
                         AutoFollow.CurrentLeader.HeroAlias, portalUsed.Name, portalUsed.Distance);
@@ -337,6 +363,7 @@ namespace AutoFollow.Coroutines
             if (AutoFollow.CurrentLeader.Distance < 150f && AutoFollow.CurrentLeader.IsInSameWorld)
             {
                 Log.Info("Leader is too close to teleport");
+                await Movement.MoveToPlayer(player, 25f);
                 return false;
             }
 

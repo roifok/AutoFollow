@@ -36,12 +36,17 @@ namespace AutoFollow.Coroutines
 
             Navigator.PlayerMover.MoveTowards(location);
 
+            var startingWorldSnoId = ZetaDia.CurrentWorldSnoId;
+
             while (ZetaDia.IsInGame && (distance = location.Distance(ZetaDia.Me.Position)) >= range)
             {
                 if (stopCondition != null && stopCondition())
                     break;
 
                 if (ZetaDia.Me.IsDead || Navigator.StuckHandler.IsStuck)
+                    break;
+
+                if (ZetaDia.CurrentWorldSnoId != startingWorldSnoId)
                     break;
 
                 if (Navigation.IsBlocked)

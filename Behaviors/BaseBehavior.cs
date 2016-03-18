@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoFollow.Behaviors.Structures;
 using AutoFollow.Coroutines;
@@ -152,13 +153,15 @@ namespace AutoFollow.Behaviors
         public virtual async Task<bool> InGameTask()
         {
             if (!AutoFollow.Enabled)
-                return false;
+                return false;            
 
             if (!IsGameReady || !ZetaDia.IsInGame || Party.IsLocked)
             {
                 Log.Verbose("Waiting (Invalid State)");
                 return true;
             }
+
+            AcceptRiftDialog();
 
             if (DateTime.UtcNow < Coordination.WaitUntil)
             {
@@ -182,6 +185,19 @@ namespace AutoFollow.Behaviors
 
             GameUI.SafeCheckClickButtons();
             return false;
+        }
+
+        private void AcceptRiftDialog()
+        {
+            if (GameUI.JoinRiftButton.IsValid && GameUI.JoinRiftButton.IsVisible)
+            {
+                if (GameUI.EmpoweredRiftToggle.IsValid && GameUI.EmpoweredRiftToggle.IsVisible)
+                {
+                    GameUI.EmpoweredRiftToggle.Click();
+                    Thread.Sleep(500);
+                }                
+                GameUI.JoinRiftButton.Click();
+            }
         }
 
         private void Pulsator_OnPulse(object sender, EventArgs e)

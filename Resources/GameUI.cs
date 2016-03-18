@@ -284,6 +284,11 @@ namespace AutoFollow.Coroutines.Resources
             get { return UIElement.FromHash(0x42E152B771A6BCC1); }
         }
 
+        public static UIElement EmpoweredRiftToggle
+        {
+            get { return UIElement.FromHash(0x6CC852143ECBE40F); }
+        }
+
         public static UIElement ReviveAtCorpseButton
         {
             get { return UIElement.FromHash(0xE3CBD66296A39588); }

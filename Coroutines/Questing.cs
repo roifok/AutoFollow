@@ -69,13 +69,20 @@ namespace AutoFollow.Coroutines
         /// </summary>
         public static async Task<bool> LeaveRiftWhenDone()
         {
-            if (RiftHelper.IsInRift && RiftHelper.RiftQuest.Step == RiftQuest.RiftStep.Cleared)
+            if (!RiftHelper.IsInRift)
+                return false;
+
+            var followerAllowedToLeave = !AutoFollow.CurrentLeader.IsInSameWorld || AutoFollow.CurrentLeader.IsCastingTownPortal || AutoFollow.CurrentLeader.IsVendoring;
+            if ((Player.IsLeader || followerAllowedToLeave) && RiftHelper.RiftQuest.Step == RiftQuest.RiftStep.Cleared)
             {
                 if (!await CommonCoroutines.UseTownPortal("Rift Finished"))
                     return false;
 
                 return true;
             }
+
+            await Coroutine.Sleep(1000);
+            Log.Info("Waiting for leader to be ready before leaving rift... ");
             return false;
         }
 

@@ -179,9 +179,10 @@ namespace AutoFollow.Behaviors
             if (e.IsMyEvent)
             {
                 Log.Warn("I killed a rift gaurdian, all me.", e.OwnerHeroAlias);
-                Coordination.WaitFor(TimeSpan.FromSeconds(20));
+                Coordination.WaitFor(TimeSpan.FromSeconds(5));
+                Coordination.WaitFor(TimeSpan.FromSeconds(30), () => AutoFollow.CurrentParty.All(b => b.Distance < 60f));
                 return true;
-            }
+            }            
             return false;
         }
 

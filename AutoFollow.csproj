@@ -97,6 +97,7 @@
     <Compile Include="Resources\AsyncEvent.cs" />
     <Compile Include="Resources\BotHistory.cs" />
     <Compile Include="Resources\CacheField.cs" />
+    <Compile Include="Resources\ClickOnPoint.cs" />
     <Compile Include="Resources\FileStore.cs" />
     <Compile Include="Resources\FileUtils.cs" />
     <Compile Include="Resources\JsonSerializer.cs" />

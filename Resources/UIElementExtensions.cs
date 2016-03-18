@@ -90,6 +90,19 @@ namespace AutoFollow.Resources
             }
         }
 
+        public static void DebugTestClickSiblings(this UIElement element)
+        {
+            if (element == null || !element.IsValid)
+                return;
+
+            foreach (var child in GetSiblings(element))
+            {
+                var result = child.SafeClick();
+                Log.Info("Click {0} on {1} ({2})", result, child.Name, child.Hash);
+                Thread.Sleep(50);
+            }
+        }
+
         public static UIElement FindAncestorWithName(this UIElement element, string name, bool allowPartialMatch = false, bool caseSensitive = false)
         {
             if (element == null || !element.IsValid || string.IsNullOrEmpty(name))
