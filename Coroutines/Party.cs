@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoFollow.Coroutines.Resources;
@@ -251,15 +252,18 @@ namespace AutoFollow.Coroutines
                 await Coroutine.Sleep(250);
             }
 
-            var stackPanel = GameUI.SocialFriendsListStackPanel;
-            var stackPanelItems = stackPanel.GetStackPanelItems();
-            if (!stackPanelItems.Any())
+            var contacts = new List<StackPanelReader.StackPanelItem>();
+            contacts.AddRange(GameUI.SocialFriendsListStackPanel.GetStackPanelItems());
+            contacts.AddRange(GameUI.SocialLocalPlayersStackPanel.GetStackPanelItems());
+            contacts.AddRange(GameUI.SocialRecentPlayersStackPanel.GetStackPanelItems());
+
+            if (!contacts.Any())
             {
-                Log.Info("No friends or local players were found!");
+                Log.Info("No friends, local or recent players were found!");
                 return false;
             }
 
-            foreach (var item in stackPanelItems)
+            foreach (var item in contacts)
             {
                 var name = Common.CleanString(item.TextElement.Text);
                 var isBattleTag = Message.IsBattleTag(name, follower.BattleTagEncrypted);

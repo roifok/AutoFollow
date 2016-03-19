@@ -219,6 +219,17 @@ namespace AutoFollow.Coroutines.Resources
             }
         }
 
+        public static UIElement SocialRecentPlayersStackPanel
+        {
+            //Root.NormalLayer.BattleNetFriendsList_main.LayoutRoot.OverlayContainer.FriendsListContent.SocialListContainer.SocialList.RecentPlayersListContainer.RecentPlayersGroupHeader.ToggleRecentPlayerListButton
+            get
+            {
+                return UIElement.FromName("Root.NormalLayer.BattleNetFriendsList_main.LayoutRoot.OverlayContainer.FriendsListContent.SocialListContainer.SocialList.RecentPlayersListContainer.LocalPlayersList._content._stackpanel");
+            }
+        }
+
+
+
         public static UIElement SocialFlyoutButton
         {
             get { return UIElement.FromHash(SocialFlyoutButtonHash); }

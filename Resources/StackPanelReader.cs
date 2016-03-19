@@ -18,6 +18,9 @@ namespace AutoFollow.Resources
         /// </summary>
         public static List<StackPanelItem> GetStackPanelItems(this UIElement stackPanel)
         {
+            if (stackPanel == null)
+                return new List<StackPanelItem>();
+
             Func<UIElement, UIElement> findTextNode = null;
             findTextNode = elements =>
             {
@@ -26,7 +29,6 @@ namespace AutoFollow.Resources
                 if (!children.Any())
                     return null;
 
-  
                 foreach (var el in children)
                 {
                     var lowerName = el.Name.ToLowerInvariant();

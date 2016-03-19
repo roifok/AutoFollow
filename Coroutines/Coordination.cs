@@ -109,7 +109,7 @@ namespace AutoFollow.Coroutines
         /// </summary>
         public static async Task<bool> WaitBeforeStartingRift()
         {
-            if (!RiftHelper.IsGreaterRiftProfile || RiftHelper.IsGreaterRiftStarted)
+            if (RiftHelper.IsGreaterRiftStarted)
                 return false;
 
             if (AutoFollow.CurrentFollowers.Any(f => f.IsVendoring))
@@ -152,7 +152,10 @@ namespace AutoFollow.Coroutines
                 _ignoreOtherBotsUntilTime = DateTime.UtcNow.AddMinutes(2);
             }
 
-            await Coroutine.Wait(20000, () => AutoFollow.CurrentFollowers.All(f => f.IsInSameWorld));
+            if (Player.IsInTown  && !Player.IsVendoring && RiftHelper.RiftQuest.Step == RiftQuest.RiftStep.NotStarted)
+            {
+                await Coroutine.Wait(30000, () => AutoFollow.CurrentFollowers.All(f => f.IsInSameWorld));
+            }
             return false;
         }
 
