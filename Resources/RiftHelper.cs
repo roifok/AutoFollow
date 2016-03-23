@@ -55,11 +55,11 @@ namespace AutoFollow.Resources
             var currentWorldId = ZetaDia.CurrentWorldSnoId;
 
             CurrentRift = currentRift;
-            IsInRift = RiftWorldIds.Contains(currentWorldId); ;
+            IsInRift = RiftWorldIds.Contains(currentWorldId);
             CurrentWorldId = currentWorldId;
             IsStarted = currentRift.IsStarted;
             Type = currentRift.Type; ;
-            CurrentDepth = GetDepthByWorldId(currentWorldId); ;
+            CurrentDepth = GetDepthByWorldId(currentWorldId);
             IsGreaterRiftStarted = IsStarted && Type == RiftType.Greater;
             IsInGreaterRift = IsInRift && Type == RiftType.Greater;
 

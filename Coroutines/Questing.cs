@@ -30,9 +30,11 @@ namespace AutoFollow.Coroutines
             if (RiftHelper.IsInRift && RiftHelper.RiftQuest.Step == RiftQuest.RiftStep.UrshiSpawned && RiftHelper.CurrentRift.IsCompleted)
             {
                 if (AutoFollow.CurrentLeader.Distance > 150f)
+                {
                     await Coordination.TeleportToPlayer(AutoFollow.CurrentLeader);
+                }
 
-                Log.Warn("Rift is Completed; requesting gem upgrade from other plugins.");
+                Log.Warn("Rift is Completed.");
 
                 while (await _gemUpgrader.GetCoroutine() == false)
                 {
@@ -69,11 +71,12 @@ namespace AutoFollow.Coroutines
         /// </summary>
         public static async Task<bool> LeaveRiftWhenDone()
         {
-            if (!RiftHelper.IsInRift)
+            if (!RiftHelper.IsInRift || RiftHelper.RiftQuest.Step != RiftQuest.RiftStep.Cleared)
                 return false;
 
             var followerAllowedToLeave = !AutoFollow.CurrentLeader.IsInSameWorld || AutoFollow.CurrentLeader.IsCastingTownPortal || AutoFollow.CurrentLeader.IsVendoring;
-            if ((Player.IsLeader || followerAllowedToLeave) && RiftHelper.RiftQuest.Step == RiftQuest.RiftStep.Cleared)
+
+            if ((Player.IsLeader || followerAllowedToLeave))
             {
                 if (!await CommonCoroutines.UseTownPortal("Rift Finished"))
                     return false;

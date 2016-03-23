@@ -253,7 +253,7 @@ namespace AutoFollow.Coroutines
             if (playerMessage.IsInSameWorld && playerMessage.Distance < 100f)
                 return false;
 
-            if (playerMessage.IsInGreaterRift)
+            if (playerMessage.IsInGreaterRift && RiftHelper.RiftQuest.Step != RiftQuest.RiftStep.UrshiSpawned)
             {
                 Log.Debug("Can't teleport in greater rifts");
                 return false;

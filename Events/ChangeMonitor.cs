@@ -169,8 +169,6 @@ namespace AutoFollow.Events
             }
         }
 
-
-
         private static void GameEvents_OnPlayerDied(object sender, EventArgs e)
         {
             LastPlayerDiedTime = DateTime.UtcNow;
@@ -223,7 +221,7 @@ namespace AutoFollow.Events
             var isCastingWaypoint = CheckVisualEffectNoneForPower(commonData, SNOPower.TeleportToWaypoint_Cast);
 
             if (isCastingTownPortal)
-                LastCastWaypoint = now;  
+                LastCastTownPortal = now;  
 
             if (isCastingTeleport)
                 LastCastWaypoint = now;

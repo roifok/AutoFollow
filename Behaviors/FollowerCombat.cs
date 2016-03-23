@@ -130,10 +130,10 @@ namespace AutoFollow.Behaviors
         /// </summary>
         public void StayCloseToPlayer(Message player)
         {
-            if (player.Distance > Settings.Coordination.CatchUpDistance && !Player.IsInTown && 
-                !Navigation.IsBlocked && !Navigator.StuckHandler.IsStuck && Player.HitpointsCurrentPct > 0.7 && !Targetting.RoutineWantsToAttackGoblin())
+            if (player.Distance > Settings.Coordination.CatchUpDistance && !Player.IsInTown && //!Navigation.IsBlocked && 
+                !Navigator.StuckHandler.IsStuck && Player.HitpointsCurrentPct > 0.4 && !Targetting.RoutineWantsToAttackGoblin())
             {
-                Targetting.State = CombatState.Pulsing;
+                Targetting.State = CombatState.Disabled;
             }
             else
             {
