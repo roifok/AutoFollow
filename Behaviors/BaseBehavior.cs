@@ -117,7 +117,7 @@ namespace AutoFollow.Behaviors
 
         public virtual async Task<bool> OutOfGameTask()
         {
-            if (!AutoFollow.Enabled)
+            if (!AutoFollow.Enabled || !ZetaDia.Service.Hero.IsValid || ZetaDia.Service.Hero.HeroId <= 0)
                 return false;
 
             // Pulse does not fire while out of game. Need to be very careful how waits are handled.

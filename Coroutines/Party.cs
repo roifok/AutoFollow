@@ -113,7 +113,7 @@ namespace AutoFollow.Coroutines
         /// If the bot designated as the leader is currently in the battle.net group/party.
         /// </summary>
         public static bool IsLeaderInParty()
-        {         
+        {
             var message = AutoFollow.CurrentLeader;
             if (ZetaDia.IsInGame)
             {
@@ -153,7 +153,7 @@ namespace AutoFollow.Coroutines
             }
 
             Log.Debug("Leader is not in our party");
-            return false;          
+            return false;
         }
 
         /// <summary>
@@ -167,7 +167,7 @@ namespace AutoFollow.Coroutines
             // Leaves party when out of game the d3-party leader and not the bot-leader.
             // Disbands party if leader leaves it.
             if (Player.IsFollower && Player.IsInParty && ZetaDia.Service.Party.IsPartyLeader && !ZetaDia.IsInGame &&
-                GameUI.ElementIsVisible(GameUI.OutOfGameLeavePartyButton) && ZetaDia.Service.Party.CurrentPartyLockReasonFlags == PartyLockReasonFlag.None && 
+                GameUI.ElementIsVisible(GameUI.OutOfGameLeavePartyButton) && ZetaDia.Service.Party.CurrentPartyLockReasonFlags == PartyLockReasonFlag.None &&
                 DateTime.UtcNow.Subtract(_lastAttemptQuickJoin) > TimeSpan.FromSeconds(10))
             {
                 Log.Info("We are a follower but leader of party - leaving party");
@@ -176,16 +176,35 @@ namespace AutoFollow.Coroutines
                 return true;
             }
 
-            if (ZetaDia.IsInGame && Player.IsFollower && !AutoFollow.CurrentLeader.IsMe && !AutoFollow.CurrentLeader.IsInSameGame && !AutoFollow.CurrentLeader.IsLoadingWorld)
+            if (ZetaDia.IsInGame && Player.IsFollower && !ZetaDia.IsLoadingWorld && !AutoFollow.CurrentLeader.IsMe)
             {
-                Log.Warn("Leader is in a different game, Leave Game!", AutoFollow.CurrentLeader.IsInSameGame);
-                await LeaveGame();
-                Coordination.WaitFor(TimeSpan.FromSeconds(5));
-                return true;
-            }
+                if (!AutoFollow.CurrentLeader.IsInSameGame && !AutoFollow.CurrentLeader.IsLoadingWorld && AutoFollow.CurrentLeader.GameId.Low != 0)
+                {
+                    if (LeaderGameMismatchLeaveTime == DateTime.MinValue)
+                    {
+                        Log.Warn("Leader gameId is different/invalid!", AutoFollow.CurrentLeader.IsInSameGame);
+                        LeaderGameMismatchLeaveTime = DateTime.UtcNow.AddSeconds(5);
+                        return false;
+                    }
 
+                    if (DateTime.UtcNow > LeaderGameMismatchLeaveTime)
+                    {
+                        Log.Warn("Leader is in a different game, Leave Game!", AutoFollow.CurrentLeader.IsInSameGame);
+                        LeaderGameMismatchLeaveTime = default(DateTime);
+                        await LeaveGame();
+                        Coordination.WaitFor(TimeSpan.FromSeconds(5));
+                        return true;
+                    }
+                }
+                else
+                {
+                    LeaderGameMismatchLeaveTime = DateTime.MinValue;
+                }
+            }
             return false;
         }
+
+        public static DateTime LeaderGameMismatchLeaveTime = DateTime.MinValue;
 
         /// <summary>
         /// Use the quickjoin links on the hero screen to join the leaders game.
@@ -315,7 +334,7 @@ namespace AutoFollow.Coroutines
                 EventManager.FireEvent(new EventData(EventType.InviteRequest));
                 return true;
             }
-                    
+
             return false;
         }
 

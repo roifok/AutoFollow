@@ -82,7 +82,7 @@ namespace AutoFollow.Coroutines
                 return false;
 
             var target = targetableProducer();
-            var distance = 0f;
+            var distance = target.Distance;
             var name = string.IsNullOrEmpty(destinationName) ? "Unknown" : destinationName;
             var destination = target.Position;
             var acdId = target.AcdId;
@@ -91,10 +91,25 @@ namespace AutoFollow.Coroutines
 
             var i = 0;
 
-            while (ZetaDia.IsInGame)
+            while (true)
             {
-                if (ZetaDia.Me.IsDead || Navigator.StuckHandler.IsStuck)
+                if (!ZetaDia.IsInGame)
+                {
+                    Log.Verbose("Movement Failed, we're no longer in game!", name, distance);
                     break;
+                }
+
+                if (ZetaDia.Me.IsDead)
+                {
+                    Log.Verbose("Movement Failed, we're dead!", name, distance);
+                    break;
+                }
+
+                if (Navigator.StuckHandler.IsStuck)
+                {
+                    Log.Verbose("Movement Failed, It looks like we're stuck!", name, distance);
+                    break;
+                }
 
                 if (Navigation.IsBlocked)
                 {
@@ -103,11 +118,6 @@ namespace AutoFollow.Coroutines
                 }
                 
                 var actor = Data.Actors.FirstOrDefault(p => p.ACDId == acdId);
-                //if (actor == null)
-                //{
-                //    Log.Info("Player not found with ACDId {0}", acdId);
-                //}
-
                 target = targetableProducer();
 
                 if (target == null && actor == null)
@@ -149,23 +159,39 @@ namespace AutoFollow.Coroutines
                     return false;
                 }
 
-                destination = actor != null ? actor.Position : target.Position;
-
+                destination = actor?.Position ?? target.Position;
                 distance = destination.Distance(ZetaDia.Me.Position);
+
                 if (distance <= range)
                     break;
                 
                 Log.Verbose("Moving to {0} Distance={1} (Dynamic) ({2})", name, distance, i);
 
-                MathEx.GetPointAt(ZetaDia.Me.Position, 15f, ZetaDia.Me.Movement.Rotation);
-
-                await Navigator.MoveTo(destination, name);
+                if (distance < 30f && Navigator.Raycast(Player.Position, destination))
+                {
+                    Navigator.PlayerMover.MoveTowards(destination);
+                }
+                else
+                {
+                    var result = await Navigator.MoveTo(destination, name);
+                    switch (result)
+                    {
+                        case MoveResult.Failed:
+                        case MoveResult.PathGenerationFailed:
+                            Log.Verbose($"Failed Move Result = {result}");
+                            break;
+                    }
+                }
                 await Coroutine.Yield();
+
                 i++;
             }
 
             if (distance <= range)
+            {
                 Navigator.PlayerMover.MoveStop();
+                return true;
+            }
 
             Log.Verbose("MoveTo Finished. Distance={0}", distance);
             return true;
