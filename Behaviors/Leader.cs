@@ -65,7 +65,7 @@ namespace AutoFollow.Behaviors
                 return true;
             }
 
-            if (IsComplexParty && Player.IsFollower)
+            if (Player.IsFollower)
             {
                 if (await Party.AcceptPartyInvite())
                     return true;
@@ -118,7 +118,7 @@ namespace AutoFollow.Behaviors
             if (await Coordination.WaitAfterChangingWorlds())
                 return true;
 
-            if (IsComplexParty)
+            if (Player.IsFollower)
             {
                 if (await Party.LeaveWhenInWrongGame())
                     return true;
@@ -129,8 +129,6 @@ namespace AutoFollow.Behaviors
 
             return false;
         }
-
-        public bool IsComplexParty { get { return AutoFollow.CurrentParty.Count(l => l.IsRequestingLeader) > 1; } }
 
         public static async Task<bool> WaitForGemUpgraded()
         {

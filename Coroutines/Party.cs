@@ -176,9 +176,9 @@ namespace AutoFollow.Coroutines
                 return true;
             }
 
-            if (ZetaDia.IsInGame && Player.IsFollower && !ZetaDia.IsLoadingWorld && !AutoFollow.CurrentLeader.IsMe)
+            if (ZetaDia.IsInGame && Player.IsFollower && !ZetaDia.IsLoadingWorld)
             {
-                if (!AutoFollow.CurrentLeader.IsInSameGame && !AutoFollow.CurrentLeader.IsLoadingWorld && AutoFollow.CurrentLeader.GameId.Low != 0)
+                if (!AutoFollow.CurrentLeader.IsInSameGame && !AutoFollow.CurrentLeader.IsLoadingWorld)
                 {
                     if (LeaderGameMismatchLeaveTime == DateTime.MinValue)
                     {
