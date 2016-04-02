@@ -112,6 +112,10 @@ namespace AutoFollow.Coroutines
             if (RiftHelper.IsGreaterRiftStarted)
                 return false;
 
+            var tag = Adventurer.Adventurer.GetCurrentTag();
+            if (tag != "GreaterRiftTag" && tag != "NephalemRiftTag" && tag != "RiftTag")
+                return false;            
+        
             if (AutoFollow.CurrentFollowers.Any(f => f.IsVendoring))
             {                
                 var obelisk = Town.Actors.RiftObelisk;
@@ -285,8 +289,7 @@ namespace AutoFollow.Coroutines
             if ((RiftHelper.IsInRift || player.IsInRift) && RiftHelper.IsGreaterRiftStarted)
                 return false;
 
-            if (Player.IsFollower && player.WorldSnoId != Player.CurrentMessage.WorldSnoId && player.IsInSameGame &&
-                !player.IsInCombat)
+            if (Player.IsFollower && player.WorldSnoId != Player.CurrentMessage.WorldSnoId && player.IsInSameGame && !player.IsInCombat)
             {
                 await Coordination.TeleportToPlayer(player);
                 return true;

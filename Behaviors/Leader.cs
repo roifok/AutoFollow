@@ -65,6 +65,15 @@ namespace AutoFollow.Behaviors
                 return true;
             }
 
+            if (IsComplexParty && Player.IsFollower)
+            {
+                if (await Party.AcceptPartyInvite())
+                    return true;
+
+                if (await Party.RequestPartyInvite())
+                    return true;
+            }
+
             if (AutoFollow.CurrentParty.Any(b => !b.IsInParty))
             {
                 Log.Info("Waiting for bots to join party...");
@@ -76,6 +85,12 @@ namespace AutoFollow.Behaviors
             {
                 Log.Info("Waiting after bot has just started. Remaining={0}s", forcedWaitUntil.Subtract(DateTime.UtcNow).TotalSeconds);
                 await Coroutine.Sleep(1000);
+                return true;
+            }
+
+            if (Player.IsFollower)
+            {
+                // Wait out of game.
                 return true;
             }
 
@@ -103,11 +118,19 @@ namespace AutoFollow.Behaviors
             if (await Coordination.WaitAfterChangingWorlds())
                 return true;
 
+            if (IsComplexParty)
+            {
+                if (await Party.LeaveWhenInWrongGame())
+                    return true;
+            }
+
             if (await WaitForGemUpgraded())
                 return true;
 
             return false;
         }
+
+        public bool IsComplexParty { get { return AutoFollow.CurrentParty.Count(l => l.IsRequestingLeader) > 1; } }
 
         public static async Task<bool> WaitForGemUpgraded()
         {
@@ -163,7 +186,7 @@ namespace AutoFollow.Behaviors
 
         public override async Task<bool> OnInviteRequest(Message sender, EventData e)
         {
-            if (e.IsFollowerEvent)
+            if (e.IsFollowerEvent && !Player.IsFollower)
             {
                 Log.Info("My minion {0} is requesting a party invite!", sender.HeroAlias);
                 await Party.InviteFollower(sender);

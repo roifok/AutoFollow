@@ -191,7 +191,7 @@ namespace AutoFollow.Coroutines
                     {
                         Log.Warn("Leader is in a different game, Leave Game!", AutoFollow.CurrentLeader.IsInSameGame);
                         LeaderGameMismatchLeaveTime = default(DateTime);
-                        await LeaveGame();
+                        await LeaveGame(true);
                         Coordination.WaitFor(TimeSpan.FromSeconds(5));
                         return true;
                     }
@@ -349,6 +349,7 @@ namespace AutoFollow.Coroutines
                 var invitePlayerName = Common.CleanString(GameUI.PartyInviteFromPlayerName.Text);
                 var isLeadersBattleTag = Message.IsBattleTag(invitePlayerName,
                     AutoFollow.CurrentLeader.BattleTagEncrypted);
+
                 if (!isLeadersBattleTag)
                 {
                     Log.Info("{0}", AutoFollow.CurrentLeader.BattleTagEncrypted);
@@ -370,7 +371,7 @@ namespace AutoFollow.Coroutines
         /// <summary>
         /// Leave the current game.
         /// </summary>
-        public static async Task<bool> LeaveGame()
+        public static async Task<bool> LeaveGame(bool leaveParty = false)
         {
             if (!ZetaDia.IsInGame)
                 return true;
@@ -384,7 +385,7 @@ namespace AutoFollow.Coroutines
             if (DateTime.UtcNow.Subtract(_lastLeaveGameAttempt).TotalSeconds < 5)
                 return false;
 
-            ZetaDia.Service.Party.LeaveGame(true);
+            ZetaDia.Service.Party.LeaveGame(!leaveParty);
             _lastLeaveGameAttempt = DateTime.UtcNow;
             return true;
         }

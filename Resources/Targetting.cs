@@ -111,7 +111,7 @@ namespace AutoFollow.Resources
         public static bool RoutineWantsToClickGizmo()
         {
             var combatTarget = CombatTargeting.Instance.Provider.GetObjectsByWeight().FirstOrDefault();
-            return combatTarget != null && combatTarget is GizmoShrine && combatTarget.Distance < 50f;
+            return combatTarget != null && combatTarget is GizmoShrine && combatTarget.Distance < 80f;
         }
 
         public static bool RoutineWantsToAttackUnit()
