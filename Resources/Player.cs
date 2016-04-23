@@ -15,6 +15,8 @@ namespace AutoFollow.Resources
 {
     public static class Player
     {
+        public static int Level { get; set; }
+        public static int Paragon { get; set; }
         public static Target Target { get; set; }
         public static int Index { get; set; }
         public static int RActorId { get; set; }
@@ -146,6 +148,8 @@ namespace AutoFollow.Resources
             IsLoadingWorld = ZetaDia.IsLoadingWorld || ZetaDia.IsPlayingCutscene;
             ActorClass = ZetaDia.Service.Hero.Class;
             IsInGame = false;
+            Level = ZetaDia.Service.Hero.Level;
+            Paragon = ZetaDia.Service.Hero.ParagonLevel;
             CurrentMessage = Message.GetMessage();            
         }
 
@@ -182,6 +186,8 @@ namespace AutoFollow.Resources
                     IsVendoring = BrainBehavior.IsVendoring;
                     ActorId = ZetaDia.Me.ActorSnoId;
                     ActorClass = ZetaDia.Service.Hero.Class;
+                    Level = ZetaDia.Service.Hero.Level;
+                    Paragon = ZetaDia.Service.Hero.ParagonLevel;
                     HeroName = Common.CleanString(ZetaDia.Service.Hero.Name);
                     HeroId = ZetaDia.PlayerData.HeroId;
                     CurrentGameId = ZetaDia.Service.CurrentGameId;
@@ -420,6 +426,7 @@ namespace AutoFollow.Resources
         {
             get { return !IsLeader; }
         }
+
 
     }
 }

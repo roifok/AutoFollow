@@ -38,6 +38,20 @@ namespace AutoFollow.Resources
         }
 
         /// <summary>
+        ///RealId	[0-9]	`NotMyName`
+        ///Character[10 - 23]	`NotMyCharName`
+        /// </summary>
+        internal static Regex InviteRequestRegex = new Regex(@"^(?<RealId>.*).*\((?<Character>.*)\)", RegexOptions.Compiled);
+
+        /// <summary>
+        ///Activity	[0-20]	`Greater Rift Tier 52`
+        ///Level	[23-25]	`70`
+        ///Paragon	[39-42]	`488`
+        ///Class	[48-57]	`Barbarian`
+        /// </summary>
+        internal static Regex SocialPanelEntryPresenceRegex = new Regex(@"^(?<Activity>.*)\s\-\s(?<Level>\d+)\s{.+}\((?<Paragon>\d+)\){\/c}\s(?<Class>\w+)", RegexOptions.Compiled);
+
+        /// <summary>
         /// Strips out a name from color encoded UI string e.g. 
         /// </summary>
         public static string CleanString(string s)
@@ -61,7 +75,8 @@ namespace AutoFollow.Resources
 
                 var removedCurlyGroups = Regex.Replace(s, @"\{.*?\}(\s|)+", "");
                 var removedAngleGroups = Regex.Replace(removedCurlyGroups, @"\<.*?\>(\s|)+", "");
-                var final = removedAngleGroups.Replace("\n","").Trim();
+                var removedSpaces = removedAngleGroups.Replace(" ", "");
+                var final = removedSpaces.Replace("\n","").Trim();
                 return final;
 
             }

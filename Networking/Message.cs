@@ -19,6 +19,7 @@ namespace AutoFollow.Networking
     {
         private static readonly SimpleAES Crypto = new SimpleAES();
         private static string _myEncryptedBattleTag;
+        private static string _myEncryptedRealId;
 
         public Message()
         {
@@ -42,6 +43,12 @@ namespace AutoFollow.Networking
 
         [DataMember]
         public int LevelAreaId { get; set; }
+
+        [DataMember]
+        public int Paragon { get; set; }
+
+        [DataMember]
+        public int Level { get; set; }
 
         [DataMember]
         public Vector3 ProfilePosition { get; set; }
@@ -111,6 +118,9 @@ namespace AutoFollow.Networking
 
         [DataMember]
         public string BattleTagEncrypted { get; set; }
+
+        [DataMember]
+        public string RealIdNameEncrypted { get; set; }
 
         [DataMember]
         public Target CurrentTarget { get; set; }
@@ -253,9 +263,12 @@ namespace AutoFollow.Networking
                         BehaviorType = AutoFollow.CurrentBehavior.Type,
                         IsQuickJoinEnabled = Player.IsQuickJoinEnabled,
                         BattleTagEncrypted = GetMyEncryptedBattleTag(),
+                        RealIdNameEncrypted = GetMyEncryptedRealId(),
                         HeroName = Player.HeroName,
                         HeroId = Player.HeroId,
                         ActorClass = Player.ActorClass,
+                        Paragon = Player.Paragon,
+                        Level = Player.Level,
                         IsLoadingWorld = Player.IsLoadingWorld,
                     };
                 }
@@ -286,7 +299,8 @@ namespace AutoFollow.Networking
                         WorldSnoId = Player.CurrentWorldSnoId,
                         IsVendoring = BrainBehavior.IsVendoring,
                         BattleTagEncrypted = GetMyEncryptedBattleTag(),
-                        HeroName= Player.HeroName,
+                        RealIdNameEncrypted = GetMyEncryptedRealId(),
+                        HeroName = Player.HeroName,
                         HeroId = Player.HeroId,
                         Events = EventManager.Events.Take(25).ToList(),
                         CurrentTarget = Player.Target,
@@ -334,6 +348,7 @@ namespace AutoFollow.Networking
                         IsQuickJoinEnabled = Player.IsQuickJoinEnabled,
                         BehaviorType = AutoFollow.CurrentBehavior.Type,
                         BattleTagEncrypted = GetMyEncryptedBattleTag(),
+                        RealIdNameEncrypted = GetMyEncryptedRealId(),
                         IsInRift = RiftHelper.IsInRift
                     };
                 }
@@ -357,6 +372,7 @@ namespace AutoFollow.Networking
                         IsQuickJoinEnabled = Player.IsQuickJoinEnabled,
                         BehaviorType = AutoFollow.CurrentBehavior.Type,
                         BattleTagEncrypted = GetMyEncryptedBattleTag(),
+                        RealIdNameEncrypted = GetMyEncryptedRealId(),
                         HeroName = Player.HeroName,
                         HeroId = Player.HeroId,
                         IsLoadingWorld = Player.IsLoadingWorld,
@@ -370,6 +386,16 @@ namespace AutoFollow.Networking
                 Log.Info("Exception in GetMessage() {0}", ex);
                 return new Message();
             }
+        }
+
+        private static string GetMyEncryptedRealId()
+        {
+            if (!Settings.Misc.IsRealIdEnabled)
+                return string.Empty;
+
+            return _myEncryptedRealId ??
+                   (_myEncryptedRealId =
+                       Crypto.EncryptToString(Common.CleanString(Settings.Misc.RealId)));
         }
 
         private static string GetMyEncryptedBattleTag()
@@ -416,6 +442,18 @@ namespace AutoFollow.Networking
         {
             return Crypto.EncryptToString(name) == encryptedBattleTag;
         }
+
+        /// <summary>
+        /// Checks if a text string is the same as an encrypted battle tag.
+        /// </summary>
+        internal static bool IsRealId(string name, string encryptedBattleTag)
+        {
+            if (!Settings.Misc.IsRealIdEnabled)
+                return false;
+
+            return Crypto.EncryptToString(name) == encryptedBattleTag;
+        }
+
         public float Distance
         {
             get { return Player.Position.Distance(Position); }
@@ -448,6 +486,5 @@ namespace AutoFollow.Networking
                 );
             }
         }
-
     }
 }

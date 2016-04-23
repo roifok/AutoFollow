@@ -39,9 +39,9 @@ namespace AutoFollow.UI
 
                 _configWindow.DataContext = Settings.ViewModel;           
                 _configWindow.Content = mainControl;
-                _configWindow.Width = 425;
-                _configWindow.Height = 450;
-                _configWindow.MinWidth = 300;
+                _configWindow.Width = 650;
+                _configWindow.Height = 380;
+                _configWindow.MinWidth = 500;
                 _configWindow.MinHeight = 380;
                 _configWindow.ResizeMode = ResizeMode.CanResizeWithGrip;
                 _configWindow.Title = "AutoFollow";

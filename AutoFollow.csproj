@@ -7,7 +7,7 @@
     <OutputType>Library</OutputType>
     <NoStandardLibraries>false</NoStandardLibraries>
     <AssemblyName>AutoFollow</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -38,10 +38,10 @@
       <HintPath>..\Adventurer\Trunk\bin\Debug\Adventurer.dll</HintPath>
     </Reference>
     <Reference Include="Demonbuddy">
-      <HintPath>..\..\DB-PTR\Demonbuddy.exe</HintPath>
+      <HintPath>..\..\DB-Current\Demonbuddy.exe</HintPath>
     </Reference>
     <Reference Include="GreyMagic">
-      <HintPath>..\..\DB-PTR\GreyMagic.dll</HintPath>
+      <HintPath>..\..\DB-Current\GreyMagic.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="PresentationCore" />
@@ -103,6 +103,7 @@
     <Compile Include="Resources\JsonSerializer.cs" />
     <Compile Include="Resources\MiscUtil.Reflection.cs" />
     <Compile Include="Resources\ProfileUtils.cs" />
+    <Compile Include="Resources\RegexExtensions.cs" />
     <Compile Include="Resources\Targetting.cs" />
     <Compile Include="Resources\Common.cs" />
     <Compile Include="Resources\Conditions.cs" />
@@ -130,6 +131,7 @@
     <Compile Include="UI\Components\Behaviors\InputBindingBehavior.cs" />
     <Compile Include="UI\Components\Behaviors\SelectTextOnFocus.cs" />
     <Compile Include="UI\Components\Controls\InputBox.cs" />
+    <Compile Include="UI\Components\Converters\BoolToValueConverter.cs" />
     <Compile Include="UI\Components\Converters\EnumBooleanConverter.cs" />
     <Compile Include="UI\Components\Converters\IntToStringConverter.cs" />
     <Compile Include="UI\NotifyBase.cs" />

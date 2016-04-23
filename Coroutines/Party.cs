@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AutoFollow.Coroutines.Resources;
 using AutoFollow.Events;
 using AutoFollow.Networking;
 using AutoFollow.Resources;
 using Buddy.Coroutines;
+using Zeta.Bot;
 using Zeta.Game;
 using Zeta.Game.Internals;
 using Zeta.Game.Internals.Service;
@@ -225,16 +227,23 @@ namespace AutoFollow.Coroutines
 
                 quickJoinElements.ForEach(e =>
                 {
-                    if (Message.IsBattleTag(Common.CleanString(e.Text), AutoFollow.CurrentLeader.BattleTagEncrypted))
+                    var name = Common.CleanString(e.Text);
+                    if (!Message.IsBattleTag(name, AutoFollow.CurrentLeader.BattleTagEncrypted))
                     {
-                        _leaderQuickJoinElement = e;
-                        Log.Info("Found Quick Join for Server's Game, Joining!");
-                        GameUI.SafeClick(e, ClickDelay.NoDelay, "Quick Join Server", 3000);
+                        var isLeadersRealId = Message.IsRealId(name, AutoFollow.CurrentLeader.RealIdNameEncrypted);
+                        if (!isLeadersRealId)
+                            return;          
                     }
+                    _leaderQuickJoinElement = e;
+                    Log.Info("Found Quick Join for Server's Game, Joining!");
+                    GameUI.SafeClick(e, ClickDelay.NoDelay, "Quick Join Server", 3000);
+
                 });
                 _lastAttemptQuickJoin = DateTime.UtcNow;
                 return true;
             }
+
+            // todo check for (ErrorDialog.IsVisible && ErrorDialog.ErrorCode == 300008. some other plugin is closing it too fast.
 
             if (_leaderQuickJoinElement != null && _leaderQuickJoinElement.IsValid && _leaderQuickJoinElement.IsVisible &&
                 !_leaderQuickJoinElement.IsEnabled)
@@ -285,26 +294,38 @@ namespace AutoFollow.Coroutines
             foreach (var item in contacts)
             {
                 var name = Common.CleanString(item.TextElement.Text);
+                var presenceElement = item.TextElement.GetSiblingByName("Presence");
+                var matches = Common.SocialPanelEntryPresenceRegex.GroupMatches(presenceElement.Text);
+                var activity = matches.StringByGroupName["Activity"].FirstOrDefault();
+                var level = matches.NumberByGroupName["Level"].FirstOrDefault();
+                var paragon = matches.NumberByGroupName["Paragon"].FirstOrDefault();
+                var actorClass = matches.StringByGroupName["Class"].FirstOrDefault();
+
                 var isBattleTag = Message.IsBattleTag(name, follower.BattleTagEncrypted);
-
-                if (isBattleTag)
+                if (!isBattleTag)
                 {
-                    Log.Info("Found follower on friends list!");
-                    var inviteButton = item.TextElement.GetSiblingByName("PartyInviteButton");
-                    inviteButton.Click();
-                    _lastInviteAttempt = DateTime.UtcNow;
-
-                    await Coroutine.Sleep(250);
-
-                    if (GameUI.FriendsListContent.IsVisible)
-                    {
-                        Log.Info("Closing Social Panel");
-                        GameUI.SocialFlyoutButton.Click();
-                        await Coroutine.Sleep(250);
-                    }
-
-                    return true;
+                    var isClassMatch = string.Equals(actorClass?.StringValue, follower.ActorClass.ToString(), StringComparison.CurrentCultureIgnoreCase);
+                    var isParagonMatch = isClassMatch && paragon?.NumberValue == follower.Paragon && level?.NumberValue == follower.Level;
+                    var isLeadersRealId = Message.IsRealId(name, AutoFollow.CurrentLeader.RealIdNameEncrypted);
+                    if (!isParagonMatch && Settings.Misc.InviteByParagon && !isLeadersRealId || !Settings.Misc.InviteByParagon && !isLeadersRealId)
+                        continue;
                 }
+
+                Log.Info("Found follower on friends list!");
+                var inviteButton = item.TextElement.GetSiblingByName("PartyInviteButton");
+                inviteButton.Click();
+                _lastInviteAttempt = DateTime.UtcNow;
+
+                await Coroutine.Sleep(250);
+
+                if (GameUI.FriendsListContent.IsVisible)
+                {
+                    Log.Info("Closing Social Panel");
+                    GameUI.SocialFlyoutButton.Click();
+                    await Coroutine.Sleep(250);
+                }
+
+                return true;
             }
 
             Log.Info("Unable to find invitation requester on friends list!");
@@ -346,17 +367,28 @@ namespace AutoFollow.Coroutines
             var partyInviteOkButton = GameUI.PartyInviteOK;
             if (partyInviteOkButton != null && partyInviteOkButton.IsVisible && partyInviteOkButton.IsEnabled)
             {
-                var invitePlayerName = Common.CleanString(GameUI.PartyInviteFromPlayerName.Text);
-                var isLeadersBattleTag = Message.IsBattleTag(invitePlayerName,
-                    AutoFollow.CurrentLeader.BattleTagEncrypted);
+                if (Settings.Misc.AlwaysAcceptInvites)
+                {
+                    Log.Warn("Accepting Party Invite (Always Accept Setting)");
+                    partyInviteOkButton.Click();
+                    await Coroutine.Sleep(250);
+                    return true;
+                }
 
+                var invitePlayerName = Common.CleanString(GameUI.PartyInviteFromPlayerName.Text);
+                var isLeadersBattleTag = Message.IsBattleTag(invitePlayerName, AutoFollow.CurrentLeader.BattleTagEncrypted);
                 if (!isLeadersBattleTag)
                 {
-                    Log.Info("{0}", AutoFollow.CurrentLeader.BattleTagEncrypted);
-                    Log.Warn("Party invite is from '{0}' who is not our leader, ignoring", invitePlayerName);
-                    await Coroutine.Sleep(new Random().Next(1000, 10000));
-                    GameUI.PartyInviteCancelButton.Click();
-                    return false;
+                    var matches = Common.InviteRequestRegex.GroupMatches(invitePlayerName);
+                    var realId = matches.StringByGroupName["RealId"].FirstOrDefault();
+                    var isLeadersRealId = Message.IsRealId(realId?.StringValue, AutoFollow.CurrentLeader.RealIdNameEncrypted);
+                    if (!isLeadersRealId)
+                    {
+                        Log.Warn("Party invite is from '{0}' who is not our leader, ignoring", Settings.Misc.HideHeroName ? "[Redacted]" : invitePlayerName);
+                        await Coroutine.Sleep(new Random().Next(1000, 10000));
+                        GameUI.PartyInviteCancelButton.Click();
+                        return false;
+                    }
                 }
 
                 Log.Warn("Accepting Party Invite");

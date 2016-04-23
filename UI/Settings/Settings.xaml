@@ -5,54 +5,60 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:behaviors="clr-namespace:AutoFollow.UI.Components.Behaviors"
             xmlns:converters="clr-namespace:AutoFollow.UI.Components.Converters"
-             mc:Ignorable="d" Foreground="{DynamicResource TextBrush}" 
-             d:DesignHeight="450" d:DesignWidth="400" Background="Gray">
+             mc:Ignorable="d" Foreground="#F2F2F2" Background="#393939"
+             d:DesignHeight="450" d:DesignWidth="550">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="..\Template.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             <converters:EnumBooleanConverter x:Key="EnumBooleanConverter" />
+            <converters:BoolToVisibilityConverter x:Key="VisibleWhenTrueConverter" TrueValue="Visible" FalseValue="Collapsed"/>
         </ResourceDictionary>
     </UserControl.Resources>
-    <Grid>
-        <StackPanel>
-            <GroupBox Header="Networking">
-                <Grid Margin="10, 5" Style="{x:Null}">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition MinWidth="130" />
-                        <ColumnDefinition Width="41*" />
-                    </Grid.ColumnDefinitions>
+    <ScrollViewer Padding="10">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="1.5*"/>                
+            </Grid.ColumnDefinitions>
+            <StackPanel Margin="0,0,10,0">
+                <GroupBox Header="Networking" VerticalContentAlignment="Top" VerticalAlignment="Top" Margin="0,0,0,10">
+                    <Grid Margin="10, 5" Style="{x:Null}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition MinWidth="130" />
+                            <ColumnDefinition Width="41*" />
+                        </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Width="80" Margin="0,0" HorizontalAlignment="Left" Text="Bind Address" />
-                    <TextBox Grid.Row="0" Grid.Column="1" Margin="0,3" HorizontalAlignment="Left" 
-                             ToolTip="IP Address used to communicate" 
-                             Text="{Binding Path=Network.BindAddress, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" 
-                             behaviors:InputBindingBehavior.UpdatePropertySourceWhenEnterPressed="TextBox.Text" 
-                             VerticalAlignment="Center" Width="150" BorderBrush="DarkGray"  />
+                        <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Width="80" Margin="0,0" HorizontalAlignment="Left" Text="Bind Address" />
+                        <TextBox Grid.Row="0" Grid.Column="1" Margin="0,3" HorizontalAlignment="Left" 
+                                ToolTip="IP Address used to communicate" 
+                                Text="{Binding Path=Network.BindAddress, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" 
+                                behaviors:InputBindingBehavior.UpdatePropertySourceWhenEnterPressed="TextBox.Text" 
+                                VerticalAlignment="Center" Width="150" BorderBrush="DarkGray"  />
 
-                    <TextBlock Grid.Row="1" Grid.Column="0" VerticalAlignment="Center"  Width="80" Margin="0,0" HorizontalAlignment="Left" Text="Server Port" />
-                    <TextBox Grid.Row="1" Grid.Column="1" Margin="0,3" HorizontalAlignment="Left" 
-                             ToolTip="Port to communicate on" 
-                             Text="{Binding Path=Network.ServerPort, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" 
-                             behaviors:InputBindingBehavior.UpdatePropertySourceWhenEnterPressed="TextBox.Text" 
-                             VerticalAlignment="Center" Width="50" BorderBrush="DarkGray"  />
+                        <TextBlock Grid.Row="1" Grid.Column="0" VerticalAlignment="Center"  Width="80" Margin="0,0" HorizontalAlignment="Left" Text="Server Port" />
+                        <TextBox Grid.Row="1" Grid.Column="1" Margin="0,3" HorizontalAlignment="Left" 
+                                ToolTip="Port to communicate on" 
+                                Text="{Binding Path=Network.ServerPort, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" 
+                                behaviors:InputBindingBehavior.UpdatePropertySourceWhenEnterPressed="TextBox.Text" 
+                                VerticalAlignment="Center" Width="50" BorderBrush="DarkGray"  />
 
-                    <TextBlock Grid.Row="2" Grid.Column="0" VerticalAlignment="Center">Update Speed</TextBlock>
-                    <Slider Grid.Row="2" Grid.Column="1" Template="{DynamicResource SliderEditable}" 
+                        <TextBlock Grid.Row="2" Grid.Column="0" VerticalAlignment="Center">Update Speed</TextBlock>
+                        <Slider Grid.Row="2" Grid.Column="1" Template="{DynamicResource SliderEditable}" 
                             ToolTip="How fast bots will send updates to each other about their position etc"
                             Interval="1" Maximum="2000" Minimum="25" 
                             SmallChange="1" TickFrequency="100" IsSnapToTickEnabled="True"
                             TickPlacement="BottomRight" Value="{Binding Network.UpdateInterval}" 
                             HorizontalAlignment="Stretch" Margin="0,3,0,3" />
-                    
-                    <!--<Grid Grid.Row="3" ColumnSpan="2" Margin="5">
+
+                        <!--<Grid Grid.Row="3" ColumnSpan="2" Margin="5">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
@@ -63,85 +69,102 @@
                             <RadioButton GroupName="Role" Margin="0,0,10,0" Content="Server" IsChecked="{Binding Path=Network.Role, Converter={StaticResource EnumBooleanConverter}, ConverterParameter=Server}" />
                             <RadioButton GroupName="Role" Margin="0,0,10,0" Content="Client" IsChecked="{Binding Path=Network.Role, Converter={StaticResource EnumBooleanConverter}, ConverterParameter=Client}" />
                         </WrapPanel>
-                    <!--</Grid>-->
+                        <!--</Grid>-->
 
-                </Grid>
+                    </Grid>
 
-            </GroupBox>
-            <GroupBox Header="Coordination">
-                <Grid Margin="10, 5" Style="{x:Null}">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>                        
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition MinWidth="130" />
-                        <ColumnDefinition Width="41*" />
-                        <ColumnDefinition Width="25" />
-                    </Grid.ColumnDefinitions>
+                </GroupBox>
+                <GroupBox Header="Coordination" VerticalContentAlignment="Top" VerticalAlignment="Top">
+                    <Grid Margin="10, 5" Style="{x:Null}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition MinWidth="130" />
+                            <ColumnDefinition Width="41*" />
+                            <ColumnDefinition Width="25" />
+                        </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center">Follow Distance</TextBlock>
-                    <Slider Grid.Row="0" Grid.Column="1" Template="{DynamicResource SliderEditable}" 
+                        <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center">Follow Distance</TextBlock>
+                        <Slider Grid.Row="0" Grid.Column="1" Template="{DynamicResource SliderEditable}" 
                             ToolTip="This determines how close the bots will get to the leader when following."
                             Interval="1" Maximum="150" Minimum="5" 
                             SmallChange="1" TickFrequency="5" IsSnapToTickEnabled="True"
                             TickPlacement="BottomRight" Value="{Binding Coordination.FollowDistance}" 
                             HorizontalAlignment="Stretch" Margin="0,3,0,3" />
-                    <TextBlock Grid.Row="0" Grid.Column="2" Margin="2,0,0,0" FontSize="10" VerticalAlignment="Center">yards</TextBlock>
+                        <TextBlock Grid.Row="0" Grid.Column="2" Margin="2,0,0,0" FontSize="10" VerticalAlignment="Center">yards</TextBlock>
 
-                    <TextBlock Grid.Row="1" Grid.Column="0" VerticalAlignment="Center">Teleport Distance</TextBlock>
-                    <Slider Grid.Row="1" Grid.Column="1" Template="{DynamicResource SliderEditable}" 
+                        <TextBlock Grid.Row="1" Grid.Column="0" VerticalAlignment="Center">Teleport Distance</TextBlock>
+                        <Slider Grid.Row="1" Grid.Column="1" Template="{DynamicResource SliderEditable}" 
                             ToolTip="How far away bots need to be from leader before teleporting"
                             Interval="1" Maximum="750" Minimum="150" 
                             SmallChange="1" TickFrequency="25" IsSnapToTickEnabled="True"
                             TickPlacement="BottomRight" Value="{Binding Coordination.TeleportDistance}" 
                             HorizontalAlignment="Stretch" Margin="0,3,0,3" />
-                    <TextBlock Grid.Row="1" Grid.Column="2" Margin="2,0,0,0" FontSize="10" VerticalAlignment="Center">yards</TextBlock>
+                        <TextBlock Grid.Row="1" Grid.Column="2" Margin="2,0,0,0" FontSize="10" VerticalAlignment="Center">yards</TextBlock>
 
-                    <TextBlock Grid.Row="2" Grid.Column="0" VerticalAlignment="Center">Catch-Up Range</TextBlock>
-                    <Slider Grid.Row="2" Grid.Column="1" Template="{DynamicResource SliderEditable}" 
+                        <TextBlock Grid.Row="2" Grid.Column="0" VerticalAlignment="Center">Catch-Up Range</TextBlock>
+                        <Slider Grid.Row="2" Grid.Column="1" Template="{DynamicResource SliderEditable}" 
                             ToolTip="When outside this range from leader, followers will cycle combat on/off to catch up faster"
                             Interval="1" Maximum="100" Minimum="10" 
                             SmallChange="1" TickFrequency="25" IsSnapToTickEnabled="True"
                             TickPlacement="BottomRight" Value="{Binding Coordination.CatchUpDistance}" 
                             HorizontalAlignment="Stretch" Margin="0,3,0,3" />
-                    <TextBlock Grid.Row="2" Grid.Column="2" Margin="2,0,0,0" FontSize="10" VerticalAlignment="Center">yards</TextBlock>
-                    
-                    <TextBlock Grid.Row="3" Grid.Column="0" VerticalAlignment="Center">Leader Start Delay</TextBlock>
-                    <Slider Grid.Row="3" Grid.Column="1" Template="{DynamicResource SliderEditable}" 
+                        <TextBlock Grid.Row="2" Grid.Column="2" Margin="2,0,0,0" FontSize="10" VerticalAlignment="Center">yards</TextBlock>
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" VerticalAlignment="Center">Leader Start Delay</TextBlock>
+                        <Slider Grid.Row="3" Grid.Column="1" Template="{DynamicResource SliderEditable}" 
                             ToolTip="How long leader will wait after creating a new game, before starting rift"
                             Interval="1" Maximum="300" Minimum="0" 
                             SmallChange="1" TickFrequency="10" IsSnapToTickEnabled="True"
                             TickPlacement="BottomRight" Value="{Binding Coordination.DelayAfterJoinGame}" 
                             HorizontalAlignment="Stretch" Margin="0,3,0,3" />
-                    <TextBlock Grid.Row="3" Grid.Column="2" Margin="2,0,0,0" FontSize="10" VerticalAlignment="Center">secs</TextBlock>
+                        <TextBlock Grid.Row="3" Grid.Column="2" Margin="2,0,0,0" FontSize="10" VerticalAlignment="Center">secs</TextBlock>
 
-                </Grid>
-            </GroupBox>
-            <GroupBox Header="Misc">
-                <UniformGrid Columns="2">
-                 
+                    </Grid>
+                </GroupBox>
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" MinWidth="170">
+                <GroupBox Header="Misc" VerticalContentAlignment="Top" VerticalAlignment="Top">
+                    <StackPanel>
                         <CheckBox Margin="5,6,5,0" IsEnabled="True" ToolTip="Bots will leave any game/party that has players it's not connected to via DemonBuddy"  IsChecked="{Binding Path=Misc.AvoidUnknownPlayers, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" >
                             <TextBlock Margin="1,1" Text="Avoid Unknown Players" ToolTip="Bots will leave any game/party that has players it's not connected to via DemonBuddy" />
                         </CheckBox>
-             
+
                         <CheckBox Margin="5,6,5,0" IsEnabled="True" ToolTip="Spams the console with lots of information" IsChecked="{Binding Path=Misc.DebugLogging, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center">
                             <TextBlock Margin="1,1" Text="Debug Logging" VerticalAlignment="Center" ToolTip="Spams the console with lots of information"/>
                         </CheckBox>
-       
                         <CheckBox Margin="5,6,5,0" IsEnabled="True" ToolTip="Replaces all logging of player name with the hero Id; useful to prevent identification when sharing logs." IsChecked="{Binding Path=Misc.HideHeroName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center">
                             <TextBlock Margin="1,1" Text="Hide Hero Names" VerticalAlignment="Center" ToolTip="Replaces all logging of player name with the hero Id; useful to prevent identification when sharing logs."/>
                         </CheckBox>
-
+                        <CheckBox Margin="5,6,5,0" IsEnabled="True" ToolTip="The name of the person inviting you will not be checked, invites will alawys be accepted." IsChecked="{Binding Path=Misc.AlwaysAcceptInvites, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center">
+                            <TextBlock Margin="1,1" Text="Always Accept Inivites" VerticalAlignment="Center" ToolTip="The name of the person inviting you will not be checked, invites will alawys be accepted."/>
+                        </CheckBox>                        
+                        <CheckBox Margin="5,6,5,0" IsEnabled="True" ToolTip="Invites are sent to the first person found with matching level, class and paragon. Name and BattleTag will be ignored." IsChecked="{Binding Path=Misc.InviteByParagon, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center">
+                            <TextBlock Margin="1,1" Text="Invite by Class/Paragon" VerticalAlignment="Center" ToolTip="Invites are sent to the first person found with matching level, class and paragon. Name and BattleTag will be checked first."/>
+                        </CheckBox>
+                        <CheckBox Margin="5,6,5,0" IsEnabled="True" ToolTip="Allow this bot to use send real-id information and check for real-id names" IsChecked="{Binding Misc.IsRealIdEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center">
+                            <TextBlock Margin="1,1" Text="Enable using Real-Id" VerticalAlignment="Center" ToolTip="Allow this bot to use send  real-id information to other bots and check for real-id names"/>
+                        </CheckBox>
                         <!--<CheckBox Margin="5,6,5,0" IsEnabled="True" ToolTip="" IsChecked="{Binding Path=Misc.HideHeroName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center">
-                            <TextBlock Margin="1,1" Text="Accept rifts as 'Empowered'" VerticalAlignment="Center" ToolTip=""/>
-                        </CheckBox>-->
+                        <TextBlock Margin="1,1" Text="Accept rifts as 'Empowered'" VerticalAlignment="Center" ToolTip=""/>
+                    </CheckBox>-->
+                        <StackPanel Margin="5" Visibility="{Binding Misc.IsRealIdEnabled, Converter={StaticResource VisibleWhenTrueConverter}}">
+                            <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Margin="0,8,0,0" ToolTip="Enter the real-id (FirstName[space]LastName) of THIS bot. This is only needed if other bots have added this bot as a real-id friend." HorizontalAlignment="Left" Text="This bots Real-Id name" />
+                            <TextBox Grid.Row="0" Grid.Column="1" Margin="0,3" HorizontalAlignment="Left"                                      
+                                    ToolTip="IP Address used to communicate" 
+                                    Text="{Binding Path=Misc.RealId, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" 
+                                    behaviors:InputBindingBehavior.UpdatePropertySourceWhenEnterPressed="TextBox.Text" 
+                                    VerticalAlignment="Center" Width="150" BorderBrush="DarkGray"  />
+                        </StackPanel>                        
+                    </StackPanel>
+                </GroupBox>
 
-                </UniformGrid>
-            </GroupBox>
-        </StackPanel>
-
-    </Grid>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
 </UserControl>

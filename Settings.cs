@@ -195,6 +195,10 @@ namespace AutoFollow
         private bool _debugLogging;
         private bool _avoidUnknownPlayers;
         private bool _hideHeroName;
+        private string _realId;
+        private bool _isRealIdEnabled;
+        private bool _inviteByParagon;
+        private bool _alwaysAcceptInvites;
 
         [DataMember, Setting]
         [DefaultValue(false)]
@@ -220,5 +224,38 @@ namespace AutoFollow
             set { SetField(ref _hideHeroName, value); }
         }
 
+        [DataMember, Setting]
+        [DefaultValue("")]
+        public string RealId
+        {
+            get { return _realId; }
+            set { SetField(ref _realId, value); }
+        }
+
+        [DataMember, Setting]
+        [DefaultValue(false)]
+        public bool IsRealIdEnabled
+        {
+            get { return _isRealIdEnabled; }
+            set { SetField(ref _isRealIdEnabled, value); }
+        }
+
+        [DataMember, Setting]
+        [DefaultValue(false)]
+        public bool InviteByParagon
+        {
+            get { return _inviteByParagon; }
+            set { SetField(ref _inviteByParagon, value); }
+        }
+
+        [DataMember, Setting]
+        [DefaultValue(false)]
+        public bool AlwaysAcceptInvites
+        {
+            get { return _alwaysAcceptInvites; }
+            set { SetField(ref _alwaysAcceptInvites, value); }
+        }
+
+        
     }
 }
