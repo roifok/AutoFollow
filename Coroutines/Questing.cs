@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Adventurer.Coroutines;
-using Adventurer.Coroutines.RiftCoroutines;
 using AutoFollow.Coroutines.Resources;
 using AutoFollow.Resources;
 using Buddy.Coroutines;
+using Trinity.Components.Adventurer.Coroutines;
+using Trinity.Components.Adventurer.Coroutines.RiftCoroutines;
 using Zeta.Bot.Coroutines;
 using Zeta.Bot.Logic;
 

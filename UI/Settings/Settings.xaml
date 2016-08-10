@@ -65,7 +65,6 @@
                         </Grid.RowDefinitions>-->
                         <TextBlock Grid.Row="3" Grid.Column="0" Text="Role:" FontWeight="Normal" TextAlignment="Left"/>
                         <WrapPanel Grid.Row="3" Grid.Column="1" Margin="0,0,25,0" HorizontalAlignment="Left">
-                            <RadioButton GroupName="Role" Margin="0,0,10,0" Content="Auto" IsChecked="{Binding Path=Network.Role, Converter={StaticResource EnumBooleanConverter}, ConverterParameter=Auto}" />
                             <RadioButton GroupName="Role" Margin="0,0,10,0" Content="Server" IsChecked="{Binding Path=Network.Role, Converter={StaticResource EnumBooleanConverter}, ConverterParameter=Server}" />
                             <RadioButton GroupName="Role" Margin="0,0,10,0" Content="Client" IsChecked="{Binding Path=Network.Role, Converter={StaticResource EnumBooleanConverter}, ConverterParameter=Client}" />
                         </WrapPanel>
@@ -129,7 +128,7 @@
             </StackPanel>
 
             <StackPanel Grid.Column="1" MinWidth="170">
-                <GroupBox Header="Misc" VerticalContentAlignment="Top" VerticalAlignment="Top">
+                <GroupBox Header="Misc" VerticalContentAlignment="Top" VerticalAlignment="Top" Height="288">
                     <StackPanel>
                         <CheckBox Margin="5,6,5,0" IsEnabled="True" ToolTip="Bots will leave any game/party that has players it's not connected to via DemonBuddy"  IsChecked="{Binding Path=Misc.AvoidUnknownPlayers, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" >
                             <TextBlock Margin="1,1" Text="Avoid Unknown Players" ToolTip="Bots will leave any game/party that has players it's not connected to via DemonBuddy" />
@@ -147,9 +146,12 @@
                         <CheckBox Margin="5,6,5,0" IsEnabled="True" ToolTip="Invites are sent to the first person found with matching level, class and paragon. Name and BattleTag will be ignored." IsChecked="{Binding Path=Misc.InviteByParagon, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center">
                             <TextBlock Margin="1,1" Text="Invite by Class/Paragon" VerticalAlignment="Center" ToolTip="Invites are sent to the first person found with matching level, class and paragon. Name and BattleTag will be checked first."/>
                         </CheckBox>
-                        <CheckBox Margin="5,6,5,0" IsEnabled="True" ToolTip="Allow this bot to use send real-id information and check for real-id names" IsChecked="{Binding Misc.IsRealIdEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center">
-                            <TextBlock Margin="1,1" Text="Enable using Real-Id" VerticalAlignment="Center" ToolTip="Allow this bot to use send  real-id information to other bots and check for real-id names"/>
+                        <CheckBox Margin="5,6,5,0" IsEnabled="True" ToolTip="Allow Trinity to Avoid whenever it wants to" IsChecked="{Binding Combat.AllowAvoidance, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center">
+                            <TextBlock Margin="1,1" Text="Allow Avoidance" VerticalAlignment="Center" ToolTip="Allow Trinity to Avoid whenever it wants to"/>
                         </CheckBox>
+                        <CheckBox Margin="5,6,5,0" IsEnabled="True" ToolTip="Allow Trinity to Kite whenever it wants to" IsChecked="{Binding Combat.AllowKiting, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center">
+                            <TextBlock Margin="1,1" Text="Allow Kiting" VerticalAlignment="Center" ToolTip="Allow Trinity to Kite whenever it wants to"/>
+                        </CheckBox>                        
                         <!--<CheckBox Margin="5,6,5,0" IsEnabled="True" ToolTip="" IsChecked="{Binding Path=Misc.HideHeroName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center">
                         <TextBlock Margin="1,1" Text="Accept rifts as 'Empowered'" VerticalAlignment="Center" ToolTip=""/>
                     </CheckBox>-->

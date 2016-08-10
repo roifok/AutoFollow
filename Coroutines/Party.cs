@@ -185,7 +185,7 @@ namespace AutoFollow.Coroutines
                     if (LeaderGameMismatchLeaveTime == DateTime.MinValue)
                     {
                         Log.Warn("Leader gameId is different/invalid!", AutoFollow.CurrentLeader.IsInSameGame);
-                        LeaderGameMismatchLeaveTime = DateTime.UtcNow.AddSeconds(5);
+                        LeaderGameMismatchLeaveTime = DateTime.UtcNow.AddSeconds(10);
                         return false;
                     }
 
@@ -194,7 +194,7 @@ namespace AutoFollow.Coroutines
                         Log.Warn("Leader is in a different game, Leave Game!", AutoFollow.CurrentLeader.IsInSameGame);
                         LeaderGameMismatchLeaveTime = default(DateTime);
                         await LeaveGame(true);
-                        Coordination.WaitFor(TimeSpan.FromSeconds(5));
+                        Coordination.WaitFor(TimeSpan.FromSeconds(10));
                         return true;
                     }
                 }

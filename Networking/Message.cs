@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using AutoFollow.Behaviors.Structures;
 using AutoFollow.Events;
 using AutoFollow.Resources;
+using Trinity.Framework.Objects.API;
+using Zeta.Bot;
 using Zeta.Bot.Logic;
 using Zeta.Common;
 using Zeta.Game;
@@ -28,6 +31,21 @@ namespace AutoFollow.Networking
             ProfilePathPrecision = 10f;
             Events = new List<EventData>();
         }
+
+        [DataMember]
+        public string ProfileName { get; set; }
+
+        [DataMember]
+        public int Dexterity { get; set; }
+
+        [DataMember]
+        public int Intelligence { get; set; }
+
+        [DataMember]
+        public int Vitality { get; set; }
+
+        [DataMember]
+        public int Strength { get; set; }
 
         [DataMember]
         public string HeroName { get; set; }
@@ -167,6 +185,9 @@ namespace AutoFollow.Networking
         [DataMember]
         public bool IsCastingTownPortal { get; set; }
 
+        [DataMember]
+        public Build Build { get; set; }
+
         public bool IsInSameGame
         {
             get
@@ -189,25 +210,13 @@ namespace AutoFollow.Networking
             }
         }
 
-        public bool IsMe
-        {
-            get { return Player.BattleTagHash == OwnerId; }
-        }
+        public bool IsMe => Player.BattleTagHash == OwnerId;
 
-        public bool IsValid
-        {
-            get { return !string.IsNullOrEmpty(HeroAlias) && (!IsInGame || IsLoadingWorld || GameId.FactoryId != 0); }
-        }
+        public bool IsValid => !string.IsNullOrEmpty(HeroAlias) && (!IsInGame || IsLoadingWorld || GameId.FactoryId != 0);
 
-        public bool IsLeader
-        {
-            get { return OwnerId == LeaderId; }
-        }
+        public bool IsLeader => OwnerId == LeaderId;
 
-        public bool IsFollower
-        {
-            get { return !IsLeader; }
-        }
+        public bool IsFollower => !IsLeader;
 
         [DataMember]
         public int WorldSnoId { get; set; }
@@ -219,10 +228,7 @@ namespace AutoFollow.Networking
         /// Returns the AcdId of this message's actor in the 'current' bot's game world.
         /// (AcdId changes for each D3 client)
         /// </summary>
-        public int AcdId
-        {
-            get { return Data.GetAcdIdByHeroId(HeroId); }
-        }
+        public int AcdId => Data.GetAcdIdByHeroId(HeroId);
 
         /// <summary>
         /// Object used to send information between bots.
@@ -295,6 +301,7 @@ namespace AutoFollow.Networking
                         ProfileActorSno = Player.ProfileActorSno,
                         ProfilePathPrecision = Player.ProfilePathPrecision,
                         ProfileTagName = Player.GetProfileTagname(),
+                        ProfileName = Path.GetFileName(ProfileManager.CurrentProfile.Path),
                         IsInCombat = Player.IsInCombat,
                         WorldSnoId = Player.CurrentWorldSnoId,
                         IsVendoring = BrainBehavior.IsVendoring,
@@ -320,7 +327,14 @@ namespace AutoFollow.Networking
                         LastPortalUsed = Player.LastPortalUsed,
                         BehaviorType = AutoFollow.CurrentBehavior.Type,
                         IsInBossEncounter = Player.IsInBossEncounter,
-                        IsCastingTownPortal = Player.IsCastingTownPortal
+                        IsCastingTownPortal = Player.IsCastingTownPortal,
+                        Strength = Player.Strength,
+                        Vitality = Player.Vitality,
+                        Intelligence = Player.Intelligence,
+                        Dexterity = Player.Dexterity,
+                        Build = Player.Build,
+                        Paragon = Player.Paragon,
+                        SettingsCode = Player.SettingsCode,
                     };
                 }
                 else if (ZetaDia.IsInGame && ZetaDia.IsLoadingWorld)
@@ -349,7 +363,16 @@ namespace AutoFollow.Networking
                         BehaviorType = AutoFollow.CurrentBehavior.Type,
                         BattleTagEncrypted = GetMyEncryptedBattleTag(),
                         RealIdNameEncrypted = GetMyEncryptedRealId(),
-                        IsInRift = RiftHelper.IsInRift
+                        IsInRift = RiftHelper.IsInRift,
+                        ProfileTagName = Player.GetProfileTagname(),
+                        ProfileName = Path.GetFileName(ProfileManager.CurrentProfile.Path),
+                        Strength = Player.Strength,
+                        Vitality = Player.Vitality,
+                        Intelligence = Player.Intelligence,
+                        Dexterity = Player.Dexterity,
+                        Paragon = Player.Paragon,
+                        Build = Player.Build,
+                        SettingsCode = Player.SettingsCode,
                     };
                 }
                 else
@@ -387,6 +410,8 @@ namespace AutoFollow.Networking
                 return new Message();
             }
         }
+
+        public string SettingsCode { get; set; }
 
         private static string GetMyEncryptedRealId()
         {
@@ -454,37 +479,25 @@ namespace AutoFollow.Networking
             return Crypto.EncryptToString(name) == encryptedBattleTag;
         }
 
-        public float Distance
-        {
-            get { return Player.Position.Distance(Position); }
-        }
+        public float Distance => Player.Position.Distance(Position);
 
-        public string HeroAlias
-        {
-            get { return Settings.Misc.HideHeroName ? HeroId.ToString() : HeroName; }
-        }
+        public string HeroAlias => Settings.Misc.HideHeroName ? HeroId.ToString() : HeroName;
 
-        public string ShortSummary
-        {
-            get
-            {
-                return string.Format(
-                    "[{0}] {1} ({2}) {3}{4}{5}{6}{7}{8}{9}{10} Age={11}ms Events={12}",
-                    OwnerId,
-                    HeroAlias,
-                    ActorClass,
-                    IsInGame ? "InGame " : "OutOfGame ",
-                    IsLoadingWorld ? "IsLoading " : string.Empty,
-                    IsInGame ? "InParty " : string.Empty,
-                    IsLeader ? "Leader " : string.Empty,
-                    IsFollower ? "Follower " : string.Empty,
-                    IsServer ? "Server " : string.Empty,
-                    IsClient ? "Client " : string.Empty,
-                    IsInGame ? string.Format("World={0} Level={1}", WorldSnoId, LevelAreaId) : string.Empty,
-                    DateTime.UtcNow.Subtract(LastUpdated).TotalMilliseconds,
-                    Events.Count
-                );
-            }
-        }
+        public string ShortSummary => string.Format(
+            "[{0}] {1} ({2}) {3}{4}{5}{6}{7}{8}{9}{10} Age={11}ms Events={12}",
+            OwnerId,
+            HeroAlias,
+            ActorClass,
+            IsInGame ? "InGame " : "OutOfGame ",
+            IsLoadingWorld ? "IsLoading " : string.Empty,
+            IsInGame ? "InParty " : string.Empty,
+            IsLeader ? "Leader " : string.Empty,
+            IsFollower ? "Follower " : string.Empty,
+            IsServer ? "Server " : string.Empty,
+            IsClient ? "Client " : string.Empty,
+            IsInGame ? string.Format("World={0} Level={1}", WorldSnoId, LevelAreaId) : string.Empty,
+            DateTime.UtcNow.Subtract(LastUpdated).TotalMilliseconds,
+            Events.Count
+            );
     }
 }

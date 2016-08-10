@@ -13,10 +13,7 @@ namespace AutoFollow.Networking
 
         private static Thread _communicationThread;
 
-        public static bool ThreadIsRunning
-        {
-            get { return _communicationThread != null && _communicationThread.IsAlive; }
-        }
+        public static bool ThreadIsRunning => _communicationThread != null && _communicationThread.IsAlive;
 
         public static void ThreadStart()
         {

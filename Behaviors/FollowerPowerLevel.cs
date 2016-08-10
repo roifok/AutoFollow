@@ -12,20 +12,11 @@ namespace AutoFollow.Behaviors
 {
     public class FollowerPowerLevel : BaseBehavior
     {
-        public override BehaviorCategory Category
-        {
-            get { return BehaviorCategory.Follower; }
-        }
+        public override BehaviorCategory Category => BehaviorCategory.Follower;
 
-        public override BehaviorType Type
-        {
-            get { return BehaviorType.Powerlevel; }
-        }
+        public override BehaviorType Type => BehaviorType.Powerlevel;
 
-        public override string Name
-        {
-            get { return "Follower PowerLevel"; }
-        }
+        public override string Name => "Follower PowerLevel";
 
         public override async Task<bool> OutOfGameTask()
         {

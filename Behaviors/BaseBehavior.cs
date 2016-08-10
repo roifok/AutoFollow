@@ -35,20 +35,11 @@ namespace AutoFollow.Behaviors
 
         private readonly Data Data = new Data();
 
-        public virtual BehaviorCategory Category
-        {
-            get { return BehaviorCategory.Unknown; }
-        }
+        public virtual BehaviorCategory Category => BehaviorCategory.Unknown;
 
-        public virtual BehaviorType Type
-        {
-            get { return BehaviorType.Default; }
-        }
+        public virtual BehaviorType Type => BehaviorType.Default;
 
-        public virtual string Name
-        {
-            get { return "Default"; }
-        }
+        public virtual string Name => "Default";
 
         public void Activate()
         {
@@ -61,7 +52,7 @@ namespace AutoFollow.Behaviors
             _inGameHook = new ActionRunCoroutine(ret => InGameTask());          
             TreeHooks.Instance.OnHooksCleared += Instance_OnHooksCleared;
             InsertHooks();
-
+                        
             EventManager.WorldAreaChanged += OnWorldAreaChanged;
             EventManager.EngagedElite += OnEngagedElite;
             EventManager.LeftGame += OnLeftGame;
@@ -126,7 +117,7 @@ namespace AutoFollow.Behaviors
 
             if (Service.IsConnected && AutoFollow.NumberOfConnectedBots == 0)
             {
-                Log.Info("Waiting for bots to connect...");
+                Log.Info("Waiting for bots to connect... ");
                 await Coroutine.Sleep(500);
                 return true;
             }
@@ -144,9 +135,8 @@ namespace AutoFollow.Behaviors
                 await Coroutine.Sleep(500);
                 return true;
             }
-
+            
             GameUI.SafeCheckClickButtons();
-
             return false;
         }
 
@@ -225,70 +215,31 @@ namespace AutoFollow.Behaviors
 
         }
 
-        public virtual async Task<bool> OnEngagedElite(Message sender, EventData e)
-        {            
-            return false;
-        }
+        public virtual async Task<bool> OnEngagedElite(Message sender, EventData e) => false;
 
-        public virtual async Task<bool> OnWorldAreaChanged(Message sender, EventData e)
-        {
-            return false;
-        }
+        public virtual async Task<bool> OnWorldAreaChanged(Message sender, EventData e) => false;
 
-        public virtual async Task<bool> OnLeftGame(Message sender, EventData e)
-        {
-            return false;
-        }
+        public virtual async Task<bool> OnLeftGame(Message sender, EventData e) => false;
 
-        public virtual async Task<bool> OnJoinedGame(Message sender, EventData e)
-        {
-            return false;
-        }
+        public virtual async Task<bool> OnJoinedGame(Message sender, EventData e) => false;
 
-        public virtual async Task<bool> OnPlayerDied(Message sender, EventData e)
-        {
-            return false;
-        }
+        public virtual async Task<bool> OnPlayerDied(Message sender, EventData e) => false;
 
-        public virtual async Task<bool> OnInTrouble(Message sender, EventData e)
-        {
-            return false;
-        }
+        public virtual async Task<bool> OnInTrouble(Message sender, EventData e) => false;
 
-        public virtual async Task<bool> OnUsedPortal(Message sender, EventData e)
-        {
-            return false;
-        }
+        public virtual async Task<bool> OnUsedPortal(Message sender, EventData e) => false;
 
-        public virtual async Task<bool> OnInviteRequest(Message sender, EventData e)
-        {
-            return false;
-        }
+        public virtual async Task<bool> OnInviteRequest(Message sender, EventData e) => false;
 
-        public virtual async Task<bool> OnLeavingGame(Message sender, EventData e)
-        {
-            return false;
-        }
+        public virtual async Task<bool> OnLeavingGame(Message sender, EventData e) => false;
 
-        public virtual async Task<bool> OnKilledRiftGaurdian(Message sender, EventData e)
-        {
-            return false;
-        }
+        public virtual async Task<bool> OnKilledRiftGaurdian(Message sender, EventData e) => false;
 
-        public virtual async Task<bool> OnSpawnedRiftGaurdian(Message sender, EventData e)
-        {
-            return false;
-        }
+        public virtual async Task<bool> OnSpawnedRiftGaurdian(Message sender, EventData e) => false;
 
-        public static bool IsGameReady
-        {
-            get { return ZetaDia.Service.IsValid && ZetaDia.Service.Hero.IsValid && AutoFollow.Enabled && !ZetaDia.IsLoadingWorld; }
-        }
+        public static bool IsGameReady => ZetaDia.Service.IsValid && ZetaDia.Service.Hero.IsValid && AutoFollow.Enabled && !ZetaDia.IsLoadingWorld;
 
-        public override int GetHashCode()
-        {
-            return Name.GetHashCode() + Type.GetHashCode() * 127;
-        }
+        public override int GetHashCode() => Name.GetHashCode() + Type.GetHashCode() * 127;
     }
 }
 

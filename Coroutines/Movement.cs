@@ -8,6 +8,7 @@ using AutoFollow.Events;
 using AutoFollow.Networking;
 using AutoFollow.Resources;
 using Buddy.Coroutines;
+using Trinity.Framework;
 using Zeta.Bot;
 using Zeta.Bot.Coroutines;
 using Zeta.Bot.Logic;
@@ -150,6 +151,18 @@ namespace AutoFollow.Coroutines
                 if (Targetting.RoutineWantsToLoot())
                 {
                     Log.Verbose("Movement Stopped, Combat routine wants to pick up an item.", name, distance);
+                    return false;
+                }
+
+                if (Settings.Combat.AllowAvoidance && Core.Avoidance.Avoider.ShouldAvoid)
+                {
+                    Log.Verbose("Movement Stopped, Trinity wants to Avoid.", name, distance);
+                    return false;
+                }
+
+                if (Settings.Combat.AllowKiting && Core.Avoidance.Avoider.ShouldKite)
+                {
+                    Log.Verbose("Movement Stopped, Trinity wants to Kite.", name, distance);
                     return false;
                 }
 

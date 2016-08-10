@@ -27,10 +27,7 @@ namespace AutoFollow.ProfileTags
         public IBehavior CurrentBehavior { get; set; }
 
         private bool _isDone;
-        public override bool IsDone
-        {
-            get { return _isDone || !IsActiveQuestStep; }
-        }
+        public override bool IsDone => _isDone || !IsActiveQuestStep;
 
         protected override Composite CreateBehavior()
         {

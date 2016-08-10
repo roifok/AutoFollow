@@ -144,302 +144,119 @@ namespace AutoFollow.Coroutines.Resources
             }
         }        
 
-        public static UIElement AcceptReviveButton
-        {
-            get { return UIElement.FromHash(AcceptReviveButtonHash); }
-        }
+        public static UIElement AcceptReviveButton => UIElement.FromHash(AcceptReviveButtonHash);
 
-        public static UIElement PartySlot1Name
-        {
-            get { return UIElement.FromHash(PartySlot1NameHash); }
-        }
+        public static UIElement PartySlot1Name => UIElement.FromHash(PartySlot1NameHash);
 
-        public static UIElement PartySlot2Name
-        {
-            get { return UIElement.FromHash(PartySlot2NameHash); }
-        }
+        public static UIElement PartySlot2Name => UIElement.FromHash(PartySlot2NameHash);
 
-        public static UIElement PartySlot3Name
-        {
-            get { return UIElement.FromHash(PartySlot3NameHash); }
-        }
+        public static UIElement PartySlot3Name => UIElement.FromHash(PartySlot3NameHash);
 
-        public static UIElement PartySlot4Name
-        {
-            get { return UIElement.FromHash(PartySlot4NameHash); }
-        }
+        public static UIElement PartySlot4Name => UIElement.FromHash(PartySlot4NameHash);
 
-        public static UIElement FriendsListCloseButton
-        {
-            get { return UIElement.FromHash(FriendsListCloseButtonHash); }
-        }
+        public static UIElement FriendsListCloseButton => UIElement.FromHash(FriendsListCloseButtonHash);
 
-        public static UIElement FriendsListContent
-        {
-            get { return UIElement.FromHash(FriendsListContentHash); }
-        }
+        public static UIElement FriendsListContent => UIElement.FromHash(FriendsListContentHash);
 
-        public static UIElement PartyInviteFromPlayerName
-        {
+        public static UIElement PartyInviteFromPlayerName => UIElement.FromHash(PartyInviteFromPlayerNameHash);
 
-            get { return UIElement.FromHash(PartyInviteFromPlayerNameHash); }
-        }
+        public static UIElement RequestToJoinPartyButton => UIElement.FromHash(RequestToJoinPartyButtonHash);
 
-        public static UIElement RequestToJoinPartyButton
-        {
-            get { return UIElement.FromHash(RequestToJoinPartyButtonHash); }
-        }
+        public static UIElement ToggleFriendsListButton => UIElement.FromHash(ToggleFriendsListButtonHash);
 
-        public static UIElement ToggleFriendsListButton
-        {
-            get { return UIElement.FromHash(ToggleFriendsListButtonHash); }
-        }
+        public static UIElement PartyInviteDialog => UIElement.FromHash(PartyInviteDialogHash);
 
-        public static UIElement PartyInviteDialog
-        {
-            get { return UIElement.FromHash(PartyInviteDialogHash); }
-        }
+        public static UIElement SocialFriendsListStackPanel => UIElement.FromName("Root.NormalLayer.BattleNetFriendsList_main.LayoutRoot.OverlayContainer.FriendsListContent.SocialListContainer.SocialList.FriendsListContainer.FriendsList._content._stackpanel");
 
-        public static UIElement SocialFriendsListStackPanel
-        {
-            //[212DE9D0] Mouseover: 0x6546288812192AFF, Name: Root.NormalLayer.BattleNetFriendsList_main.LayoutRoot.OverlayContainer
-            //.FriendsListContent.SocialListContainer.SocialList.FriendsListContainer.FriendsList._content._stackpanel._item0
-            get
-            {
-                return UIElement.FromName("Root.NormalLayer.BattleNetFriendsList_main.LayoutRoot.OverlayContainer.FriendsListContent.SocialListContainer.SocialList.FriendsListContainer.FriendsList._content._stackpanel"); 
-            }
-        }
-        public static UIElement SocialLocalPlayersStackPanel
-        {
-            //[1F09BAE0] Mouseover: 0x648E62A0B271E5BF, Name: Root.NormalLayer.BattleNetFriendsList_main.LayoutRoot.OverlayContainer
-            //.FriendsListContent.SocialListContainer.SocialList.LocalPlayersListContainer.LocalPlayersList._content._stackpanel._item0
-            get
-            {
-                return UIElement.FromName("Root.NormalLayer.BattleNetFriendsList_main.LayoutRoot.OverlayContainer.FriendsListContent.SocialListContainer.SocialList.LocalPlayersListContainer.LocalPlayersList._content._stackpanel");
-            }
-        }
+        public static UIElement SocialLocalPlayersStackPanel => UIElement.FromName("Root.NormalLayer.BattleNetFriendsList_main.LayoutRoot.OverlayContainer.FriendsListContent.SocialListContainer.SocialList.LocalPlayersListContainer.LocalPlayersList._content._stackpanel");
 
-        public static UIElement SocialRecentPlayersStackPanel
-        {
-            //Root.NormalLayer.BattleNetFriendsList_main.LayoutRoot.OverlayContainer.FriendsListContent.SocialListContainer.SocialList.RecentPlayersListContainer.RecentPlayersGroupHeader.ToggleRecentPlayerListButton
-            get
-            {
-                return UIElement.FromName("Root.NormalLayer.BattleNetFriendsList_main.LayoutRoot.OverlayContainer.FriendsListContent.SocialListContainer.SocialList.RecentPlayersListContainer.LocalPlayersList._content._stackpanel");
-            }
-        }
+        public static UIElement SocialRecentPlayersStackPanel => UIElement.FromName("Root.NormalLayer.BattleNetFriendsList_main.LayoutRoot.OverlayContainer.FriendsListContent.SocialListContainer.SocialList.RecentPlayersListContainer.LocalPlayersList._content._stackpanel");
 
 
+        public static UIElement SocialFlyoutButton => UIElement.FromHash(SocialFlyoutButtonHash);
 
-        public static UIElement SocialFlyoutButton
-        {
-            get { return UIElement.FromHash(SocialFlyoutButtonHash); }
-        }
+        public static UIElement PartyInviteCancelButton => UIElement.FromHash(PartyInviteCancelHash);
 
-        public static UIElement PartyInviteCancelButton
-        {
-            get { return UIElement.FromHash(PartyInviteCancelHash); }
-        }
+        public static UIElement SocialFilterInputBox => UIElement.FromHash(SocialFilterInputBoxHash);
 
-        public static UIElement SocialFilterInputBox
-        {
-            get { return UIElement.FromHash(SocialFilterInputBoxHash); }
-        }
+        public static UIElement SocialFilterInputClearButton => UIElement.FromHash(SocialFilterInputClearButtonHash);
 
-        public static UIElement SocialFilterInputClearButton
-        {
-            get { return UIElement.FromHash(SocialFilterInputClearButtonHash); }
-        }
+        public static UIElement StashWindow => UIElements.StashWindow;
 
-        public static UIElement StashWindow
-        {
-            get { return UIElements.StashWindow; }
-        }
+        public static UIElement KanaisCubeWindow => UIElement.FromHash(0xCF916D15D32769F9);
 
-        public static UIElement KanaisCubeWindow
-        {
-            get { return UIElement.FromHash(0xCF916D15D32769F9); }
-        }
+        public static UIElement ChinaStoreCloseButton => UIElement.FromHash(0xCDD29D7F6A61DAD8);
 
-        public static UIElement ChinaStoreCloseButton
-        {
-            get { return UIElement.FromHash(0xCDD29D7F6A61DAD8); }
-        }
+        public static UIElement CloseCreditsButton => UIElement.FromHash(0x981391BBDF64B009);
 
-        public static UIElement CloseCreditsButton
-        {
-            get { return UIElement.FromHash(0x981391BBDF64B009); }
-        }
+        public static UIElement PatchOKButton => UIElement.FromHash(patchOKButton);
 
-        public static UIElement PatchOKButton
-        {
-            get { return UIElement.FromHash(patchOKButton); }
-        }
+        public static UIElement RiftCompleteOkButton => UIElement.FromHash(riftCompleteOkButton);
 
-        public static UIElement RiftCompleteOkButton
-        {
-            get { return UIElement.FromHash(riftCompleteOkButton); }
-        }
+        public static UIElement StashDialogMainPage => UIElement.FromHash(0xB83F0423F7247928);
 
-        public static UIElement StashDialogMainPage
-        {
-            get { return UIElement.FromHash(0xB83F0423F7247928); }
-        }
+        public static UIElement StashDialogMainPageTab1 => UIElement.FromHash(0x276522EDF3238841);
 
-        public static UIElement StashDialogMainPageTab1
-        {
-            get { return UIElement.FromHash(0x276522EDF3238841); }
-        }
+        public static UIElement JoinRiftButton => UIElement.FromHash(0x42E152B771A6BCC1);
 
-        public static UIElement JoinRiftButton
-        {
-            get { return UIElement.FromHash(0x42E152B771A6BCC1); }
-        }
+        public static UIElement EmpoweredRiftToggle => UIElement.FromHash(0x6CC852143ECBE40F);
 
-        public static UIElement EmpoweredRiftToggle
-        {
-            get { return UIElement.FromHash(0x6CC852143ECBE40F); }
-        }
+        public static UIElement ReviveAtCorpseButton => UIElement.FromHash(0xE3CBD66296A39588);
 
-        public static UIElement ReviveAtCorpseButton
-        {
-            get { return UIElement.FromHash(0xE3CBD66296A39588); }
-        }
+        public static UIElement ReviveAtCheckpointButton => UIElement.FromHash(0xBFAAF48BA9316742);
 
-        public static UIElement ReviveAtCheckpointButton
-        {
-            get { return UIElement.FromHash(0xBFAAF48BA9316742); }
-        }
+        public static UIElement ReviveInTownButton => UIElement.FromHash(0x7A2AF9C0F3045ADA);
 
-        public static UIElement ReviveInTownButton
-        {
-            get { return UIElement.FromHash(0x7A2AF9C0F3045ADA); }
-        }
+        public static UIElement SalvageAllNormalsButton => UIElement.FromHash(salvageAllNormalsButton);
 
-        public static UIElement SalvageAllNormalsButton
-        {
-            get { return UIElement.FromHash(salvageAllNormalsButton); }
-        }
+        public static UIElement SalvageAllMagicsButton => UIElement.FromHash(salvageAllMagicsButton);
 
-        public static UIElement SalvageAllMagicsButton
-        {
-            get { return UIElement.FromHash(salvageAllMagicsButton); }
-        }
+        public static UIElement SalvageAllRaresButton => UIElement.FromHash(salvageAllRaresButton);
 
-        public static UIElement SalvageAllRaresButton
-        {
-            get { return UIElement.FromHash(salvageAllRaresButton); }
-        }
+        public static UIElement GamePotion => UIElement.FromHash(gamePotionHash);
 
-        public static UIElement GamePotion
-        {
-            get { return UIElement.FromHash(gamePotionHash); }
-        }
+        public static UIElement BountyRewardDialog => UIElement.FromHash(bountyRewardDialogHash);
 
-        public static UIElement BountyRewardDialog
-        {
-            get { return UIElement.FromHash(bountyRewardDialogHash); }
-        }
+        public static UIElement PotionButton => UIElement.FromHash(potionButtonHash);
 
-        public static UIElement PotionButton
-        {
-            get { return UIElement.FromHash(potionButtonHash); }
-        }
+        public static UIElement ConfirmTimedDungeonOK => UIElement.FromHash(confirmTimedDungeonOKHash);
 
-        public static UIElement ConfirmTimedDungeonOK
-        {
-            get { return UIElement.FromHash(confirmTimedDungeonOKHash); }
-        }
+        public static UIElement MercenaryOKButton => UIElement.FromHash(mercenaryOKHash);
 
-        public static UIElement MercenaryOKButton
-        {
-            get { return UIElement.FromHash(mercenaryOKHash); }
-        }
+        public static UIElement ConversationSkipButton => UIElement.FromHash(conversationSkipHash);
 
-        public static UIElement ConversationSkipButton
-        {
-            get { return UIElement.FromHash(conversationSkipHash); }
-        }
+        public static UIElement PartyLeaderBossAccept => UIElement.FromHash(partyLeaderBossAcceptHash);
 
-        public static UIElement PartyLeaderBossAccept
-        {
-            get { return UIElement.FromHash(partyLeaderBossAcceptHash); }
-        }
+        public static UIElement PartyFollowerBossAccept => UIElement.FromHash(partyFollowerBossAcceptHash);
 
-        public static UIElement PartyFollowerBossAccept
-        {
-            get { return UIElement.FromHash(partyFollowerBossAcceptHash); }
-        }
+        public static UIElement GenericOK => UIElement.FromHash(genericOKHash);
 
-        public static UIElement GenericOK
-        {
-            get { return UIElement.FromHash(genericOKHash); }
-        }
+        public static UIElement TalktoInteractButton1 => UIElement.FromHash(talkToInteractButton1Hash);
 
-        public static UIElement TalktoInteractButton1
-        {
-            get { return UIElement.FromHash(talkToInteractButton1Hash); }
-        }
+        public static UIElement StashBuyNewTabButton => UIElement.FromHash(stashBuyNewTabButtonHash);
 
-        public static UIElement StashBuyNewTabButton
-        {
-            get { return UIElement.FromHash(stashBuyNewTabButtonHash); }
-        }
+        public static UIElement TieredRiftRewardContinueButton => UIElement.FromHash(tieredRiftRewardContinueHash);
 
-        public static UIElement TieredRiftRewardContinueButton
-        {
-            get { return UIElement.FromHash(tieredRiftRewardContinueHash); }
-        }
+        public static bool IsPartyDialogVisible => IsElementVisible(PartyFollowerBossAccept) || IsElementVisible(PartyLeaderBossAccept);
 
-        public static bool IsPartyDialogVisible
-        {
-            get { return IsElementVisible(PartyFollowerBossAccept) || IsElementVisible(PartyLeaderBossAccept); }
-        }
+        public static UIElement OutOfGameLeavePartyButton => UIElement.FromHash(OutOfGameLeavePartyButtonHash);
 
-        public static UIElement OutOfGameLeavePartyButton
-        {
-            get { return UIElement.FromHash(OutOfGameLeavePartyButtonHash); }
-        }
+        public static UIElement PlayGameButton => UIElement.FromHash(PlayGameButtonHash);
 
-        public static UIElement PlayGameButton
-        {
-            get { return UIElement.FromHash(PlayGameButtonHash); }
-        }
+        public static UIElement ChangeQuestButton => UIElement.FromHash(ChangeQuestButtonHash);
 
-        public static UIElement ChangeQuestButton
-        {
-            get { return UIElement.FromHash(ChangeQuestButtonHash); }
-        }
+        public static UIElement BattleNetOK => UIElement.FromHash(BattleNetOKHash);
 
-        public static UIElement BattleNetOK
-        {
-            get { return UIElement.FromHash(BattleNetOKHash); }
-        }
+        public static UIElement MercenaryPartyOK => UIElement.FromHash(MercenaryPartyOKHash);
 
-        public static UIElement MercenaryPartyOK
-        {
-            get { return UIElement.FromHash(MercenaryPartyOKHash); }
-        }
+        public static UIElement PartyInviteOK => UIElement.FromHash(PartyInviteOKHash);
 
-        public static UIElement PartyInviteOK
-        {
-            get { return UIElement.FromHash(PartyInviteOKHash); }
-        }
-
-        public static UIElement CustomizeBannerClose
-        {
-            get { return UIElement.FromHash(CustomizeBannerCloseHash); }
-        }
+        public static UIElement CustomizeBannerClose => UIElement.FromHash(CustomizeBannerCloseHash);
 
         // this is used to check if we are in a party, from the game menu
-        public static UIElement PartySlot2Icon
-        {
-            get { return UIElement.FromHash(PartySlot2IconHash); }
-        }
+        public static UIElement PartySlot2Icon => UIElement.FromHash(PartySlot2IconHash);
 
-        public static UIElement LeaveGameButton
-        {
-            get { return UIElement.FromHash(LeaveGameButtonHash); }
-        }
+        public static UIElement LeaveGameButton => UIElement.FromHash(LeaveGameButtonHash);
 
         public static bool IsElementVisible(UIElement element)
         {

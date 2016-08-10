@@ -111,15 +111,9 @@ namespace AutoFollow.Events
             LastBotStartedTime = DateTime.UtcNow;
         }
 
-        public static TimeSpan BotRunningTime
-        {
-            get
-            {
-                return BotMain.IsRunning
-                    ? DateTime.UtcNow.Subtract(LastBotStartedTime)
-                    : LastBotStoppedTime.Subtract(LastBotStartedTime);
-            }
-        }
+        public static TimeSpan BotRunningTime => BotMain.IsRunning
+            ? DateTime.UtcNow.Subtract(LastBotStartedTime)
+            : LastBotStoppedTime.Subtract(LastBotStartedTime);
 
         private static void GameEvents_OnWorldTransferStart(object sender, EventArgs e)
         {

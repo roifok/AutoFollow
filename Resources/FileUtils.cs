@@ -40,21 +40,9 @@ namespace AutoFollow.Resources
             }
         }
 
-        public static string SettingsFolder
-        {
-            get
-            {
-                return Path.Combine(DemonBuddyPath, "Settings", ZetaDia.Service.Hero.BattleTagName, "AutoFollow", ZetaDia.Service.Hero.HeroId.ToString());
-            }
-        }    
+        public static string SettingsFolder => Path.Combine(DemonBuddyPath, "Settings", ZetaDia.Service.Hero.BattleTagName, "AutoFollow", ZetaDia.Service.Hero.HeroId.ToString());
 
-        public static string SettingsPath
-        {
-            get
-            {
-                return Path.Combine(DemonBuddyPath, "Settings", ZetaDia.Service.Hero.BattleTagName, "AutoFollow", ZetaDia.Service.Hero.HeroId.ToString(), "Config.json");
-            }
-        }
+        public static string SettingsPath => Path.Combine(DemonBuddyPath, "Settings", ZetaDia.Service.Hero.BattleTagName, "AutoFollow", ZetaDia.Service.Hero.HeroId.ToString(), "Config.json");
 
         public static void WriteToTextFile(string path, string value)
         {

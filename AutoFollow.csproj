@@ -34,9 +34,6 @@
     <RootNamespace>AutoFollow</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Adventurer">
-      <HintPath>..\Adventurer\Trunk\bin\Debug\Adventurer.dll</HintPath>
-    </Reference>
     <Reference Include="Demonbuddy">
       <HintPath>..\..\DB-Current\Demonbuddy.exe</HintPath>
     </Reference>
@@ -60,8 +57,9 @@
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="Trinity">
-      <HintPath>..\Trinity 2x\Trunk\bin\Debug\Trinity.dll</HintPath>
+    <Reference Include="Trinity, Version=1.7.3.8, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\_Trinity New 2x\bin\Release\Trinity.dll</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
   </ItemGroup>
@@ -113,14 +111,12 @@
     <Compile Include="Resources\GameUI.cs" />
     <Compile Include="Resources\Interactable.cs" />
     <Compile Include="Resources\InterfaceLoader.cs" />
-    <Compile Include="Resources\IPluginCommunicator.cs" />
     <Compile Include="Resources\ITargetable.cs" />
     <Compile Include="Resources\Log.cs" />
     <Compile Include="Resources\MathUtil.cs" />
     <Compile Include="Resources\MemoryHelper.cs" />
     <Compile Include="Resources\Player.cs" />
     <Compile Include="Resources\Navigation.cs" />
-    <Compile Include="Resources\PluginCommunicator.cs" />
     <Compile Include="Resources\RiftHelper.cs" />
     <Compile Include="Resources\SimpleAES.cs" />
     <Compile Include="Resources\StackPanelReader.cs" />

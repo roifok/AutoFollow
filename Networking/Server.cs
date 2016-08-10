@@ -31,26 +31,26 @@ namespace AutoFollow.Networking
         {
             try
             {
-                if (Server.ServiceHost == null)
+                if (ServiceHost == null)
                     return;
 
-                if (Server.ServiceHost.State == CommunicationState.Faulted)
+                if (ServiceHost.State == CommunicationState.Faulted)
                 {
                     Log.Info("Aborting Faulted Server Service");
-                    Server.ServiceHost.Abort();
+                    ServiceHost.Abort();
                     return;
                 }
 
                 Log.Info("Closing Server Service");
-                Server.ServiceHost.Close();
+                ServiceHost.Close();
             }
             catch (CommunicationObjectFaultedException ex)
             {
-                Log.Debug("Client tried to close server connection but it is faulted.");
+                Log.Debug("Tried to close server connection but it is faulted.");
             }
             finally
             {
-                Server.ServiceHost = null;
+                ServiceHost = null;
             }
         }
 
@@ -114,9 +114,7 @@ namespace AutoFollow.Networking
                 ServiceHost.Open();
 
                 IsInitialized = true;
-
-                if (OnServerInitialized != null)
-                    OnServerInitialized.Invoke();
+                OnServerInitialized?.Invoke();
             }
             catch (AddressAlreadyInUseException ex)
             {
@@ -124,24 +122,14 @@ namespace AutoFollow.Networking
                 Log.Debug(ex.ToString());
                 DontAttemptServerModeUntil = DateTime.UtcNow.Add(TimeSpan.FromSeconds(30));
                 LastFailTime = DateTime.UtcNow;
-                Server.ShutdownServer();
+                ShutdownServer();
                 Client.ShutdownClient();
-
-                if (!Service.ForceConnectionMode)
-                {
-                    Service.ConnectionMode = ConnectionMode.Client;
-                }
             }
             catch (Exception ex)
             {
                 Log.Verbose("Could not initialize service. Do you already have a leader started? Attempt={0}", ServerStartAttempts);
                 Log.Debug(ex.ToString());
                 LastFailTime = DateTime.UtcNow;
-            }
-
-            if (!Service.ForceConnectionMode && ServerStartAttempts > 5 && !IsValid)
-            {
-                Service.ConnectionMode = ConnectionMode.Client;
             }
         }
 
@@ -182,9 +170,7 @@ namespace AutoFollow.Networking
                 LastSummaryTime = DateTime.UtcNow;
             }
 
-            if (OnServerUpdated != null)
-                OnServerUpdated.Invoke(AutoFollow.ClientMessages);
-
+            OnServerUpdated?.Invoke(AutoFollow.ClientMessages);
             LastServerUpdate = DateTime.UtcNow;
         }
 

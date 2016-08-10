@@ -7,7 +7,7 @@ using AutoFollow.Events;
 using AutoFollow.Networking;
 using AutoFollow.Resources;
 using Buddy.Coroutines;
-using Org.BouncyCastle.Utilities.Date;
+using Trinity.Components.Adventurer;
 using Zeta.Bot;
 using Zeta.Bot.Logic;
 using Zeta.Game;
@@ -30,10 +30,7 @@ namespace AutoFollow.Coroutines
 
         private static DateTime _waitUntil = DateTime.MinValue;
 
-        public static DateTime WaitUntil
-        {
-            get { return _waitUntil; }
-        }
+        public static DateTime WaitUntil => _waitUntil;
 
         public static void WaitFor(TimeSpan time, Func<bool> condition = null)
         {
@@ -112,7 +109,7 @@ namespace AutoFollow.Coroutines
             if (RiftHelper.IsGreaterRiftStarted)
                 return false;
 
-            var tag = Adventurer.Adventurer.GetCurrentTag();
+            var tag = Adventurer.GetCurrentTag();
             if (tag != "GreaterRiftTag" && tag != "NephalemRiftTag" && tag != "RiftTag")
                 return false;            
         

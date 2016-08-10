@@ -26,15 +26,9 @@ namespace AutoFollow.Resources
             get { return ZetaDia.Actors.GetActorsOfType<DiaUnit>(true).Where(u => IsValid(u) && u.IsHostile && !u.IsDead).ToList(); }
         }
 
-        public static List<DiaObject> Actors
-        {
-            get { return ZetaDia.Actors.GetActorsOfType<DiaObject>(true).Where(IsValid).ToList(); }
-        }
+        public static List<DiaObject> Actors => ZetaDia.Actors.GetActorsOfType<DiaObject>(true).Where(IsValid).ToList();
 
-        public static List<MinimapMarker> Markers
-        {
-            get { return ZetaDia.Minimap.Markers.CurrentWorldMarkers.ToList(); }
-        }
+        public static List<MinimapMarker> Markers => ZetaDia.Minimap.Markers.CurrentWorldMarkers.ToList();
 
         public static List<DiaPlayer> Players
         {

@@ -146,10 +146,7 @@ namespace AutoFollow.Resources
         /// <summary>
         /// Time since last update in Milliseconds
         /// </summary>
-        public double Age
-        {
-            get { return DateTime.UtcNow.Subtract(LastUpdate).TotalMilliseconds; }
-        }
+        public double Age => DateTime.UtcNow.Subtract(LastUpdate).TotalMilliseconds;
 
         internal void Invalidate()
         {

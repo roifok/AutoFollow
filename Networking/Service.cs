@@ -90,13 +90,12 @@ namespace AutoFollow.Networking
             if (IsConnected)
                 return true;
 
-            var tooManyAutoAttempts = Server.ServerStartAttempts > 20 && Client.ConnectionAttempts > 20;
-            var tooManyClientAttempts = ForceConnectionMode && ConnectionMode == ConnectionMode.Client && Client.ConnectionAttempts > 100;
-            var tooManyServerAttempts = ForceConnectionMode && ConnectionMode == ConnectionMode.Server && Server.ServerStartAttempts > 40;
-            if (tooManyAutoAttempts || tooManyClientAttempts || tooManyServerAttempts)
+            var tooManyClientAttempts = ConnectionMode == ConnectionMode.Client && Client.ConnectionAttempts > 100;
+            var tooManyServerAttempts = ConnectionMode == ConnectionMode.Server && Server.ServerStartAttempts > 40;
+            if (tooManyClientAttempts || tooManyServerAttempts)
             {
                 Log.Info("Failed to Connect too many times, Disabling Plugin");
-                AutoFollow.DisablePlugin();
+                AutoFollow.DeselectPlugin();
             }
 
             if (ConnectionMode == ConnectionMode.Client)
@@ -136,8 +135,12 @@ namespace AutoFollow.Networking
                     if (!IsConnected)
                         Connect(ConnectionMode);
 
-                    if (OnUpdatePreview != null)
-                        OnUpdatePreview.Invoke();
+                    OnUpdatePreview?.Invoke();
+
+                    if (ConnectionMode == ConnectionMode.Client && Server.IsValid && Server.IsInitialized)
+                    {
+                        Server.ShutdownServer();
+                    }
 
                     if (ConnectionMode == ConnectionMode.Server)
                     {
@@ -145,16 +148,10 @@ namespace AutoFollow.Networking
                     }
                     else
                     {
-                        if (Server.IsValid && Server.IsInitialized)
-                        {
-                            Server.ShutdownServer();
-                        }
-
                         Client.ClientUpdate();
                     }
 
-                    if (OnUpdated != null)
-                        OnUpdated.Invoke();
+                    OnUpdated?.Invoke();
                 }
                 catch (ThreadAbortException e)
                 {
@@ -209,6 +206,15 @@ namespace AutoFollow.Networking
             {
                 Log.Info("Error in UpdateUri: {0}", ex);
             }
+        }
+
+        public static void Disconnect()
+        {
+            if (Server.ServiceHost != null && Server.ServiceHost.State != CommunicationState.Closed)
+                Server.ShutdownServer();
+
+            if (ConnectionMode == ConnectionMode.Client)
+                Client.ShutdownClient();
         }
     }
 }

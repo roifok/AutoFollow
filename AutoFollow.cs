@@ -19,65 +19,80 @@ using Zeta.Bot.Logic;
 using Zeta.Common;
 using Zeta.Common.Plugins;
 using Zeta.Game;
-using Zeta.TreeSharp;
 using EventManager = AutoFollow.Events.EventManager;
-using System.IO;
-using System.Xml.Linq;
-using System.Xml.XPath;
 
 namespace AutoFollow
 {
-    public class AutoFollow : ICommunicationEnabledPlugin
+    public class AutoFollow : IPlugin
     {
+        #region IPlugin Members
+
+        public Version Version => PluginVersion;
+
+        public string Author => "xzjv";
+
+        public string Description => "Co-op made better";
+
+        public Window DisplayWindow => UILoader.GetSettingsWindow();
+
+        public string Name => "AutoFollow";
+
+        public void OnEnabled() => Enable();
+
+        public void OnDisabled() => Disable();
+
+        public void OnPulse() => Pulse();
+
+        public void OnInitialize() => Initialize();
+
+        public void OnShutdown() { }
+
+        public bool Equals(IPlugin other) => (other.Name == Name) && (other.Version == Version);
+
+        #endregion
+
         public AutoFollow()
         {
-            // Find and load all IBehavior instances
             Behaviors = new InterfaceLoader<IBehavior>();
             Instance = this;
         }
 
         public static AutoFollow Instance { get; set; }
-
-        public PluginCommunicationResponse Receive(IPlugin sender, string command, params object[] args)
-        {
-            return PluginCommunicator.Receive(sender, command, args);
-        }
-
         public static InterfaceLoader<IBehavior> Behaviors;
-        public static Version PluginVersion = new Version(1, 0, 23);
+        public static Version PluginVersion = new Version(1, 0, 27);
         internal static bool Enabled;
         internal static Message ServerMessage = new Message();
         internal static Dictionary<int, Message> ClientMessages = new Dictionary<int, Message>();
         internal static IBehavior LeaderBehavior = new Leader();
         internal static IBehavior FollowerBehavior = new FollowerCombat();
         internal static IBehavior DefaultBehavior = new BaseBehavior();
-        internal static List<Message> CurrentParty = new List<Message>();
-        internal static List<Message> CurrentFollowers = new List<Message>();
-        internal static Message CurrentLeader = new Message();
+        public static List<Message> CurrentParty = new List<Message>();
+        public static List<Message> CurrentFollowers = new List<Message>();
+        public static Message CurrentLeader = new Message();
         public static int NumberOfConnectedBots;
         public static BehaviorType CurrentBehaviorType;
         private static DateTime _lastSelectedBehavior = DateTime.MinValue;
-
         private static IBehavior _currentBehavior;
+
         public static IBehavior CurrentBehavior
         {
-            get { return AutoFollow._currentBehavior; }
+            get { return _currentBehavior; }
             set
             {
-                if (value == null || AutoFollow._currentBehavior == value)
+                if (value == null || _currentBehavior == value)
                     return;
 
-                if (AutoFollow._currentBehavior != null)
+                if (_currentBehavior != null)
                 {
-                    AutoFollow._currentBehavior.Deactivate();
-                    Log.Warn("Changing behavior type from {0} to {1}", AutoFollow._currentBehavior.Name, value.Name);
+                    _currentBehavior.Deactivate();
+                    Log.Warn("Changing behavior type from {0} to {1}", _currentBehavior.Name, value.Name);
 
                     // Important: need to restart profile or behavior hooks will still run even after being removed.
                     ProfileManager.Load(ProfileManager.CurrentProfile.Path);
                 }
 
-                AutoFollow._currentBehavior = value;
-                AutoFollow._currentBehavior.Activate();
+                _currentBehavior = value;
+                _currentBehavior.Activate();
             }
         }
 
@@ -89,7 +104,7 @@ namespace AutoFollow
 
         }
 
-        internal static void Pulse()
+        public static void Pulse()
         {
             if (!Enabled)
                 return;
@@ -174,35 +189,6 @@ namespace AutoFollow
                 return;
             }
 
-            //// Check if our tag has been started within profile.
-            //if (AutoFollowTag.Current != null && AutoFollowTag.Current.CurrentBehavior != null)
-            //{
-            //    if (CurrentBehavior == AutoFollowTag.Current.CurrentBehavior)
-            //        return;
-
-            //    CurrentBehavior = AutoFollowTag.Current.CurrentBehavior;
-            //    return;
-            //}
-
-            // Check if profile contains our tag.       
-            //if (ProfileHasTag("AutoFollow"))
-            //{
-            //    Log.Verbose("AutoFollow Tag was found in profile");
-            //    CurrentBehavior = FollowerBehavior;
-            //    return;
-            //}
-
-            //var profileTag = GetProfileTag("AutoFollow");
-            //if (profileTag == null)
-            //{
-            //    if (profileTag.HasAttributes)
-            //    {
-            //        var behavior = profileTag.Attribute("behavior");
-            //        if (behavior.Value.ToLower().Contains("leadermanual"));
-            //    }
-            //    var attr = 
-            //}
-
             CurrentBehavior = LeaderBehavior;
         }
 
@@ -235,7 +221,7 @@ namespace AutoFollow
             if (!string.IsNullOrEmpty(name))
             {
                 IBehavior behavior;
-                if (AutoFollow.Behaviors.Items.TryGetValue(name, out behavior) && CurrentBehavior != behavior)
+                if (Behaviors.Items.TryGetValue(name, out behavior) && CurrentBehavior != behavior)
                 {
                     Log.Info("Loading behavior: {0}", name);
                     CurrentBehavior = behavior;
@@ -244,12 +230,12 @@ namespace AutoFollow
             else
             {
                 Log.Info("Requested behavior '{0}' was not found", name);
-                CurrentBehavior = AutoFollow.DefaultBehavior;
+                CurrentBehavior = DefaultBehavior;
                 BotMain.Stop();
             }
         }
 
-        public static void DisablePlugin()
+        public static void DeselectPlugin()
         {
             Enabled = false;
             var thisPlugin = PluginManager.Plugins.FirstOrDefault(p => p.Plugin.Name == "AutoFollow");
@@ -257,37 +243,24 @@ namespace AutoFollow
                 thisPlugin.Enabled = false;
         }
 
-        #region IPlugin Members
-
-        public Version Version
+        private void Disable()
         {
-            get { return AutoFollow.PluginVersion; }
+            Enabled = false;
+            Log.Info("Plugin disabled! ");
+            CurrentBehavior?.Deactivate();
+            BotMain.OnStart -= BotMain_OnStart;
+            BotMain.OnStop -= BotMain_OnStop;
+            EventManager.Disable();
+            EventManager.OnPulseOutOfGame -= Pulse;
+            Service.OnUpdatePreview -= ServiceOnUpdatePreview;
+            BotHistory.Disable();
+            TabUi.RemoveTab();
+            ChangeMonitor.Disable();
         }
 
-        public string Author
-        {
-            get { return "xzjv"; }
-        }
-
-        public string Description
-        {
-            get { return "Co-op made better"; }
-        }
-
-        public Window DisplayWindow
-        {
-            get { return UILoader.GetSettingsWindow(); }
-        }
-
-        public string Name
-        {
-            get { return "AutoFollow"; }
-        }
-
-        public void OnEnabled()
+        private void Enable()
         {
             if (!Application.Current.CheckAccess()) return;
-
             Enabled = true;
             Log.Info(" v{0} Enabled", Version);
             BotMain.OnStart += BotMain_OnStart;
@@ -297,53 +270,17 @@ namespace AutoFollow
             BotHistory.Enable();
             TabUi.InstallTab();
             ChangeMonitor.Enable();
-
             Server.ServerStartAttempts = 0;
             Client.ConnectionAttempts = 0;
-
             Service.Connect();
             CommunicationThread.ThreadStart();
-
-            // When start button is clicked, hooks are cleared,
             TreeHooks.Instance.OnHooksCleared += OnHooksCleared;
         }
 
-        //private void OnProfileLoaded(object sender, EventArgs eventArgs)
-        //{
-        //    if (!Enabled) return;
-
-        //    SelectBehavior();
-        //}
-
         private void OnHooksCleared(object sender, EventArgs e)
         {
-            // Need to activate current behavior to ensure its hooks are added before game is started.
             CurrentBehavior.Activate();
         }
-
-        public void OnDisabled()
-        {
-            Enabled = false;
-            Log.Info("Plugin disabled! ");
-
-            if(CurrentBehavior != null)
-                CurrentBehavior.Deactivate();
-
-            BotMain.OnStart -= BotMain_OnStart;
-            BotMain.OnStop -=  BotMain_OnStop;
-            EventManager.Disable();
-            EventManager.OnPulseOutOfGame += Pulse;
-            Service.OnUpdatePreview -= ServiceOnUpdatePreview;
-            BotHistory.Disable();
-            TabUi.RemoveTab();
-            ChangeMonitor.Disable();
-        }
-
-        public void OnPulse()
-        {
-            Pulse();
-        }
-
 
         private void BotMain_OnStart(IBot bot)
         {
@@ -359,27 +296,24 @@ namespace AutoFollow
 
         private void BotMain_OnStop(IBot bot)
         {
+            if (Service.IsConnected)
+            {
+                Service.Disconnect();
+                CommunicationThread.ThreadShutdown();
+                CurrentParty.Clear();
+                ServerMessage = null;
+                ClientMessages.Clear();                
+            }
             CurrentBehavior.Deactivate();
         }
 
-        public void OnInitialize()
+        private static void Initialize()
         {
             if (!Application.Current.CheckAccess()) return;
 
             Conditions.Initialize();
             Service.Initialize();
         }
-
-        public void OnShutdown()
-        {
-        }
-
-        public bool Equals(IPlugin other)
-        {
-            return (other.Name == Name) && (other.Version == Version);
-        }
-
-        #endregion
 
         public static Message GetUpdatedMessage(Message message)
         {
@@ -389,8 +323,12 @@ namespace AutoFollow
         public static Vector3 GetUpdatedPosition(Message message)
         {
             var partyMember = GetUpdatedMessage(message);
-            return partyMember != null ? partyMember.Position : Vector3.Zero;
+            return partyMember?.Position ?? Vector3.Zero;
         }
+
+
+
+
 
     }
 }

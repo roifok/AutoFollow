@@ -15,7 +15,7 @@ namespace AutoFollow.Networking
     {
         private static ChannelFactory<IService> _httpFactory;
         private static IService _httpProxy;
-        public static bool ClientInitialized { get; private set; }
+        public static bool ClientConnected { get; private set; }
         public static DateTime LastUnexpectedException = DateTime.MinValue;
         public static int ConnectionAttempts { get; set; }
         public static DateTime LastExpectedException = DateTime.MinValue;
@@ -41,10 +41,9 @@ namespace AutoFollow.Networking
 
             try
             {
-                if (!ClientInitialized && AutoFollow.Enabled)
+                if (!ClientConnected && AutoFollow.Enabled)
                 {
                     var serverPort = Settings.Network.ServerPort;
-
                     Server.ServerUri = new Uri(Server.ServerUri.AbsoluteUri.Replace(Server._basePort.ToString(), serverPort.ToString()));
 
                     Log.Info("Initializing Client Service connection to {0} Attempt={1}", Server.ServerUri.AbsoluteUri + "Follow", ConnectionAttempts);
@@ -61,16 +60,12 @@ namespace AutoFollow.Networking
                     };
 
                     binding.Security.Transport.ClientCredentialType = HttpClientCredentialType.None;
-
                     var endPointAddress = new EndpointAddress(Server.ServerUri.AbsoluteUri + "Follow/?wsdl");
-
                     _httpFactory = new ChannelFactory<IService>(binding, endPointAddress);
                     _httpProxy = _httpFactory.CreateChannel();
-                 
-                    if (OnClientInitialized != null)
-                        OnClientInitialized.Invoke();
 
-                    ClientInitialized = true;
+                    OnClientInitialized?.Invoke();
+                    ClientConnected = true;
                 }
             }
             catch (Exception ex)
@@ -80,12 +75,12 @@ namespace AutoFollow.Networking
             }
             finally 
             {
-               // _httpFactory.Close();
+
             }
 
-            if (ConnectionAttempts > 5 && !ClientInitialized && !Service.ForceConnectionMode)
+            if (ConnectionAttempts > 5 && !ClientConnected)
             {
-                Service.ConnectionMode = ConnectionMode.Server;
+                Thread.Sleep(5000);
             }
         }
 
@@ -105,13 +100,10 @@ namespace AutoFollow.Networking
                 _httpFactory = null;
                 _httpProxy = null;
             }
-            ClientInitialized = false;
+            ClientConnected = false;
         }
 
-        public static bool IsValid
-        {
-            get { return ClientInitialized && _httpProxy != null; }
-        }
+        public static bool IsValid => ClientConnected && _httpProxy != null;
 
         /// <summary>
         /// Called by Client, Receives Server Message and Sends Client Message
@@ -202,8 +194,7 @@ namespace AutoFollow.Networking
                         Log.Verbose("Received new unfired event {0} from {1}", e.Type, e.OwnerHeroAlias);
                 }
 
-                if (OnClientUpdated != null)
-                    OnClientUpdated.Invoke(AutoFollow.ServerMessage);
+                OnClientUpdated?.Invoke(AutoFollow.ServerMessage);
 
                 ConnectionAttempts = 0;
                 ExpectedExceptionCount = 0;
@@ -218,7 +209,7 @@ namespace AutoFollow.Networking
 
                 EarliestNextAttempt = DateTime.UtcNow.Add(TimeSpan.FromSeconds(5));
 
-                ClientInitialized = false;
+                ClientConnected = false;
 
                 if (!Service.ForceConnectionMode)
                 {
@@ -241,24 +232,11 @@ namespace AutoFollow.Networking
             catch (Exception ex)
             {
                 Log.Info("Exception: Could not get an update from the leader using {0}. Is the leader running?", _httpFactory.Endpoint.Address.Uri.AbsoluteUri);
-                ClientInitialized = false;
+                ClientConnected = false;
                 LastUnexpectedException = DateTime.UtcNow;
                 Log.Info(ex.ToString());
                 ConnectionAttempts++;
                 EarliestNextAttempt = DateTime.UtcNow.Add(TimeSpan.FromSeconds(5));
-            }
-
-            if (!Service.ForceConnectionMode)
-            {
-                if (ConnectionAttempts > 3)
-                {
-                    Service.ConnectionMode = ConnectionMode.Server;
-                }
-
-                if (ExpectedExceptionCount > 20)
-                {
-                    Service.ConnectionMode = ConnectionMode.Server;
-                }
             }
 
             _firstConnectionAttempt = false;

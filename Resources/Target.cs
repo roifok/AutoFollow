@@ -40,10 +40,7 @@ namespace AutoFollow.Resources
         public Vector3 Position { get; set; }
         public int WorldSnoId { get; set; }
 
-        public float Distance
-        {
-            get { return Player.Position.Distance(Position); }
-        }
+        public float Distance => Player.Position.Distance(Position);
 
         public override string ToString()
         {

@@ -25,20 +25,9 @@ namespace AutoFollow.Behaviors
 {
     public class FollowerCombat : BaseBehavior
     {
-        public override BehaviorCategory Category
-        {
-            get { return BehaviorCategory.Follower; }
-        }
-
-        public override BehaviorType Type
-        {
-            get { return BehaviorType.Follow; }
-        }
-
-        public override string Name
-        {
-            get { return "Follower Combat"; }
-        }
+        public override BehaviorCategory Category => BehaviorCategory.Follower;
+        public override BehaviorType Type => BehaviorType.Follow;
+        public override string Name => "Follower Combat";
 
         public override async Task<bool> OutOfGameTask()
         {

@@ -19,10 +19,7 @@ namespace AutoFollow.UI
         }
 
         [IgnoreDataMember]
-        public Type DerivedType
-        {
-            get { return _type ?? (_type = GetType()); }
-        }
+        public Type DerivedType => _type ?? (_type = GetType());
 
         protected static double CoerceValue(double value, double min, double max)
         {

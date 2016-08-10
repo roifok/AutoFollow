@@ -9,20 +9,11 @@ namespace AutoFollow.Behaviors
 {
     public class LeaderManual : BaseBehavior
     {
-        public override BehaviorCategory Category
-        {
-            get { return BehaviorCategory.Leader; }
-        }
+        public override BehaviorCategory Category => BehaviorCategory.Leader;
 
-        public override BehaviorType Type
-        {
-            get { return BehaviorType.Lead; }
-        }
+        public override BehaviorType Type => BehaviorType.Lead;
 
-        public override string Name
-        {
-            get { return "Leader Manual"; }
-        }
+        public override string Name => "Leader Manual";
 
         public override void OnActivated()
         {

@@ -18,10 +18,7 @@ namespace AutoFollow.Resources
             Load();
         }
 
-        public string SaveFilePath
-        {
-            get { return Path.Combine(FileUtils.SettingsFolder, FilenameWithoutExtension + ".json"); }
-        }
+        public string SaveFilePath => Path.Combine(FileUtils.SettingsFolder, FilenameWithoutExtension + ".json");
 
         public delegate void FileStoreEvent();
         public event FileStoreEvent Loaded = () => {};

@@ -39,15 +39,9 @@ namespace AutoFollow.Events
         public object NewValue { get; private set; }
         public int Id { get; private set; }
 
-        public bool IsMyEvent
-        {
-            get { return Player.BattleTagHash == OwnerId; }
-        }
+        public bool IsMyEvent => Player.BattleTagHash == OwnerId;
 
-        public TimeSpan Elapsed
-        {
-            get { return DateTime.UtcNow.Subtract(Time); }
-        }
+        public TimeSpan Elapsed => DateTime.UtcNow.Subtract(Time);
 
         public bool BreakExecution { get; private set; }
 

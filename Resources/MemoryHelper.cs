@@ -7,22 +7,13 @@ namespace AutoFollow.Resources
 {
     public static class MemoryHelperState
     {
-        public static bool InFramelock
-        {
-            get { return MemoryHelperLevel > 0; }
-        }
+        public static bool InFramelock => MemoryHelperLevel > 0;
 
-        public static uint CurrentFrame
-        {
-            get { return ZetaDia.Memory.Executor.FrameCount; }
-        }
+        public static uint CurrentFrame => ZetaDia.Memory.Executor.FrameCount;
 
         public static uint LastUpdatedActorsFrame { get; set; }
 
-        public static bool UpdatedActorsThisFrame
-        {
-            get { return CurrentFrame == LastUpdatedActorsFrame; }
-        }
+        public static bool UpdatedActorsThisFrame => CurrentFrame == LastUpdatedActorsFrame;
 
         public static int MemoryHelperLevel { get; set; }
     }

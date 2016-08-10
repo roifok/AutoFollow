@@ -88,15 +88,9 @@ namespace AutoFollow.Resources
             return _isProperBlocked;
         }
 
-        public static bool IsBlocked
-        {
-            get { return _isProperBlocked; }
-        }
+        public static bool IsBlocked => _isProperBlocked;
 
-        public static long BlockedTimeMs
-        {
-            get { return BlockedTimer.ElapsedMilliseconds; }
-        }
+        public static long BlockedTimeMs => BlockedTimer.ElapsedMilliseconds;
 
         #endregion
 
@@ -116,12 +110,6 @@ namespace AutoFollow.Resources
             return !Data.NavigationObstacles.Any(o => MathEx.IntersectsPath(o.Position, o.CollisionSphere.Radius, vStartLocation, vDestination));          
         }
 
-        internal static MainGridProvider MainGridProvider
-        {
-            get
-            {
-                return (MainGridProvider)Navigator.SearchGridProvider;
-            }
-        }
+        internal static MainGridProvider MainGridProvider => (MainGridProvider)Navigator.SearchGridProvider;
     }
 }

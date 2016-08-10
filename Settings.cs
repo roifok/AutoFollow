@@ -12,21 +12,12 @@ namespace AutoFollow
         private static FileStore<NetworkSettings> _network;
         private static FileStore<CoordinationSettings> _coordination;
         private static FileStore<MiscSettings> _misc;
+        private static FileStore<CombatSettings> _combat;
 
-        public static NetworkSettings Network
-        {
-            get { return _network.Source; }
-        }
-
-        public static CoordinationSettings Coordination
-        {
-            get { return _coordination.Source; }
-        }
-
-        public static MiscSettings Misc
-        {
-            get { return _misc.Source; }
-        }
+        public static NetworkSettings Network => _network.Source;
+        public static CoordinationSettings Coordination => _coordination.Source;
+        public static MiscSettings Misc => _misc.Source;
+        public static CombatSettings Combat => _combat.Source;
 
         public static SettingsViewModel ViewModel { get; set; }
 
@@ -40,12 +31,14 @@ namespace AutoFollow
             _network = new FileStore<NetworkSettings>();
             _coordination = new FileStore<CoordinationSettings>();
             _misc = new FileStore<MiscSettings>();
+            _combat = new FileStore<CombatSettings>();
 
             ViewModel = new SettingsViewModel
             {
                 Network = _network.Source,
                 Coordination = _coordination.Source,
-                Misc = _misc.Source
+                Misc = _misc.Source,
+                Combat = _combat.Source,
             };
 
             ApplyNetworkRoleSettings();
@@ -63,6 +56,7 @@ namespace AutoFollow
             _network.Save();
             _coordination.Save();
             _misc.Save();
+            _combat.Save();
         }
 
         public static void ApplyNetworkRoleSettings()
@@ -89,6 +83,7 @@ namespace AutoFollow
         public NetworkSettings Network { get; set; }
         public CoordinationSettings Coordination { get; set; }
         public MiscSettings Misc { get; set; }
+        public CombatSettings Combat { get; set; }
     }
 
     [DataContract]
@@ -132,14 +127,14 @@ namespace AutoFollow
         }
 
         [DataMember, Setting]
-        [DefaultValue(NetworkRole.Auto)]
+        [DefaultValue(NetworkRole.Client)]
         public NetworkRole Role
         {
             get { return _role; }
             set
             {
                 if (value == NetworkRole.None)
-                    SetField(ref _role, NetworkRole.Auto);
+                    SetField(ref _role, NetworkRole.Client);
                 else
                     SetField(ref _role, value);
             }
@@ -258,4 +253,30 @@ namespace AutoFollow
 
         
     }
+
+
+    [DataContract]
+    public class CombatSettings : NotifyBase
+    {
+        private bool _allowAvoidance;
+        private bool _allowKiting;
+
+        [DataMember, Setting]
+        [DefaultValue(true)]
+        public bool AllowAvoidance
+        {
+            get { return _allowAvoidance; }
+            set { SetField(ref _allowAvoidance, value); }
+        }
+
+        [DataMember, Setting]
+        [DefaultValue(true)]
+        public bool AllowKiting
+        {
+            get { return _allowKiting; }
+            set { SetField(ref _allowKiting, value); }
+        }
+
+    }
+
 }

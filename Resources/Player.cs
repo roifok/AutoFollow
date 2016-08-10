@@ -2,6 +2,8 @@
 using System.Linq;
 using AutoFollow.Events;
 using AutoFollow.Networking;
+using Trinity.Framework;
+using Trinity.Framework.Objects.API;
 using Zeta.Bot;
 using Zeta.Bot.Logic;
 using Zeta.Common;
@@ -35,7 +37,7 @@ namespace AutoFollow.Resources
         public static bool IsInTown { get; set; }
         public static bool IsInGame { get; set; }
         public static DateTime LastUpdate { get; set; }
-        public static bool IsValid { get { return ZetaDia.Me.IsValid; } }
+        public static bool IsValid => ZetaDia.Me.IsValid;
         public static bool IsVendoring { get; set; }
         public static ActorClass ActorClass { get; set; }
         public static int ActorId { get; set; }
@@ -60,6 +62,12 @@ namespace AutoFollow.Resources
         public static bool IsIdle { get; set; }
         public static bool IsCasting { get; set; }
         public static bool IsInBossEncounter { get; set; }
+        public static int Strength { get; set; }
+        public static int Dexterity { get; set; }
+        public static int Vitality { get; set; }
+        public static int Intelligence { get; set; }
+
+        public static Build Build { get; set; }
 
         public static int CachedLevelAreaId = -1;
         public static DateTime LastUpdatedLevelAreaId = DateTime.MinValue;
@@ -187,7 +195,7 @@ namespace AutoFollow.Resources
                     ActorId = ZetaDia.Me.ActorSnoId;
                     ActorClass = ZetaDia.Service.Hero.Class;
                     Level = ZetaDia.Service.Hero.Level;
-                    Paragon = ZetaDia.Service.Hero.ParagonLevel;
+                    Paragon = ZetaDia.Me.ParagonLevel;
                     HeroName = Common.CleanString(ZetaDia.Service.Hero.Name);
                     HeroId = ZetaDia.PlayerData.HeroId;
                     CurrentGameId = ZetaDia.Service.CurrentGameId;
@@ -212,6 +220,11 @@ namespace AutoFollow.Resources
                     FreeBackPackSlots = ZetaDia.Me.Inventory.NumFreeBackpackSlots;
                     IsDead = ZetaDia.Me.IsDead;
                     LastCastTownPortal = ChangeMonitor.LastCastTownPortal;
+                    Strength = (int)ZetaDia.Me.Strength;
+                    Intelligence = (int)ZetaDia.Me.Intelligence;
+                    Dexterity = (int)ZetaDia.Me.Dexterity;
+                    Vitality = (int)ZetaDia.Me.Vitality;
+
                 }
                 catch (Exception ex)
                 {
@@ -219,8 +232,17 @@ namespace AutoFollow.Resources
                 }
             }
 
+            if (DateTime.UtcNow.Subtract(LastSlowUpdate).TotalSeconds > 30)
+            {
+                Build = Core.Build.Current;
+                SettingsCode = Trinity.Settings.SettingsManager.GetCurrrentSettingsExportCode();
+                LastSlowUpdate = DateTime.UtcNow;
+            }
+            
             CurrentMessage = Message.GetMessage();
         }
+
+        public static DateTime LastSlowUpdate { get; set; }
 
 
         public static string GetProfileTagname()
@@ -338,10 +360,7 @@ namespace AutoFollow.Resources
                 RActorId, AcdId, HitpointsCurrent, HitpointsCurrentPct*100, HitpointsMaxTotal, Position, CurrentLevelAreaId, CurrentWorldSnoId, CurrentDynamicWorldId, IsInGame, IsInTown, IsVendoring, AutoFollow.CurrentBehaviorType, AutoFollow.CurrentBehavior.Category);
         }
 
-        public static int BattleTagHash
-        {
-            get { return ZetaDia.Service.Hero.BattleTagName.GetHashCode(); }
-        }
+        public static int BattleTagHash => ZetaDia.Service.Hero.BattleTagName.GetHashCode();
 
         public static int NumPlayersInParty
         {
@@ -402,31 +421,16 @@ namespace AutoFollow.Resources
         //    }
         //}
 
-        public static bool IsInParty
-        {
-            get { return NumPlayersInParty > 1; }
-        }
+        public static bool IsInParty => NumPlayersInParty > 1;
 
-        public static bool IsClient
-        {
-            get { return Service.ConnectionMode == ConnectionMode.Client; }
-        }
+        public static bool IsClient => Service.ConnectionMode == ConnectionMode.Client;
 
-        public static bool IsServer
-        {
-            get { return Service.ConnectionMode == ConnectionMode.Server; }
-        }
+        public static bool IsServer => Service.ConnectionMode == ConnectionMode.Server;
 
-        public static bool IsLeader
-        {
-            get { return AutoFollow.CurrentLeader != null && CurrentMessage != null && CurrentMessage.OwnerId == AutoFollow.CurrentLeader.OwnerId; }
-        }
+        public static bool IsLeader => AutoFollow.CurrentLeader != null && CurrentMessage != null && CurrentMessage.OwnerId == AutoFollow.CurrentLeader.OwnerId;
 
-        public static bool IsFollower
-        {
-            get { return !IsLeader; }
-        }
+        public static bool IsFollower => !IsLeader;
 
-
+        public static string SettingsCode { get; set; }
     }
 }

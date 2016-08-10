@@ -43,20 +43,11 @@ namespace AutoFollow.Resources
         public int WorldSnoId { get; set; }
         public DateTime LastTimeCloseTo { get; set; }
 
-        public bool IsHearthPortal
-        {
-            get { return ActorSnoId == 191492;  }
-        }
+        public bool IsHearthPortal => ActorSnoId == 191492;
 
-        public bool IsWorldEntryPoint
-        {
-            get { return GizmoType == GizmoType.Portal && Marker != null && Marker.IsPortalEntrance; }
-        }
+        public bool IsWorldEntryPoint => GizmoType == GizmoType.Portal && Marker != null && Marker.IsPortalEntrance;
 
-        public bool IsWorldExitPoint
-        {
-            get { return GizmoType == GizmoType.Portal && Marker != null && Marker.IsPortalExit; }
-        }
+        public bool IsWorldExitPoint => GizmoType == GizmoType.Portal && Marker != null && Marker.IsPortalExit;
 
         [IgnoreDataMember]
         public MinimapMarker Marker
