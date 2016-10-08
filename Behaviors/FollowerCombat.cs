@@ -5,11 +5,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoFollow.Behaviors.Structures;
 using AutoFollow.Coroutines;
-using AutoFollow.Coroutines.Resources;
 using AutoFollow.Events;
 using AutoFollow.Networking;
 using AutoFollow.Resources;
 using Buddy.Coroutines;
+using Trinity.Components.Combat.Resources;
+using Trinity.Framework;
 using Zeta.Bot;
 using Zeta.Bot.Coroutines;
 using Zeta.Bot.Logic;
@@ -26,31 +27,27 @@ namespace AutoFollow.Behaviors
     public class FollowerCombat : BaseBehavior
     {
         public override BehaviorCategory Category => BehaviorCategory.Follower;
-        public override BehaviorType Type => BehaviorType.Follow;
         public override string Name => "Follower Combat";
 
         public override async Task<bool> OutOfGameTask()
         {
-            if (await base.OutOfGameTask())
-                return true;
-
             if (await Party.LeaveWhenInWrongGame())
-                return true;
+                return Repeat(PartyObjective.LeavingGame);
 
             if (await Party.StartGameWhenPartyReady())
-                return true;
+                return Repeat(PartyObjective.JoiningGame);
 
-            if (await Party.JoinGameOrLeaveParty())
-                return true;
+            if (await Party.JoinGameInProgress())
+                return Repeat(PartyObjective.JoiningGame);
 
             if (await Party.QuickJoinLeader())
-                return true;
+                return Repeat(PartyObjective.JoiningGame);
 
             if (await Party.AcceptPartyInvite())
-                return true;
+                return Repeat(PartyObjective.JoiningParty);
 
             if (await Party.RequestPartyInvite())
-                return true;
+                return Repeat(PartyObjective.JoiningParty);
 
             Log.Verbose("Waiting... (Out of Game)");
             await Coroutine.Sleep(500);
@@ -59,7 +56,7 @@ namespace AutoFollow.Behaviors
 
         public override void OnPulse()
         {
-            StayCloseToPlayer(AutoFollow.CurrentLeader);
+            State = GetFollowMode();
         }
 
         public override async Task<bool> InGameTask()
@@ -68,81 +65,108 @@ namespace AutoFollow.Behaviors
             // Returning False => allow execution to continue to lower hooks. Such as profiles, Adventurer.
 
             if (await base.InGameTask())
-                return true;
+                return Repeat(PartyObjective.TownRun);
 
             if (await Party.LeaveWhenInWrongGame())
-                return true;
+                return Repeat(PartyObjective.LeavingGame);
 
             if (await Questing.UpgradeGems())
-                return false;
+                return Continue(PartyObjective.Quest);
 
             if (await Coordination.StartTownRunWithLeader())
-                return false;
+                return Continue(PartyObjective.Teleporting);
 
             if (await Coordination.WaitForGreaterRiftInProgress())
-                return true;
-
-            if (await Questing.LeaveRiftWhenDone())
-                return true;
+                return Repeat(PartyObjective.TownRun);
 
             if (Targetting.RoutineWantsToLoot() || Targetting.RoutineWantsToClickGizmo())
-                return false;
+                return Continue(PartyObjective.None);
+
+            if (await Coordination.LeaveFinishedRift())
+                return Repeat(PartyObjective.TownRun);
 
             if (await Coordination.FollowLeaderThroughPortal())
-                return true;
+                return Repeat(PartyObjective.FollowLeader);
 
             if (await Coordination.TeleportWhenInDifferentWorld(AutoFollow.CurrentLeader))
-                return true;
+                return Repeat(PartyObjective.Teleporting);
 
             if (await Coordination.TeleportWhenTooFarAway(AutoFollow.CurrentLeader))
-                return true;
+                return Repeat(PartyObjective.Teleporting);
 
-            //if (await Combat.StandInFocussedPowerArea())
-            //    return true;
-
-            if (await Movement.MoveToPlayer(AutoFollow.CurrentLeader, Settings.Coordination.FollowDistance))
-                return false;
-
-            // ------- below wont be executed except if leader in different world.
+            if (await FollowLeader())
+                return Continue(PartyObjective.FollowLeader);
 
             if (await Questing.ReturnToGreaterRift())
-                return true;
+                return Repeat(PartyObjective.TownRun);
 
             if (await Movement.MoveToGreaterRiftExitPortal())
-                return true;
+                return Repeat(PartyObjective.FollowLeader);
 
             return false;
         }
 
-        /// <summary>
-        /// Turn combat (Trinity) on and off while the follower is far away from the leader.   
-        /// </summary>
-        public void StayCloseToPlayer(Message player)
+        private static FollowMode GetFollowMode()
         {
-            if (player.Distance > Settings.Coordination.CatchUpDistance && !Player.IsInTown && //!Navigation.IsBlocked && 
-                !Navigator.StuckHandler.IsStuck && Player.HitpointsCurrentPct > 0.4 && !Targetting.RoutineWantsToAttackGoblin())
-            {
-                Targetting.State = CombatState.Disabled;
-            }
-            else
+            if (Trinity.Components.Combat.Combat.Routines.Current.ShouldIgnoreFollowing())
             {
                 Targetting.State = CombatState.Enabled;
+                return FollowMode.None;
             }
+
+            if (AutoFollow.CurrentLeader.InDifferentLevelArea && RiftHelper.IsInGreaterRift)
+            {
+                Targetting.State = CombatState.Disabled;
+                return FollowMode.MoveToRiftExit;
+            }
+
+            if (!AutoFollow.CurrentLeader.InDifferentLevelArea && !Targetting.IsPriorityTarget)
+            {
+                if (AutoFollow.CurrentLeader.Distance > Settings.Coordination.CatchUpDistance)
+                {
+                    Targetting.State = CombatState.Disabled;
+                    return FollowMode.ChaseLeader;
+                }
+                if (AutoFollow.CurrentLeader.Distance > Settings.Coordination.FollowDistance)
+                {
+                    Targetting.State = CombatState.Pulsing;
+                    return FollowMode.FollowLeader;
+                }
+            }
+           
+            Targetting.State = CombatState.Enabled;
+            return FollowMode.Combat;          
+        }
+        
+        public static FollowMode State { get; set; }
+
+        public enum FollowMode
+        {
+            None = 0,
+            Combat,
+            MoveToRiftExit,
+            FollowLeader,
+            ChaseLeader,
         }
 
-        //public async Task<bool> AttackWithPlayer(Message player)
-        //{
-        //    if (player.IsInCombat && player.CurrentTarget != null && player.Distance < 150f && 
-        //        player.CurrentTarget.Distance < 150f && ZetaDia.Me.IsInCombat && Data.Monsters.Count(m => m.Distance <= 30f) < 10)
-        //    {
-        //        Log.Info("Moving to attack {0}'s target - {1} Distance={2}", 
-        //            player.HeroAlias, player.CurrentTarget.Name, player.CurrentTarget.Distance);
+        private static async Task<bool> FollowLeader()
+        {
+            if (!AutoFollow.CurrentLeader.IsInSameGame)
+                return false;
 
-        //        if(await Movement.MoveTo(() => AutoFollow.GetUpdatedMessage(player).CurrentTarget, player.CurrentTarget.Name, 10f, () => ZetaDia.Me.IsInCombat || !ZetaDia.Me.Movement.IsMoving))
-        //            return true;                
-        //    }
-        //    return false;
-        //}
+            switch (State)
+            {
+                case FollowMode.FollowLeader:
+                case FollowMode.ChaseLeader:
+                    await Navigator.MoveTo(AutoFollow.CurrentLeader.Destination);
+                    return true;
+                
+                case FollowMode.MoveToRiftExit:
+                    await Movement.MoveToGreaterRiftExitPortal();
+                    return true;
+            }
+            return false;
+        }
 
         public override async Task<bool> OnUsedPortal(Message sender, EventData e)
         {            
@@ -187,7 +211,7 @@ namespace AutoFollow.Behaviors
                 }
 
                 var closestPortal = Data.Portals.OrderBy(p => p.Position.Distance(Player.Position)).FirstOrDefault();
-                if (closestPortal != null)
+                if (closestPortal != null && !Player.IsInTown)
                 {
                     Log.Info("Trying our luck with this nearby portal...");
                     await Movement.MoveToAndInteract(closestPortal);

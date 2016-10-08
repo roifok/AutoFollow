@@ -97,6 +97,7 @@ namespace AutoFollow.Events
 
         private static void OnPulse(object sender, EventArgs eventArgs)
         {
+            TrackPortals();
             LastPulseTime = DateTime.UtcNow;
         }
 
@@ -133,12 +134,35 @@ namespace AutoFollow.Events
             if (DateTime.UtcNow.Subtract(LastCastPortalSpell).TotalSeconds < 10)
                 return;
 
-            //LastWorldPosition = _lastPosition;
-            //LastWorldId = _worldId;
-
             PortalUsedEvent(false);
 
             IsIdle = false;
+        }
+
+        public static Dictionary<Vector3, Interactable> PortalHistory { get; set; } = new Dictionary<Vector3, Interactable>();
+
+        public static void TrackPortals()
+        {
+            var portals = Data.Portals.Where(p => p.Distance <= 60f).ToList();
+
+            foreach (var p in portals)
+            {
+                if (PortalHistory.ContainsKey(p.Position) && p.Distance <= 30f)
+                {
+                    Log.Verbose("Updating Last Seen Time for Portal - {0} ({1})", p.Name, p.ActorSnoId);
+                    PortalHistory[p.Position].LastTimeCloseTo = DateTime.UtcNow;
+                }
+            }
+
+            var nearestPortal = portals.OrderBy(p => p.Distance).FirstOrDefault();
+            if (nearestPortal != null && PortalHistory.All(p => p.Value.ActorPosition != nearestPortal.Position))
+            {
+                Log.Verbose("Adding new Portal to History - {0} ({1})", nearestPortal.Name, nearestPortal.ActorSnoId);
+                PortalHistory.Add(nearestPortal.Position, new Interactable(nearestPortal));
+            }
+
+            if (PortalHistory.Count > 25)
+                PortalHistory.Remove(PortalHistory.First().Key);
         }
 
         private static void PortalUsedEvent(bool isDeathGate)
@@ -148,7 +172,7 @@ namespace AutoFollow.Events
             var portal = Data.Portals.OrderByDescending(p => p.Distance).FirstOrDefault();
             if (portal != null)
             {
-                var interactable = BotHistory.PortalHistory .FirstOrDefault(p => DateTime.UtcNow.Subtract(p.Value.LastTimeCloseTo).TotalSeconds < 15 && p.Value.WorldSnoId != ZetaDia.CurrentWorldSnoId);
+                var interactable = PortalHistory .FirstOrDefault(p => DateTime.UtcNow.Subtract(p.Value.LastTimeCloseTo).TotalSeconds < 15 && p.Value.WorldSnoId != ZetaDia.CurrentWorldSnoId);
                 if (interactable.Value != null)
                 {
                     Log.Info("Portal Used: {0} in WorldSnoId={1}", interactable.Value.InternalName, interactable.Value.WorldSnoId);
@@ -308,15 +332,18 @@ namespace AutoFollow.Events
                 }
             }
 
-            var riftGaurdianHiding = RiftHelper.CurrentRift.IsStarted && !RiftHelper.CurrentRift.HasGuardianSpawned;
-            if (riftGaurdianHiding != _riftGaurdianHiding)
+            if (RiftHelper.CurrentRift != null)
             {
-                if (!riftGaurdianHiding && RiftHelper.CurrentRift.IsStarted)
+                var riftGaurdianHiding = RiftHelper.CurrentRift.IsStarted && !RiftHelper.CurrentRift.HasGuardianSpawned;
+                if (riftGaurdianHiding != _riftGaurdianHiding)
                 {
-                    Log.Warn("Whats this, there's something lurking nearby?");
-                    EventManager.FireEvent(new EventData(EventType.SpawnedRiftGaurdian));
-                }                    
-                _riftGaurdianHiding = riftGaurdianHiding;
+                    if (!riftGaurdianHiding && RiftHelper.CurrentRift.IsStarted)
+                    {
+                        Log.Warn("Whats this, there's something lurking nearby?");
+                        EventManager.FireEvent(new EventData(EventType.SpawnedRiftGaurdian));
+                    }
+                    _riftGaurdianHiding = riftGaurdianHiding;
+                }
             }
 
             _lastPosition = ZetaDia.Me.Position;
@@ -326,8 +353,7 @@ namespace AutoFollow.Events
         private static void CheckForDeathGateUsage(Vector3 currentPosition, float distanceTravelled)
         {
             var nearestDeathGate = Data.FindNearestDeathGate();
-            if (nearestDeathGate != null && nearestDeathGate.Distance < 20f && _lastPosition != Vector3.Zero &&
-                currentPosition != Vector3.Zero)
+            if (nearestDeathGate != null && nearestDeathGate.Distance < 20f && _lastPosition != Vector3.Zero && currentPosition != Vector3.Zero)
             {
                 if (_lastClosestDeathGateAcdId != nearestDeathGate.ACDId && distanceTravelled > 20f)
                 {

@@ -50,7 +50,7 @@ namespace AutoFollow.Resources
                 {
                     var serializer = new DataContractJsonSerializer(typeof (T));                    
                     var newObj = serializer.ReadObject(stream) as T;
-                    MiscUtil.Reflection.PropertyCopy.Copy(newObj, instance);
+                    PropertyCopy.Copy(newObj, instance);
                     return instance;
                 }
             }

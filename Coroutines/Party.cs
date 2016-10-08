@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using AutoFollow.Coroutines.Resources;
 using AutoFollow.Events;
 using AutoFollow.Networking;
 using AutoFollow.Resources;
@@ -39,7 +38,7 @@ namespace AutoFollow.Coroutines
         /// <summary>
         /// Handle being in a party lobby.
         /// </summary>
-        public static async Task<bool> JoinGameOrLeaveParty()
+        public static async Task<bool> JoinGameInProgress()
         {
             if (!ZetaDia.Service.Party.IsPartyLeader && Player.IsInParty && !ZetaDia.IsInGame)
             {
@@ -213,18 +212,15 @@ namespace AutoFollow.Coroutines
         /// </summary>
         public static async Task<bool> QuickJoinLeader()
         {
+            if (!AutoFollow.CurrentLeader.IsQuickJoinEnabled)
+                return false;
+
+            var quickJoinElements = UIElement.UIMap.Where(e => e.Name.Contains("CallToArmsElem")).ToList();
+            if (!quickJoinElements.Any())
+                return false;
+
             if (DateTime.UtcNow.Subtract(_lastAttemptQuickJoin) > TimeSpan.FromSeconds(5) && !Player.IsInParty && AutoFollow.CurrentLeader.IsInGame && AutoFollow.CurrentLeader != null)
-            {
-                var quickJoinElements = UIElement.UIMap.Where(e => e.Name.Contains("CallToArmsElem")).ToList();
-
-                if (AutoFollow.NumberOfConnectedBots > 0 && Player.IsFollower && !AutoFollow.CurrentLeader.IsQuickJoinEnabled)
-                {
-                    Log.Debug("Current leader doesn't have QuickJoin enabled!");
-                }
-
-                if (!quickJoinElements.Any())
-                    return false;
-
+            {                
                 quickJoinElements.ForEach(e =>
                 {
                     var name = Common.CleanString(e.Text);

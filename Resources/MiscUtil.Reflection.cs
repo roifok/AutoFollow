@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.Serialization;
 
-namespace MiscUtil.Reflection
+namespace AutoFollow.Resources
 {
     /// <summary>
     /// Non-generic class allowing properties to be copied from one instance

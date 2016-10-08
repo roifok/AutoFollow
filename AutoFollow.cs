@@ -7,18 +7,20 @@ using System.Threading.Tasks;
 using System.Windows;
 using AutoFollow.Behaviors;
 using AutoFollow.Behaviors.Structures;
-using AutoFollow.Coroutines.Resources;
+using AutoFollow.Coroutines;
 using AutoFollow.Events;
 using AutoFollow.Networking;
 using AutoFollow.ProfileTags;
 using AutoFollow.Resources;
 using AutoFollow.UI;
 using JetBrains.Annotations;
+using Trinity.Components.Combat;
 using Zeta.Bot;
 using Zeta.Bot.Logic;
 using Zeta.Common;
 using Zeta.Common.Plugins;
 using Zeta.Game;
+using Combat = Trinity.Components.Combat.Combat;
 using EventManager = AutoFollow.Events.EventManager;
 
 namespace AutoFollow
@@ -59,7 +61,7 @@ namespace AutoFollow
 
         public static AutoFollow Instance { get; set; }
         public static InterfaceLoader<IBehavior> Behaviors;
-        public static Version PluginVersion = new Version(1, 0, 27);
+        public static Version PluginVersion = new Version(1, 0, 30);
         internal static bool Enabled;
         internal static Message ServerMessage = new Message();
         internal static Dictionary<int, Message> ClientMessages = new Dictionary<int, Message>();
@@ -70,7 +72,6 @@ namespace AutoFollow
         public static List<Message> CurrentFollowers = new List<Message>();
         public static Message CurrentLeader = new Message();
         public static int NumberOfConnectedBots;
-        public static BehaviorType CurrentBehaviorType;
         private static DateTime _lastSelectedBehavior = DateTime.MinValue;
         private static IBehavior _currentBehavior;
 
@@ -89,6 +90,8 @@ namespace AutoFollow
 
                     // Important: need to restart profile or behavior hooks will still run even after being removed.
                     ProfileManager.Load(ProfileManager.CurrentProfile.Path);
+
+                    Targetting.State = CombatState.Enabled;
                 }
 
                 _currentBehavior = value;
@@ -201,7 +204,7 @@ namespace AutoFollow
             if (NumberOfConnectedBots <= 0)
                 return ServerMessage;
 
-            var leader = CurrentParty.FirstOrDefault(m => m.BehaviorType == BehaviorType.Lead);
+            var leader = CurrentParty.FirstOrDefault(m => m.BehaviorCategory == BehaviorCategory.Leader);
             if (leader == null)
             {
                 Log.Warn("Waiting for a leader...");
@@ -246,6 +249,7 @@ namespace AutoFollow
         private void Disable()
         {
             Enabled = false;
+            Combat.Party = DefaultProviders.Party;
             Log.Info("Plugin disabled! ");
             CurrentBehavior?.Deactivate();
             BotMain.OnStart -= BotMain_OnStart;
@@ -253,7 +257,8 @@ namespace AutoFollow
             EventManager.Disable();
             EventManager.OnPulseOutOfGame -= Pulse;
             Service.OnUpdatePreview -= ServiceOnUpdatePreview;
-            BotHistory.Disable();
+            Server.ShutdownServer();
+            Client.ShutdownClient();         
             TabUi.RemoveTab();
             ChangeMonitor.Disable();
         }
@@ -262,12 +267,12 @@ namespace AutoFollow
         {
             if (!Application.Current.CheckAccess()) return;
             Enabled = true;
+            Combat.Party = new AutoFollowPartyProvider();
             Log.Info(" v{0} Enabled", Version);
             BotMain.OnStart += BotMain_OnStart;
             BotMain.OnStop += BotMain_OnStop;
             CurrentBehavior = DefaultBehavior;
             EventManager.Enable();
-            BotHistory.Enable();
             TabUi.InstallTab();
             ChangeMonitor.Enable();
             Server.ServerStartAttempts = 0;
@@ -275,6 +280,7 @@ namespace AutoFollow
             Service.Connect();
             CommunicationThread.ThreadStart();
             TreeHooks.Instance.OnHooksCleared += OnHooksCleared;
+            
         }
 
         private void OnHooksCleared(object sender, EventArgs e)

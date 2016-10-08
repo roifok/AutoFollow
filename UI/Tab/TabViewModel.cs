@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
 using AutoFollow.Behaviors.Structures;
-using AutoFollow.Coroutines.Resources;
 using AutoFollow.Networking;
 using AutoFollow.Resources;
 using AutoFollow.UI.Components.Controls;
@@ -27,7 +26,6 @@ namespace AutoFollow.UI.Tab
 {
     public class TabViewModel : INotifyPropertyChanged
     {
-        private BehaviorType _behaviorType;
         private string _behaviorName;
         private int _connectedBots;
         private ConnectionMode _connectionMode;
@@ -46,7 +44,6 @@ namespace AutoFollow.UI.Tab
 
         private void Service_OnUpdated()
         {
-            BehaviorType = AutoFollow.CurrentBehavior.Type;
             BehaviorName = AutoFollow.CurrentBehavior.Name;
             ConnectionMode = Service.ConnectionMode;
             IsConnected = Service.IsConnected;
@@ -97,12 +94,6 @@ namespace AutoFollow.UI.Tab
         {
             get { return _behaviorName; }
             set { SetField(ref _behaviorName, value); }
-        }
-
-        public BehaviorType BehaviorType
-        {
-            get { return _behaviorType; }
-            set { SetField(ref _behaviorType, value); }
         }
 
         public ICommand OpenSettingsCommand

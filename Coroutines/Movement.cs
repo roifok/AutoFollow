@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoFollow.Behaviors;
-using AutoFollow.Coroutines.Resources;
 using AutoFollow.Events;
 using AutoFollow.Networking;
 using AutoFollow.Resources;
 using Buddy.Coroutines;
+using Trinity.Components.Combat.Resources;
 using Trinity.Framework;
 using Zeta.Bot;
 using Zeta.Bot.Coroutines;
@@ -130,7 +130,7 @@ namespace AutoFollow.Coroutines
                 if (stopCondition != null && stopCondition(target ?? new Target()))
                     break;
 
-                if (target != null && target.WorldSnoId != Player.CurrentWorldSnoId)
+                if (target != null && target.WorldDynamicId != Player.CurrentDynamicWorldId)
                 {
                     Log.Verbose("Movement Failed, Target is in a different world", name, distance);
                     return false;

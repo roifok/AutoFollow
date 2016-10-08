@@ -7,11 +7,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using AutoFollow.Behaviors.Structures;
 using AutoFollow.Coroutines;
-using AutoFollow.Coroutines.Resources;
 using AutoFollow.Events;
 using AutoFollow.Networking;
 using AutoFollow.Resources;
 using Buddy.Coroutines;
+using Trinity.Components.Combat.Resources;
 using Zeta.Bot;
 using Zeta.Common;
 using Zeta.Game;
@@ -27,17 +27,16 @@ namespace AutoFollow.Behaviors
 {
     public class BaseBehavior : IBehavior
     {
+
         public static DateTime LastActivated { get; set; }
         public static bool IsActive { get; set; }
 
         private static Composite _inGameHook;
         private static Composite _outGameHook;
 
-        private readonly Data Data = new Data();
-
         public virtual BehaviorCategory Category => BehaviorCategory.Unknown;
 
-        public virtual BehaviorType Type => BehaviorType.Default;
+        public PartyObjective Objective { get; set; }
 
         public virtual string Name => "Default";
 
@@ -48,11 +47,11 @@ namespace AutoFollow.Behaviors
 
             Log.Info("Activated {0}", Name);
 
-            _outGameHook = new ActionRunCoroutine(ret => OutOfGameTask());
-            _inGameHook = new ActionRunCoroutine(ret => InGameTask());          
-            TreeHooks.Instance.OnHooksCleared += Instance_OnHooksCleared;
+            _outGameHook = new ActionRunCoroutine(ret => BaseOutOfGameTask());
+            _inGameHook = new ActionRunCoroutine(ret => InGameTask());
+
             InsertHooks();
-                        
+            TreeHooks.Instance.OnHooksCleared += Instance_OnHooksCleared;                                    
             EventManager.WorldAreaChanged += OnWorldAreaChanged;
             EventManager.EngagedElite += OnEngagedElite;
             EventManager.LeftGame += OnLeftGame;
@@ -82,12 +81,16 @@ namespace AutoFollow.Behaviors
             TreeHooks.Instance.InsertHook("OutOfGame", 0, _outGameHook);
         }
 
-        public void Deactivate()
-        {                               
+        private static void RemoveHooks()
+        {
             TreeHooks.Instance.RemoveHook("BotBehavior", _inGameHook);
             TreeHooks.Instance.RemoveHook("OutOfGame", _outGameHook);
-            TreeHooks.Instance.OnHooksCleared -= Instance_OnHooksCleared;
+        }
 
+        public void Deactivate()
+        {
+            RemoveHooks();
+            TreeHooks.Instance.OnHooksCleared -= Instance_OnHooksCleared;
             EventManager.EngagedElite -= OnEngagedElite;
             EventManager.WorldAreaChanged -= OnWorldAreaChanged;
             EventManager.LeftGame -= OnLeftGame;
@@ -106,14 +109,45 @@ namespace AutoFollow.Behaviors
             OnDeactivated();
         }
 
-        public virtual async Task<bool> OutOfGameTask()
+        /// <summary>
+        /// Allow profiles and combat to run
+        /// </summary>
+        /// <param name="objective">reason or current state</param>
+        /// <returns>false</returns>
+        public bool Continue(PartyObjective objective)
+        {
+            Objective = objective;
+            return false;
+        }
+
+        /// <summary>
+        ///  Prevent profiles and combat from running, moves to next tick at tree-top.
+        /// </summary>
+        /// <param name="objective">reason or current state</param>
+        /// <returns>false</returns>
+        public bool Repeat(PartyObjective objective)
+        {
+            Objective = objective;
+            return true;
+        }
+
+        private async Task<bool> BaseOutOfGameTask()
+        {
+            if (await DefaultOutOfGameChecks())
+                return true;
+
+            return await OutOfGameTask();
+        }
+
+        private async Task<bool> DefaultOutOfGameChecks()
         {
             if (!AutoFollow.Enabled || !ZetaDia.Service.Hero.IsValid || ZetaDia.Service.Hero.HeroId <= 0)
                 return false;
 
             // Pulse does not fire while out of game. Need to be very careful how waits are handled.
             // Don't use long Coroutine.Sleeps out of game as it will prevent player updates for the duration.
-            AutoFollow.Pulse();            
+
+            AutoFollow.Pulse();
 
             if (Service.IsConnected && AutoFollow.NumberOfConnectedBots == 0)
             {
@@ -135,8 +169,13 @@ namespace AutoFollow.Behaviors
                 await Coroutine.Sleep(500);
                 return true;
             }
-            
+
             GameUI.SafeCheckClickButtons();
+            return false;
+        }
+
+        public virtual async Task<bool> OutOfGameTask()
+        {
             return false;
         }
 
@@ -239,7 +278,7 @@ namespace AutoFollow.Behaviors
 
         public static bool IsGameReady => ZetaDia.Service.IsValid && ZetaDia.Service.Hero.IsValid && AutoFollow.Enabled && !ZetaDia.IsLoadingWorld;
 
-        public override int GetHashCode() => Name.GetHashCode() + Type.GetHashCode() * 127;
+        public override int GetHashCode() => Name.GetHashCode() * 127;
     }
 }
 

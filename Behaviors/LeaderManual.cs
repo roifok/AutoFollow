@@ -11,8 +11,6 @@ namespace AutoFollow.Behaviors
     {
         public override BehaviorCategory Category => BehaviorCategory.Leader;
 
-        public override BehaviorType Type => BehaviorType.Lead;
-
         public override string Name => "Leader Manual";
 
         public override void OnActivated()
@@ -27,9 +25,6 @@ namespace AutoFollow.Behaviors
 
         public override async Task<bool> OutOfGameTask()
         {
-            if (await base.OutOfGameTask())
-                return true;
-
             return true;
         }
 

@@ -67,7 +67,7 @@ namespace AutoFollow.Resources
         {
             // AcdId is a local client object id that changes between d3 instances.
             var player = ZetaDia.Players.FirstOrDefault(p => p.HeroId == heroId);
-            return player != null ? player.ACDId : -1;
+            return player?.ACDId ?? -1;
         }
 
         public static DiaPlayer GetPlayerActor(Message player)

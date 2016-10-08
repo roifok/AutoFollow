@@ -1,34 +1,35 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.ServiceModel;
 using System.Threading;
-using System.Windows;
+using AutoFollow.Events;
 using AutoFollow.Resources;
-using Zeta.Common;
-using EventManager = AutoFollow.Events.EventManager;
 
 namespace AutoFollow.Networking
 {
     public class Client
     {
+        public delegate void ClientMessageDelegate(Message message);
+
         private static ChannelFactory<IService> _httpFactory;
         private static IService _httpProxy;
-        public static bool ClientConnected { get; private set; }
+
+        public static bool FirstConnectionAttempt = true;
         public static DateTime LastUnexpectedException = DateTime.MinValue;
-        public static int ConnectionAttempts { get; set; }
         public static DateTime LastExpectedException = DateTime.MinValue;
-        public static int ExpectedExceptionCount { get; set; }
         public static DateTime LastClientUpdate = DateTime.MinValue;
-        public delegate void ClientMessageDelegate(Message message);        
+        public static DateTime EarliestNextAttempt = DateTime.MinValue;
+        public static DateTime LastSummaryTime = DateTime.MinValue;
+
+        public static bool ClientConnected { get; private set; }
+        public static int ConnectionAttempts { get; set; }
+        public static int ExpectedExceptionCount { get; set; }
+        public static bool IsValid => ClientConnected && _httpProxy != null;
+
         public static event Server.ServiceDelegate OnClientInitialized;
         public static event ClientMessageDelegate OnClientUpdated;
-        public static bool _firstConnectionAttempt = true;
 
-        /// <summary>
-        /// Initializes the Client connection to the Server
-        /// </summary>
         public static void ClientInitialize()
         {
             if (!AutoFollow.Enabled)
@@ -73,10 +74,6 @@ namespace AutoFollow.Networking
                 Log.Info("Exception in ClientInitialize() {0} Attempt={1}", ex, ConnectionAttempts);
                 LastUnexpectedException = DateTime.UtcNow;
             }
-            finally 
-            {
-
-            }
 
             if (ConnectionAttempts > 5 && !ClientConnected)
             {
@@ -93,7 +90,6 @@ namespace AutoFollow.Networking
                     _httpFactory.Close();
                 }
                 _httpProxy = null;
-                
             }
             catch (Exception)
             {
@@ -103,8 +99,6 @@ namespace AutoFollow.Networking
             ClientConnected = false;
         }
 
-        public static bool IsValid => ClientConnected && _httpProxy != null;
-
         /// <summary>
         /// Called by Client, Receives Server Message and Sends Client Message
         /// </summary>
@@ -112,13 +106,13 @@ namespace AutoFollow.Networking
         {
             if (!AutoFollow.Enabled)
                 return;
-            
+
             if (Server.ServiceHost != null && Server.ServiceHost.State != CommunicationState.Closed)
             {
                 Server.ShutdownServer();
             }
 
-            if (!Client.IsValid)
+            if (!IsValid)
             {
                 Log.Info("Client is not valid");
 
@@ -134,14 +128,13 @@ namespace AutoFollow.Networking
                     Thread.Sleep(250);
                 }
 
-                if (!Client.IsValid || _httpProxy == null || _httpFactory.State != CommunicationState.Closed)
+                if (!IsValid || _httpProxy == null || _httpFactory.State != CommunicationState.Closed)
                 {
                     Log.Info("Waiting for client connection to be valid");
                     return;
                 }
-                    
             }
-                
+
             try
             {
                 var elapsed = DateTime.UtcNow.Subtract(LastClientUpdate).TotalMilliseconds;
@@ -190,7 +183,7 @@ namespace AutoFollow.Networking
 
                 foreach (var e in messageWrapper.PrimaryMessage.Events)
                 {
-                    if(!EventManager.HasFired(e))
+                    if (!EventManager.HasFired(e))
                         Log.Verbose("Received new unfired event {0} from {1}", e.Type, e.OwnerHeroAlias);
                 }
 
@@ -201,7 +194,7 @@ namespace AutoFollow.Networking
             }
             catch (EndpointNotFoundException ex)
             {
-                if (!_firstConnectionAttempt)
+                if (!FirstConnectionAttempt)
                 {
                     Log.Info("Lost Connection to server...");
                     Log.Debug("EndpointNotFoundException: Could not get an update from the leader using {0}. Is the leader running? ({1})", _httpFactory.Endpoint.Address.Uri.AbsoluteUri, ex.Message);
@@ -218,14 +211,13 @@ namespace AutoFollow.Networking
             }
             catch (CommunicationException ex)
             {
-                Log.Debug("CommunicationException. Failed to Communicate with Server on {0} Message={1}", _httpFactory.Endpoint.Address.Uri.AbsoluteUri, ex.Message);
+                Log.Error("CommunicationException. Failed to Communicate with Server on {0} Message={1}", _httpFactory.Endpoint.Address.Uri.AbsoluteUri, ex.Message, ex.InnerException);
                 LastExpectedException = DateTime.UtcNow;
                 ExpectedExceptionCount++;
             }
             catch (TimeoutException ex)
             {
                 Log.Debug("CommunicationException. Server failed to respond (Thread: {0})", Thread.CurrentThread.ManagedThreadId);
-                //_httpFactory.Endpoint.Address.Uri.AbsoluteUri, ex.Message, 
                 LastExpectedException = DateTime.UtcNow;
                 ExpectedExceptionCount++;
             }
@@ -239,12 +231,8 @@ namespace AutoFollow.Networking
                 EarliestNextAttempt = DateTime.UtcNow.Add(TimeSpan.FromSeconds(5));
             }
 
-            _firstConnectionAttempt = false;
+            FirstConnectionAttempt = false;
         }
-
-        public static DateTime EarliestNextAttempt = DateTime.MinValue;
-
-        public static DateTime LastSummaryTime = DateTime.MinValue;
 
         private static void UpdateDataAsClient(MessageWrapper messageWrapper)
         {

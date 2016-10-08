@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoFollow.Behaviors.Structures;
 using AutoFollow.Coroutines;
-using AutoFollow.Coroutines.Resources;
 using AutoFollow.Events;
 using AutoFollow.Networking;
 using AutoFollow.Resources;
@@ -26,8 +25,6 @@ namespace AutoFollow.Behaviors
     {
         public override BehaviorCategory Category => BehaviorCategory.Leader;
 
-        public override BehaviorType Type => BehaviorType.Lead;
-
         public override string Name => "Leader";
 
         public override void OnPulse()
@@ -37,9 +34,6 @@ namespace AutoFollow.Behaviors
 
         public override async Task<bool> OutOfGameTask()
         {
-            if (await base.OutOfGameTask())
-                return true;
-
             if (await Party.StartGameWhenPartyReady())
                 return true;
 

@@ -6,7 +6,11 @@ using System.Runtime.Serialization;
 using AutoFollow.Behaviors.Structures;
 using AutoFollow.Events;
 using AutoFollow.Resources;
-using Trinity.Framework.Objects.API;
+using Trinity;
+using Trinity.Components.Combat.Resources;
+using Trinity.Framework.Actors.ActorTypes;
+using Trinity.Framework.Objects;
+using Trinity.Framework.Objects.Api;
 using Zeta.Bot;
 using Zeta.Bot.Logic;
 using Zeta.Common;
@@ -16,9 +20,12 @@ using Zeta.Game.Internals.Service;
 namespace AutoFollow.Networking
 {
     [DataContract]
-    [KnownType(typeof (Interactable))]
-    [KnownType(typeof (Target))]
-    public class Message : ITargetable
+    [KnownType(typeof(Interactable))]
+    [KnownType(typeof(Target))]
+    [KnownType(typeof(IPartyMember))]
+    [KnownType(typeof(TrinityObjectType))]
+    [KnownType(typeof(PartyObjective))]    
+    public class Message : IPartyMember
     {
         private static readonly SimpleAES Crypto = new SimpleAES();
         private static string _myEncryptedBattleTag;
@@ -31,6 +38,21 @@ namespace AutoFollow.Networking
             ProfilePathPrecision = 10f;
             Events = new List<EventData>();
         }
+
+        [DataMember]
+        public int CatchUpDistance { get; set; }
+        [DataMember]
+        public int FollowDistance { get; set; }
+        [DataMember]
+        public int WorldDynamicId { get; set; }
+
+        [DataMember]
+        public PartyObjective Objective { get; set; }
+
+        public string SettingsCode { get; set; }
+
+        [DataMember]
+        public Vector3 Destination { get; set; }
 
         [DataMember]
         public string ProfileName { get; set; }
@@ -93,7 +115,7 @@ namespace AutoFollow.Networking
         public bool IsInParty { get; set; }
 
         [DataMember]
-        public int ActorSNO { get; set; }
+        public int ActorSnoId { get; set; }
 
         [DataMember]
         public ActorClass ActorClass { get; set; }
@@ -171,7 +193,7 @@ namespace AutoFollow.Networking
         public bool IsVendoring { get; set; }
 
         [DataMember]
-        public BehaviorType BehaviorType { get; set; }
+        public BehaviorCategory BehaviorCategory { get; set; }
 
         [DataMember]
         public bool IsInRift { get; set; }
@@ -186,7 +208,10 @@ namespace AutoFollow.Networking
         public bool IsCastingTownPortal { get; set; }
 
         [DataMember]
-        public Build Build { get; set; }
+        public ApiBuild Build { get; set; }
+
+        [DataMember]
+        public ApiRoutine Routine { get; set; }
 
         public bool IsInSameGame
         {
@@ -221,8 +246,11 @@ namespace AutoFollow.Networking
         [DataMember]
         public int WorldSnoId { get; set; }
 
+
+
         [DataMember]
         public Vector3 Position { get; set; }
+
 
         /// <summary>
         /// Returns the AcdId of this message's actor in the 'current' bot's game world.
@@ -266,7 +294,7 @@ namespace AutoFollow.Networking
                         IsServer = Service.ConnectionMode == ConnectionMode.Server,
                         IsClient = Service.ConnectionMode == ConnectionMode.Client,
                         IsRequestingLeader = AutoFollow.CurrentBehavior.Category == BehaviorCategory.Leader,
-                        BehaviorType = AutoFollow.CurrentBehavior.Type,
+                        BehaviorCategory = AutoFollow.CurrentBehavior.Category,
                         IsQuickJoinEnabled = Player.IsQuickJoinEnabled,
                         BattleTagEncrypted = GetMyEncryptedBattleTag(),
                         RealIdNameEncrypted = GetMyEncryptedRealId(),
@@ -290,13 +318,14 @@ namespace AutoFollow.Networking
                         NumPartymembers = Player.NumPlayersInParty,
                         IsLoadingWorld = Player.IsLoadingWorld,
                         ActorClass = Player.ActorClass,
-                        ActorSNO = Player.ActorId,
+                        ActorSnoId = Player.ActorId,
                         GameId = Player.CurrentGameId,
                         HitpointsCurrent = Player.HitpointsCurrent,
                         HitpointsMaxTotal = Player.HitpointsMaxTotal,
                         LevelAreaId = Player.LevelAreaId,
                         IsInTown = Player.LevelAreaId != 55313 && Player.IsInTown, // A2 Caldeum Bazaar
                         Position = Player.Position,
+                        Destination = Player.Destination,
                         ProfilePosition = Player.GetProfilePosition(),
                         ProfileActorSno = Player.ProfileActorSno,
                         ProfilePathPrecision = Player.ProfilePathPrecision,
@@ -325,16 +354,20 @@ namespace AutoFollow.Networking
                         IsRequestingLeader = AutoFollow.CurrentBehavior.Category == BehaviorCategory.Leader,
                         IsQuickJoinEnabled = Player.IsQuickJoinEnabled,
                         LastPortalUsed = Player.LastPortalUsed,
-                        BehaviorType = AutoFollow.CurrentBehavior.Type,
+                        BehaviorCategory = AutoFollow.CurrentBehavior.Category,
                         IsInBossEncounter = Player.IsInBossEncounter,
                         IsCastingTownPortal = Player.IsCastingTownPortal,
                         Strength = Player.Strength,
                         Vitality = Player.Vitality,
                         Intelligence = Player.Intelligence,
-                        Dexterity = Player.Dexterity,
-                        Build = Player.Build,
+                        Dexterity = Player.Dexterity,   
                         Paragon = Player.Paragon,
                         SettingsCode = Player.SettingsCode,
+                        FollowDistance = Settings.Coordination.CatchUpDistance,
+                        CatchUpDistance = Settings.Coordination.CatchUpDistance,
+                        Objective = AutoFollow.CurrentBehavior.Objective,
+                        Build = Player.Build,
+                        Routine = Player.Routine,
                     };
                 }
                 else if (ZetaDia.IsInGame && ZetaDia.IsLoadingWorld)
@@ -360,7 +393,7 @@ namespace AutoFollow.Networking
                         IsServer = Service.ConnectionMode == ConnectionMode.Server,
                         IsClient = Service.ConnectionMode == ConnectionMode.Client,
                         IsQuickJoinEnabled = Player.IsQuickJoinEnabled,
-                        BehaviorType = AutoFollow.CurrentBehavior.Type,
+                        BehaviorCategory = AutoFollow.CurrentBehavior.Category,
                         BattleTagEncrypted = GetMyEncryptedBattleTag(),
                         RealIdNameEncrypted = GetMyEncryptedRealId(),
                         IsInRift = RiftHelper.IsInRift,
@@ -371,8 +404,8 @@ namespace AutoFollow.Networking
                         Intelligence = Player.Intelligence,
                         Dexterity = Player.Dexterity,
                         Paragon = Player.Paragon,
-                        Build = Player.Build,
                         SettingsCode = Player.SettingsCode,
+                        WorldDynamicId = Player.CurrentDynamicWorldId,
                     };
                 }
                 else
@@ -393,7 +426,7 @@ namespace AutoFollow.Networking
                         IsServer = Service.ConnectionMode == ConnectionMode.Server,
                         IsClient = Service.ConnectionMode == ConnectionMode.Client,
                         IsQuickJoinEnabled = Player.IsQuickJoinEnabled,
-                        BehaviorType = AutoFollow.CurrentBehavior.Type,
+                        BehaviorCategory = AutoFollow.CurrentBehavior.Category,
                         BattleTagEncrypted = GetMyEncryptedBattleTag(),
                         RealIdNameEncrypted = GetMyEncryptedRealId(),
                         HeroName = Player.HeroName,
@@ -411,7 +444,8 @@ namespace AutoFollow.Networking
             }
         }
 
-        public string SettingsCode { get; set; }
+
+
 
         private static string GetMyEncryptedRealId()
         {
@@ -441,7 +475,7 @@ namespace AutoFollow.Networking
                 Position,
                 IsInTown,
                 IsInGame,
-                ActorSNO,
+                ActorSnoId,
                 ActorClass,
                 HitpointsMaxTotal,
                 HitpointsCurrent,
@@ -495,9 +529,33 @@ namespace AutoFollow.Networking
             IsFollower ? "Follower " : string.Empty,
             IsServer ? "Server " : string.Empty,
             IsClient ? "Client " : string.Empty,
-            IsInGame ? string.Format("World={0} Level={1}", WorldSnoId, LevelAreaId) : string.Empty,
+            IsInGame ? $"World={WorldSnoId} Level={LevelAreaId}" : string.Empty,
             DateTime.UtcNow.Subtract(LastUpdated).TotalMilliseconds,
             Events.Count
             );
+
+        public bool InDifferentLevelArea => Player.LevelAreaId != LevelAreaId;
+
+
+        #region IPartyMember / ITargetable
+
+        ActorClass IPartyMember.ActorClass => ActorClass;
+        bool IPartyMember.IsLeader => IsLeader;
+        bool IPartyMember.IsFollower => IsFollower;
+        bool IPartyMember.IsInCombat => IsInCombat;
+        bool IPartyMember.IsMe => IsMe;
+        int IPartyMember.MemberId => OwnerId;
+        PartyRole IPartyMember.Role => BehaviorCategory == BehaviorCategory.Leader ? PartyRole.Leader : PartyRole.Follower;
+        float IPartyMember.LeashDistance => CatchUpDistance;
+        PartyObjective IPartyMember.Objective => Objective;        
+        ITargetable IPartyMember.Target => CurrentTarget;
+        int IPartyMember.HeroId => HeroId;
+        string ITargetable.Name => HeroName;
+        int ITargetable.WorldDynamicId => WorldDynamicId;
+
+
+        TrinityObjectType ITargetable.Type => TrinityObjectType.Player;
+
+        #endregion
     }
 }

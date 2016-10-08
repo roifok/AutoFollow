@@ -147,7 +147,11 @@ namespace AutoFollow.Events
                 _lastClearedEvents = DateTime.UtcNow;
             }
 
-            _hasFiredIds.RemoveAll(e => DateTime.UtcNow.Subtract(e.Value).TotalSeconds > 10);
+            foreach (var cur in _hasFiredIds.Where(e => DateTime.UtcNow.Subtract(e.Value).TotalSeconds > 10).ToList())
+            {
+                _hasFiredIds.Remove(cur.Key);
+            }
+
             _lastClearedEvents = DateTime.UtcNow;
        
             if (Settings.Misc.DebugLogging)
@@ -328,6 +332,7 @@ namespace AutoFollow.Events
             await ExecuteQueuedEventsTask();
             return false;
        }
+
         /// <summary>
         /// Fires events as async coroutines inside TreeStart hook.
         /// </summary>

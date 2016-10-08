@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using AutoFollow.Behaviors.Structures;
 using AutoFollow.Coroutines;
-using AutoFollow.Coroutines.Resources;
 using AutoFollow.Events;
 using AutoFollow.Networking;
 using AutoFollow.Resources;
@@ -14,22 +13,17 @@ namespace AutoFollow.Behaviors
     {
         public override BehaviorCategory Category => BehaviorCategory.Follower;
 
-        public override BehaviorType Type => BehaviorType.Powerlevel;
-
         public override string Name => "Follower PowerLevel";
 
         public override async Task<bool> OutOfGameTask()
         {
-            if (await base.OutOfGameTask())
-                return true;
-
             if (await Party.LeaveWhenInWrongGame())
                 return true;
 
             if (await Party.StartGameWhenPartyReady())
                 return true;
 
-            if (await Party.JoinGameOrLeaveParty())
+            if (await Party.JoinGameInProgress())
                 return true;
 
             if (await Party.QuickJoinLeader())

@@ -3,9 +3,12 @@ using System.Linq;
 using AutoFollow.Events;
 using AutoFollow.Networking;
 using Trinity.Framework;
-using Trinity.Framework.Objects.API;
+using Trinity.Framework.Objects;
+using Trinity.Framework.Objects.Api;
+using Trinity.Routines;
 using Zeta.Bot;
 using Zeta.Bot.Logic;
+using Zeta.Bot.Navigation;
 using Zeta.Common;
 using Zeta.Game;
 using Zeta.Game.Internals;
@@ -17,6 +20,7 @@ namespace AutoFollow.Resources
 {
     public static class Player
     {
+        public static Vector3 Destination { get; set; }
         public static int Level { get; set; }
         public static int Paragon { get; set; }
         public static Target Target { get; set; }
@@ -67,7 +71,6 @@ namespace AutoFollow.Resources
         public static int Vitality { get; set; }
         public static int Intelligence { get; set; }
 
-        public static Build Build { get; set; }
 
         public static int CachedLevelAreaId = -1;
         public static DateTime LastUpdatedLevelAreaId = DateTime.MinValue;
@@ -146,6 +149,14 @@ namespace AutoFollow.Resources
         {
             Log.Debug("Creating Player Obj");
             LastUpdate = DateTime.MinValue;
+
+            Core.Routines.Changed += RoutinesOnChanged;            
+        }
+
+        private static void RoutinesOnChanged(IRoutine newRoutine)
+        {
+            Routine = ApiRoutineBuilder.CreateRoutine(); 
+            Build = ApiBuildBuilder.CreateBuild();
         }
 
         public static void UpdateOutOfGame()
@@ -172,7 +183,7 @@ namespace AutoFollow.Resources
                 shouldUpdate = false;
 
             if (!ZetaDia.IsInGame && (ZetaDia.PlayerData == null || !ZetaDia.PlayerData.IsValid))
-                shouldUpdate = false;
+                shouldUpdate = false;            
 
             if (shouldUpdate)
             {
@@ -225,6 +236,9 @@ namespace AutoFollow.Resources
                     Dexterity = (int)ZetaDia.Me.Dexterity;
                     Vitality = (int)ZetaDia.Me.Vitality;
 
+                    //var navigator = (Navigator.NavigationProvider as DefaultNavigationProvider);
+                    //Destination = navigator?.CurrentPathDest ?? MathEx.GetPointAt(Position, 10f, ZetaDia.Me.Movement.Rotation);
+                    Destination = MathEx.GetPointAt(Position, 10f, ZetaDia.Me.Movement.Rotation);
                 }
                 catch (Exception ex)
                 {
@@ -234,7 +248,6 @@ namespace AutoFollow.Resources
 
             if (DateTime.UtcNow.Subtract(LastSlowUpdate).TotalSeconds > 30)
             {
-                Build = Core.Build.Current;
                 SettingsCode = Trinity.Settings.SettingsManager.GetCurrrentSettingsExportCode();
                 LastSlowUpdate = DateTime.UtcNow;
             }
@@ -357,7 +370,7 @@ namespace AutoFollow.Resources
         public static string GetString()
         {            
             return string.Format("Player ({12} - {13}): RActorId={0} AcdId={1} HitpointsCurrent={2:0} HitpointsCurrentPct={3:0} HitpointsMaxTotal={4:0} Position={5} LevelAreaId={6} WorldSnoId={7} DynamicWorldId={8} IsInGame={9} IsInTown={10} IsVendoring: {11}",
-                RActorId, AcdId, HitpointsCurrent, HitpointsCurrentPct*100, HitpointsMaxTotal, Position, CurrentLevelAreaId, CurrentWorldSnoId, CurrentDynamicWorldId, IsInGame, IsInTown, IsVendoring, AutoFollow.CurrentBehaviorType, AutoFollow.CurrentBehavior.Category);
+                RActorId, AcdId, HitpointsCurrent, HitpointsCurrentPct*100, HitpointsMaxTotal, Position, CurrentLevelAreaId, CurrentWorldSnoId, CurrentDynamicWorldId, IsInGame, IsInTown, IsVendoring, string.Empty, AutoFollow.CurrentBehavior.Category);
         }
 
         public static int BattleTagHash => ZetaDia.Service.Hero.BattleTagName.GetHashCode();
@@ -432,5 +445,10 @@ namespace AutoFollow.Resources
         public static bool IsFollower => !IsLeader;
 
         public static string SettingsCode { get; set; }
+
+        public static ApiRoutine Routine { get; set; }
+
+        public static ApiBuild Build { get; set; }
+
     }
 }

@@ -2,15 +2,17 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using AutoFollow.Coroutines.Resources;
 using AutoFollow.Events;
 using AutoFollow.Networking;
 using AutoFollow.Resources;
 using Buddy.Coroutines;
 using Trinity.Components.Adventurer;
 using Zeta.Bot;
+using Zeta.Bot.Coroutines;
 using Zeta.Bot.Logic;
+using Zeta.Common;
 using Zeta.Game;
+using Zeta.Game.Internals;
 using Zeta.Game.Internals.Actors;
 using Zeta.Game.Internals.SNO;
 
@@ -106,57 +108,42 @@ namespace AutoFollow.Coroutines
         /// </summary>
         public static async Task<bool> WaitBeforeStartingRift()
         {
-            if (RiftHelper.IsGreaterRiftStarted)
-                return false;
-
-            var tag = Adventurer.GetCurrentTag();
-            if (tag != "GreaterRiftTag" && tag != "NephalemRiftTag" && tag != "RiftTag")
-                return false;            
-        
-            if (AutoFollow.CurrentFollowers.Any(f => f.IsVendoring))
+            if (Player.IsInTown && AutoFollow.CurrentFollowers.Any(f => f.IsVendoring || f.InDifferentLevelArea))                
             {                
                 var obelisk = Town.Actors.RiftObelisk;
                 if (obelisk != null)
                 {
                     await Movement.MoveTo(obelisk.Position);
                 }
-
                 Log.Info("Waiting for followers to finish vendoring.");
-                await Coroutine.Wait(30000, () => !AutoFollow.CurrentFollowers.All(f => f.IsVendoring));
-                return false;
+                await Coroutine.Sleep(5000);
+                return true;
             }
+            return false;
+        }
 
-            if (_ignoreOtherBotsUntilTime > DateTime.UtcNow)
-                return false;
-
-            if (AutoFollow.NumberOfConnectedBots == 0 || !AutoFollow.CurrentFollowers.All(f => f.IsInSameGame))
+        public static async Task<bool> LeaveFinishedRift()
+        {
+            var turnInStep = RiftHelper.RiftQuest.Step == RiftQuest.RiftStep.NotStarted && RiftHelper.RiftQuest.State == QuestState.InProgress;
+            if (turnInStep)
             {
-                if (!_startedWaiting.HasValue)
+                if (Targetting.RoutineWantsToLoot())
+                    return true;
+
+                if (Player.IsInRift || Player.IsIsInGreaterRift)
                 {
-                    _startedWaiting = DateTime.UtcNow;
-                    Log.Info("Waiting for bots to connect/join.");
-                    await Coroutine.Sleep(2000);
+                    Log.Info("Going to town, rift is finished");
+                    await CommonCoroutines.UseTownPortal();
                     return true;
                 }
-
-                var secondsWaiting = DateTime.UtcNow.Subtract(_startedWaiting.Value).TotalSeconds;
-                if (secondsWaiting < 60)
+                if(Player.IsInTown && AutoFollow.CurrentLeader != null && !AutoFollow.CurrentLeader.IsInTown)
                 {
-                    Log.Info("Waiting for bots to connect/join. Waited {0} seconds", secondsWaiting);
-                    await Coroutine.Sleep(2000);
+                    Log.Info("Waiting for leader to return to town");
+                    await Coroutine.Sleep(1000);
                     return true;
                 }
-
-                Log.Info("Waited for {0}s for bots to connect.. starting without them.", secondsWaiting);
-                await Coroutine.Sleep(2000);
-                _startedWaiting = null;
-                _ignoreOtherBotsUntilTime = DateTime.UtcNow.AddMinutes(2);
             }
 
-            if (Player.IsInTown  && !Player.IsVendoring && RiftHelper.RiftQuest.Step == RiftQuest.RiftStep.NotStarted)
-            {
-                await Coroutine.Wait(30000, () => AutoFollow.CurrentFollowers.All(f => f.IsInSameWorld));
-            }
             return false;
         }
 
@@ -306,7 +293,7 @@ namespace AutoFollow.Coroutines
                 !playerMessage.IsInCombat && playerMessage.Distance > Settings.Coordination.TeleportDistance)
             {
                 Log.Info("{0} is getting quite far away... attempting teleport!", playerMessage.HeroAlias);
-                await Coordination.TeleportToPlayer(playerMessage);
+                await TeleportToPlayer(playerMessage);
                 return true;
             }
 

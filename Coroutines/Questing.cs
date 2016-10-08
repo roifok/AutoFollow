@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AutoFollow.Coroutines.Resources;
 using AutoFollow.Resources;
 using Buddy.Coroutines;
 using Trinity.Components.Adventurer.Coroutines;
@@ -36,7 +35,7 @@ namespace AutoFollow.Coroutines
 
                 Log.Warn("Rift is Completed.");
 
-                while (await _gemUpgrader.GetCoroutine() == false)
+                while (await _gemUpgrader.GetCoroutine() == false && !Player.IsDead)
                 {
                     await Coroutine.Yield();
                 }
@@ -94,7 +93,7 @@ namespace AutoFollow.Coroutines
         /// </summary>
         public static async Task<bool> ReturnToGreaterRift()
         {
-            if (!RiftHelper.IsStarted || !Player.IsInTown || !AutoFollow.CurrentLeader.IsInGreaterRift || BrainBehavior.IsVendoring || !Player.IsIdle)
+            if (!RiftHelper.IsStarted || !Player.IsInTown || !AutoFollow.CurrentLeader.IsInGreaterRift || BrainBehavior.IsVendoring || !Player.IsIdle || !AutoFollow.CurrentLeader.InDifferentLevelArea)
                 return false;
 
             //ActorId: 191492, Type: Gizmo, Name: hearthPortal-46321, Distance2d: 6.981126, CollisionRadius: 8.316568, MinimapActive: 0, MinimapIconOverride: -1, MinimapDisableArrow: 0 

@@ -90,7 +90,7 @@
                         <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center">Follow Distance</TextBlock>
                         <Slider Grid.Row="0" Grid.Column="1" Template="{DynamicResource SliderEditable}" 
                             ToolTip="This determines how close the bots will get to the leader when following."
-                            Interval="1" Maximum="150" Minimum="5" 
+                            Interval="1" Maximum="150" Minimum="0" 
                             SmallChange="1" TickFrequency="5" IsSnapToTickEnabled="True"
                             TickPlacement="BottomRight" Value="{Binding Coordination.FollowDistance}" 
                             HorizontalAlignment="Stretch" Margin="0,3,0,3" />

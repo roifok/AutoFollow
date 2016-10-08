@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Diagnostics;
-using AutoFollow.Resources;
 using Zeta.Bot;
 using Zeta.Game;
 using Zeta.Game.Internals;
 
-namespace AutoFollow.Coroutines.Resources
+namespace AutoFollow.Resources
 {
     public class GameUI
     {

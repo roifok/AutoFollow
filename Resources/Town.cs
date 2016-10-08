@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Data;
 using Zeta.Common;
 using Zeta.Game;
 using Zeta.Game.Internals.Actors;
 
-namespace AutoFollow.Coroutines.Resources
+namespace AutoFollow.Resources
 {
     public static class Town
-    {
+    {        
         public static class ActorIds
         {
             public const int Stash = 130400;
@@ -29,123 +28,83 @@ namespace AutoFollow.Coroutines.Resources
             public const int Orek = 363744;
         }
 
-        public static HashSet<int> VendorIds = new HashSet<int>
-        {
-            ActorIds.TheFence,
-            ActorIds.TheQuaterMaster,
-            ActorIds.ThePeddler,
-            ActorIds.TheMiner,
-            ActorIds.TheCollector,
-        };
-
-        public static DiaObject NearestVendor
-        {
-            get { return ZetaDia.Actors.GetActorsOfType<DiaGizmo>(true).Where(o => VendorIds.Contains(o.ActorSnoId)).OrderBy(o => o.Distance).FirstOrDefault(); }
-        }
-
         public static class Actors
         {
+            public static IEnumerable<DiaUnit> Units 
+                => ZetaDia.Actors.GetActorsOfType<DiaUnit>(true);
+
+            public static IEnumerable<DiaUnit> Gizmos
+                => ZetaDia.Actors.GetActorsOfType<DiaUnit>(true);
+
             public static DiaObject Stash 
-            {
-                get { return ZetaDia.Actors.GetActorsOfType<DiaGizmo>(true).FirstOrDefault(o => o.ActorSnoId == ActorIds.Stash); }
-            }
+                => Gizmos.FirstOrDefault(o => o.ActorSnoId == ActorIds.Stash);
 
-            public static DiaObject TheQuaterMaster
-            {
-                get { return ZetaDia.Actors.GetActorsOfType<DiaUnit>(true).FirstOrDefault(o => o.ActorSnoId == ActorIds.TheQuaterMaster); }
-            }
-            
-            public static DiaObject ThePeddler
-            {
-                get { return ZetaDia.Actors.GetActorsOfType<DiaUnit>(true).FirstOrDefault(o => o.ActorSnoId == ActorIds.ThePeddler); }
-            }
+            public static DiaObject TheQuaterMaster 
+                => Units.FirstOrDefault(o => o.ActorSnoId == ActorIds.TheQuaterMaster);
 
-            public static DiaObject TheMiner
-            {
-                get { return ZetaDia.Actors.GetActorsOfType<DiaUnit>(true).FirstOrDefault(o => o.ActorSnoId == ActorIds.TheMiner); }
-            }
+            public static DiaObject ThePeddler 
+                => Units.FirstOrDefault(o => o.ActorSnoId == ActorIds.ThePeddler);
 
-            public static DiaObject Tyrael
-            {
-                get { return ZetaDia.Actors.GetActorsOfType<DiaUnit>(true).FirstOrDefault(o => o.ActorSnoId == ActorIds.Tyrael); }
-            }
+            public static DiaObject TheMiner 
+                => Units.FirstOrDefault(o => o.ActorSnoId == ActorIds.TheMiner);
 
-            public static DiaObject BookOfCain
-            {
-                get { return ZetaDia.Actors.GetActorsOfType<DiaGizmo>(true).FirstOrDefault(o => o.ActorSnoId == ActorIds.BookOfCain); }
-            }
+            public static DiaObject Tyrael 
+                => Units.FirstOrDefault(o => o.ActorSnoId == ActorIds.Tyrael);
 
-            public static DiaObject Jeweler
-            {
-                get { return ZetaDia.Actors.GetActorsOfType<DiaUnit>(true).FirstOrDefault(o => o.ActorSnoId == ActorIds.Jeweler); }
-            }
+            public static DiaObject BookOfCain 
+                => Gizmos.FirstOrDefault(o => o.ActorSnoId == ActorIds.BookOfCain);
 
-            public static DiaObject BlackSmith
-            {
-                get { return ZetaDia.Actors.GetActorsOfType<DiaUnit>(true).FirstOrDefault(o => o.ActorSnoId == ActorIds.BlackSmith); }
-            }
+            public static DiaObject Jeweler 
+                => Units.FirstOrDefault(o => o.ActorSnoId == ActorIds.Jeweler);
 
-            public static DiaObject Kadala
-            {
-                get { return ZetaDia.Actors.GetActorsOfType<DiaUnit>(true).FirstOrDefault(o => o.ActorSnoId == ActorIds.Kadala); }
-            }
+            public static DiaObject BlackSmith 
+                => Units.FirstOrDefault(o => o.ActorSnoId == ActorIds.BlackSmith);
 
-            public static DiaObject KanaisCube
-            {
-                get { return ZetaDia.Actors.GetActorsOfType<DiaGizmo>(true).FirstOrDefault(o => o.ActorSnoId == ActorIds.KanaisCube); }
-            } 
-         
-            public static DiaObject RiftObelisk
-            {
-                get { return ZetaDia.Actors.GetActorsOfType<DiaGizmo>(true).FirstOrDefault(o => o.ActorSnoId == ActorIds.RiftObelisk); }
-            } 
+            public static DiaObject Kadala 
+                => Units.FirstOrDefault(o => o.ActorSnoId == ActorIds.Kadala);
 
-            public static DiaObject TheCollector
-            {
-                get { return ZetaDia.Actors.GetActorsOfType<DiaUnit>(true).FirstOrDefault(o => o.ActorSnoId == ActorIds.TheCollector); }
-            }
- 
-            public static DiaObject TheMystic
-            {
-                get { return ZetaDia.Actors.GetActorsOfType<DiaUnit>(true).FirstOrDefault(o => o.ActorSnoId == ActorIds.TheMystic); }
-            } 
+            public static DiaObject KanaisCube 
+                => Gizmos.FirstOrDefault(o => o.ActorSnoId == ActorIds.KanaisCube);
 
-            public static DiaObject TheFence
-            {
-                get { return ZetaDia.Actors.GetActorsOfType<DiaUnit>(true).FirstOrDefault(o => o.ActorSnoId == ActorIds.TheFence); }
-            }
+            public static DiaObject RiftObelisk 
+                => Gizmos.FirstOrDefault(o => o.ActorSnoId == ActorIds.RiftObelisk);
 
-            public static DiaObject Orek
-            {
-                get { return ZetaDia.Actors.GetActorsOfType<DiaUnit>(true).FirstOrDefault(o => o.ActorSnoId == ActorIds.Orek); }
-            }
+            public static DiaObject TheCollector 
+                => Units.FirstOrDefault(o => o.ActorSnoId == ActorIds.TheCollector);
 
+            public static DiaObject TheMystic 
+                => Units.FirstOrDefault(o => o.ActorSnoId == ActorIds.TheMystic);
+
+            public static DiaObject TheFence 
+                => Units.FirstOrDefault(o => o.ActorSnoId == ActorIds.TheFence);
+
+            public static DiaObject Orek 
+                => Units.FirstOrDefault(o => o.ActorSnoId == ActorIds.Orek);
         }
 
-        /// <summary>
-        /// Moving to fixed locations is the most reliable way to navigate around town
-        /// </summary>
-        public static class Locations
+        public static class LevelAreaIds
         {
+            public const int A1CampaignTown = 19947;
+            public const int A1OpenWorldTown = 332339;
+            public const int A2Town = 168314;
+            public const int A3A4Town = 92945;
+            public const int A5Town = 270011;
+        }
+
+        public static class Locations
+        {            
             public static Vector3 Stash
             {
                 get
                 {
-                    var levelAreaId = ZetaDia.CurrentLevelAreaSnoId;
-                    switch (levelAreaId)
+                    switch (ZetaDia.CurrentLevelAreaSnoId)
                     {
-                        case 19947: // Campaign A1 Hub
-                            return new Vector3(2968.16f, 2789.63f, 23.94531f);
-                        case 332339: // OpenWorld A1 Hub
-                            return new Vector3(388.16f, 509.63f, 23.94531f);
-                        case 168314: // A2 Hub
-                            return new Vector3(323.0558f, 222.7048f, 0f);
-                        case 92945: // A3/A4 Hub
-                            return new Vector3(387.6834f, 382.0295f, 0f);
-                        case 270011: // A5 Hub
-                            return new Vector3(502.8296f, 739.7472f, 2.598635f);
-                        default:
-                            throw new ValueUnavailableException("Unknown LevelArea Id " + levelAreaId);
+                        case LevelAreaIds.A1CampaignTown: return new Vector3(2968.16f, 2789.63f, 23.94531f);
+                        case LevelAreaIds.A1OpenWorldTown: return new Vector3(388.16f, 509.63f, 23.94531f);
+                        case LevelAreaIds.A2Town: return new Vector3(323.0558f, 222.7048f, 0f);
+                        case LevelAreaIds.A3A4Town: return new Vector3(387.6834f, 382.0295f, 0f);
+                        case LevelAreaIds.A5Town: return new Vector3(502.8296f, 739.7472f, 2.598635f);
+                        default: throw new ValueUnavailableException("Unknown LevelAreaId");
                     }
                 }
             }
@@ -154,21 +113,14 @@ namespace AutoFollow.Coroutines.Resources
             {
                 get
                 {
-                    var levelAreaId = ZetaDia.CurrentLevelAreaSnoId;
-                    switch (levelAreaId)
+                    switch (ZetaDia.CurrentLevelAreaSnoId)
                     {
-                        case 19947: // Campaign A1 Hub
-                            return Vector3.Zero;
-                        case 332339: // OpenWorld A1 Hub
-                            return new Vector3(419.0077f, 581.7107f, 24.04533f);
-                        case 168314: // A2 Hub
-                            return new Vector3(290.3684f, 323.3933f, 0.1000038f);
-                        case 92945: // A3/A4 Hub
-                            return new Vector3(427.6537f, 493.0599f, 0.4094009f);
-                        case 270011: // A5 Hub
-                            return new Vector3(574.3948f, 807.548f, 2.620763f);
-                        default:
-                            throw new ValueUnavailableException("Unknown LevelArea Id " + levelAreaId);
+                        case LevelAreaIds.A1CampaignTown: return Vector3.Zero;
+                        case LevelAreaIds.A1OpenWorldTown: return new Vector3(419.0077f, 581.7107f, 24.04533f);
+                        case LevelAreaIds.A2Town: return new Vector3(290.3684f, 323.3933f, 0.1000038f);
+                        case LevelAreaIds.A3A4Town:  return new Vector3(427.6537f, 493.0599f, 0.4094009f);
+                        case LevelAreaIds.A5Town:  return new Vector3(574.3948f, 807.548f, 2.620763f);
+                        default: throw new ValueUnavailableException("Unknown LevelAreaId");
                     }
                 }
             }
@@ -275,7 +227,7 @@ namespace AutoFollow.Coroutines.Resources
                         case 270011: // A5 Hub
                             return new Vector3(545.3922f, 775.2578f, 2.782243f);
                         default:
-                            throw new ValueUnavailableException(String.Format("There is no QuarterMaster merchant for this act ({0})", levelAreaId));
+                            throw new ValueUnavailableException($"There is no QuarterMaster merchant for this act ({levelAreaId})");
                     }
                 }
             }
@@ -284,13 +236,10 @@ namespace AutoFollow.Coroutines.Resources
             {
                 get
                 {
-                    var levelAreaId = ZetaDia.CurrentLevelAreaSnoId;
-                    switch (levelAreaId)
+                    switch (ZetaDia.CurrentLevelAreaSnoId)
                     {
-                        case 168314: // A2 Hub
-                            return new Vector3(291.3571f, 276.9437f, 0.1000038f);
-                        default:
-                            throw new ValueUnavailableException(String.Format("There is no QuarterMaster merchant for this act ({0})", levelAreaId));
+                        case LevelAreaIds.A2Town: return new Vector3(291.3571f, 276.9437f, 0.1000038f);
+                        default: throw new ValueUnavailableException($"There is no QuarterMaster merchant for this act");
                     }
                 }
             }
@@ -299,18 +248,12 @@ namespace AutoFollow.Coroutines.Resources
             {
                 switch (vendorId)
                 {
-                    case ActorIds.Stash:
-                        return Stash;
-                    case ActorIds.TheFence:
-                        return TheFence;
-                    case ActorIds.TheMiner:
-                        return TheMiner;
-                    case ActorIds.ThePeddler:
-                        return ThePeddler;
-                    case ActorIds.TheQuaterMaster:
-                        return TheQuarterMaster;
-                    default:
-                        throw new ValueUnavailableException(String.Format("There is no position available for this actorId ({0})", vendorId));
+                    case ActorIds.Stash: return Stash;
+                    case ActorIds.TheFence: return TheFence;
+                    case ActorIds.TheMiner: return TheMiner;
+                    case ActorIds.ThePeddler: return ThePeddler;
+                    case ActorIds.TheQuaterMaster: return TheQuarterMaster;
+                    default: throw new ValueUnavailableException($"There is no position available for this actorId ({vendorId})");
                 }
             }
 
