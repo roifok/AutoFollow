@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoFollow.Networking;
 using AutoFollow.Resources;
+using Trinity.Framework;
 using Zeta.Bot;
 using Zeta.Common;
 using Zeta.Game;
@@ -74,6 +75,9 @@ namespace AutoFollow.Events
 
         private static void Pulsator_OnPulse(object sender, EventArgs eventArgs)
         {
+            if (!Core.TrinityIsReady)
+                return;
+
             Update();
         }
 
@@ -340,6 +344,12 @@ namespace AutoFollow.Events
         {
             if (!ZetaDia.Service.IsValid || !ZetaDia.Service.Hero.IsValid)
                 return false;
+
+           /* if (!Core.IsOutOfGame && !Core.TrinityIsReady)
+            {
+                Log.Verbose("Waiting for Trinity to be ready");
+                return true;
+            }*/
 
             if (IsExecutionBreakRequested)
             {

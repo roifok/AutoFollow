@@ -9,6 +9,7 @@ using AutoFollow.Events;
 using AutoFollow.Networking;
 using AutoFollow.Resources;
 using Buddy.Coroutines;
+using Trinity.Components.Combat;
 using Trinity.Components.Combat.Resources;
 using Trinity.Framework;
 using Zeta.Bot;
@@ -108,7 +109,7 @@ namespace AutoFollow.Behaviors
 
         private static FollowMode GetFollowMode()
         {
-            if (Trinity.Components.Combat.Combat.Routines.Current.ShouldIgnoreFollowing())
+            if (TrinityCombat.Routines.Current.ShouldIgnoreFollowing())
             {
                 Targetting.State = CombatState.Enabled;
                 return FollowMode.None;

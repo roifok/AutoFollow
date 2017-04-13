@@ -10,7 +10,6 @@ using Trinity;
 using Trinity.Components.Combat.Resources;
 using Trinity.Framework.Actors.ActorTypes;
 using Trinity.Framework.Objects;
-using Trinity.Framework.Objects.Api;
 using Zeta.Bot;
 using Zeta.Bot.Logic;
 using Zeta.Common;
@@ -39,6 +38,10 @@ namespace AutoFollow.Networking
             Events = new List<EventData>();
         }
 
+        [DataMember]
+        public double CurrentHealthPct { get; set; }
+        [DataMember]
+        public double PrimaryResourcePct { get; set; }
         [DataMember]
         public int CatchUpDistance { get; set; }
         [DataMember]
@@ -207,11 +210,11 @@ namespace AutoFollow.Networking
         [DataMember]
         public bool IsCastingTownPortal { get; set; }
 
-        [DataMember]
-        public ApiBuild Build { get; set; }
+        //[DataMember]
+        //public ApiBuild Build { get; set; }
 
-        [DataMember]
-        public ApiRoutine Routine { get; set; }
+        //[DataMember]
+        //public ApiRoutine Routine { get; set; }
 
         public bool IsInSameGame
         {
@@ -269,7 +272,7 @@ namespace AutoFollow.Networking
             {
                 Message m;
 
-                if (!ZetaDia.Service.IsValid || !ZetaDia.Service.Platform.IsConnected)
+                if (!ZetaDia.Service.IsValid)
                 {
                     m = new Message
                     {
@@ -283,7 +286,7 @@ namespace AutoFollow.Networking
                 {
                     m = new Message
                     {
-                        Index = Player.Index,
+                        //Index = Player.Index,
                         IsInGame = false,
                         LastUpdated = DateTime.UtcNow,
                         IsInParty = Player.IsInParty,
@@ -306,11 +309,11 @@ namespace AutoFollow.Networking
                         IsLoadingWorld = Player.IsLoadingWorld,
                     };
                 }
-                else if (ZetaDia.IsInGame && !ZetaDia.IsLoadingWorld && ZetaDia.Me.IsValid)
+                else if (ZetaDia.IsInGame && !ZetaDia.Globals.IsLoadingWorld && ZetaDia.Me.IsValid)
                 {
                     m = new Message
                     {
-                        Index = Player.Index,
+                        //Index = Player.Index,
                         LastUpdated = DateTime.UtcNow,
                         IsInGame = Player.IsInGame,
                         OwnerId = Player.BattleTagHash,
@@ -322,6 +325,8 @@ namespace AutoFollow.Networking
                         GameId = Player.CurrentGameId,
                         HitpointsCurrent = Player.HitpointsCurrent,
                         HitpointsMaxTotal = Player.HitpointsMaxTotal,
+                        CurrentHealthPct = Player.HitpointsCurrentPct,
+                        PrimaryResourcePct = Player.PrimaryResourcePct,
                         LevelAreaId = Player.LevelAreaId,
                         IsInTown = Player.LevelAreaId != 55313 && Player.IsInTown, // A2 Caldeum Bazaar
                         Position = Player.Position,
@@ -362,19 +367,19 @@ namespace AutoFollow.Networking
                         Intelligence = Player.Intelligence,
                         Dexterity = Player.Dexterity,   
                         Paragon = Player.Paragon,
-                        SettingsCode = Player.SettingsCode,
+                        //SettingsCode = Player.SettingsCode,
                         FollowDistance = Settings.Coordination.CatchUpDistance,
                         CatchUpDistance = Settings.Coordination.CatchUpDistance,
                         Objective = AutoFollow.CurrentBehavior.Objective,
-                        Build = Player.Build,
-                        Routine = Player.Routine,
+                        //Build = Player.Build,
+                        //Routine = Player.Routine,
                     };
                 }
-                else if (ZetaDia.IsInGame && ZetaDia.IsLoadingWorld)
+                else if (ZetaDia.IsInGame && ZetaDia.Globals.IsLoadingWorld)
                 {
                     m = new Message
                     {
-                        Index = Player.Index,
+                        //Index = Player.Index,
                         IsInGame = true,
                         IsLoadingWorld = true,
                         GameId = Player.CurrentGameId,
@@ -404,7 +409,7 @@ namespace AutoFollow.Networking
                         Intelligence = Player.Intelligence,
                         Dexterity = Player.Dexterity,
                         Paragon = Player.Paragon,
-                        SettingsCode = Player.SettingsCode,
+                        //SettingsCode = Player.SettingsCode,
                         WorldDynamicId = Player.CurrentDynamicWorldId,
                     };
                 }
@@ -412,7 +417,7 @@ namespace AutoFollow.Networking
                 {
                     m = new Message
                     {
-                        Index = Player.Index,
+                        //Index = Player.Index,
                         IsInGame = false,
                         IsInTown = false,
                         OwnerId = Player.BattleTagHash,
@@ -443,7 +448,6 @@ namespace AutoFollow.Networking
                 return new Message();
             }
         }
-
 
 
 

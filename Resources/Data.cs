@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AutoFollow.Networking;
+using Trinity.Framework;
 using Zeta.Game;
 using Zeta.Game.Internals;
 using Zeta.Game.Internals.Actors;
@@ -65,8 +66,10 @@ namespace AutoFollow.Resources
 
         public static int GetAcdIdByHeroId(int heroId)
         {
+            if (!Core.TrinityIsReady) return -1;
+
             // AcdId is a local client object id that changes between d3 instances.
-            var player = ZetaDia.Players.FirstOrDefault(p => p.HeroId == heroId);
+            var player = ZetaDia.Storage.PlayerDataManager.Players.FirstOrDefault(p => p.HeroId == heroId);
             return player?.ACDId ?? -1;
         }
 

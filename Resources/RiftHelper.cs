@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoFollow.Resources;
+using Trinity.Framework;
 using Zeta.Bot;
 using Zeta.Common;
 using Zeta.Game;
@@ -14,8 +15,6 @@ namespace AutoFollow.Resources
 {
     public static class RiftHelper
     {
-        public static RiftInfo CurrentRift { get; set; }
-
         static RiftHelper()
         {
             GameEvents.OnGameJoined += GameEvents_OnGameJoined;
@@ -24,12 +23,15 @@ namespace AutoFollow.Resources
 
         private static void Pulsator_OnPulse(object sender, EventArgs e)
         {
+            if (!Core.TrinityIsReady)
+                return;
+
             Update();
         }
 
         private static void GameEvents_OnGameJoined(object sender, EventArgs e)
         {
-            Update(true);            
+            //Update(true);            
         }
 
         private static void Reset()
@@ -46,23 +48,22 @@ namespace AutoFollow.Resources
 
             _lastUpdateTime = DateTime.UtcNow;
 
-            var currentRift = ZetaDia.CurrentRift;
-            if (currentRift == null)
-                return;
-
             RiftQuest = new RiftQuest();
 
-            var currentWorldId = ZetaDia.CurrentWorldSnoId;
+            if (ZetaDia.Storage.CurrentRiftType == RiftType.None)
+                return;
 
-            CurrentRift = currentRift;
+            var currentWorldId = ZetaDia.Globals.WorldSnoId;   
             IsInRift = RiftWorldIds.Contains(currentWorldId);
             CurrentWorldId = currentWorldId;
-            IsStarted = currentRift.IsStarted;
-            Type = currentRift.Type; ;
+            IsStarted = ZetaDia.Storage.RiftStarted;
+            Type = ZetaDia.Storage.CurrentRiftType;
             CurrentDepth = GetDepthByWorldId(currentWorldId);
             IsGreaterRiftStarted = IsStarted && Type == RiftType.Greater;
             IsInGreaterRift = IsInRift && Type == RiftType.Greater;
+            IsCompleted = ZetaDia.Storage.RiftCompleted;
 
+            HasGuardianSpawned = ZetaDia.Storage.RiftGuardianSpawned;
             IsLockedOutOfRift = !ZetaDia.Me.IsParticipatingInTieredLootRun && IsGreaterRiftStarted;
 
             IsGreaterRiftProfile = Player.CurrentMessage != null && 
@@ -89,6 +90,8 @@ namespace AutoFollow.Resources
         public static bool IsStarted { get; set; }
 
         public static bool IsGreaterRiftProfile { get; set; }
+        public static bool HasGuardianSpawned { get; set; }
+        public static bool IsCompleted { get; set; }
 
         public static readonly HashSet<int> RiftWorldIds = new HashSet<int>
         {

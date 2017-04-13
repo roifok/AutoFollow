@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using AutoFollow.Networking;
 using AutoFollow.Resources;
+using Trinity.Framework;
 using Zeta.Bot;
 using Zeta.Bot.Logic;
 using Zeta.Bot.Navigation;
@@ -97,6 +98,9 @@ namespace AutoFollow.Events
 
         private static void OnPulse(object sender, EventArgs eventArgs)
         {
+            if (!Core.TrinityIsReady)
+                return;
+
             TrackPortals();
             LastPulseTime = DateTime.UtcNow;
         }
@@ -121,7 +125,7 @@ namespace AutoFollow.Events
             if (ZetaDia.Service.Party.CurrentPartyLockReasonFlags != PartyLockReasonFlag.None)
                 return;
 
-            if (ZetaDia.IsLoadingWorld || ZetaDia.IsInTown)
+            if (ZetaDia.Globals.IsLoadingWorld || ZetaDia.IsInTown)
                 return;
 
             Log.Info("World Transfer Start Fired!");
@@ -172,7 +176,7 @@ namespace AutoFollow.Events
             var portal = Data.Portals.OrderByDescending(p => p.Distance).FirstOrDefault();
             if (portal != null)
             {
-                var interactable = PortalHistory .FirstOrDefault(p => DateTime.UtcNow.Subtract(p.Value.LastTimeCloseTo).TotalSeconds < 15 && p.Value.WorldSnoId != ZetaDia.CurrentWorldSnoId);
+                var interactable = PortalHistory .FirstOrDefault(p => DateTime.UtcNow.Subtract(p.Value.LastTimeCloseTo).TotalSeconds < 15 && p.Value.WorldSnoId != ZetaDia.Globals.WorldSnoId);
                 if (interactable.Value != null)
                 {
                     Log.Info("Portal Used: {0} in WorldSnoId={1}", interactable.Value.InternalName, interactable.Value.WorldSnoId);
@@ -264,7 +268,7 @@ namespace AutoFollow.Events
                 _isVendoring = isVendoring;
             }
 
-            var worldId = ZetaDia.CurrentWorldSnoId;
+            var worldId = ZetaDia.Globals.WorldSnoId;
             if (ZetaDia.WorldInfo.IsValid && worldId != _worldId && worldId != 0)
             {                
                 EventManager.FireEvent(new EventData(EventType.WorldAreaChanged, _worldId, worldId));
@@ -332,12 +336,12 @@ namespace AutoFollow.Events
                 }
             }
 
-            if (RiftHelper.CurrentRift != null)
+            if (RiftHelper.Type != RiftType.None)
             {
-                var riftGaurdianHiding = RiftHelper.CurrentRift.IsStarted && !RiftHelper.CurrentRift.HasGuardianSpawned;
+                var riftGaurdianHiding = RiftHelper.IsStarted && !RiftHelper.HasGuardianSpawned;
                 if (riftGaurdianHiding != _riftGaurdianHiding)
                 {
-                    if (!riftGaurdianHiding && RiftHelper.CurrentRift.IsStarted)
+                    if (!riftGaurdianHiding && RiftHelper.IsStarted)
                     {
                         Log.Warn("Whats this, there's something lurking nearby?");
                         EventManager.FireEvent(new EventData(EventType.SpawnedRiftGaurdian));
@@ -403,7 +407,7 @@ namespace AutoFollow.Events
             if (ZetaDia.IsInTown && (UIElements.VendorWindow.IsVisible || UIElements.SalvageWindow.IsVisible))
                 return false;
 
-            if (ZetaDia.Me.IsInConversation || ZetaDia.IsPlayingCutscene || ZetaDia.IsLoadingWorld)
+            if (ZetaDia.Me.IsInConversation || ZetaDia.Globals.IsPlayingCutscene || ZetaDia.Globals.IsLoadingWorld)
                 return false;
 
             if (ZetaDia.Me.LoopingAnimationEndTime > 0)

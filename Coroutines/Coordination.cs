@@ -124,7 +124,7 @@ namespace AutoFollow.Coroutines
 
         public static async Task<bool> LeaveFinishedRift()
         {
-            var turnInStep = RiftHelper.RiftQuest.Step == RiftQuest.RiftStep.NotStarted && RiftHelper.RiftQuest.State == QuestState.InProgress;
+            var turnInStep = RiftHelper.RiftQuest?.Step == RiftQuest.RiftStep.NotStarted && RiftHelper.RiftQuest?.State == QuestState.InProgress;
             if (turnInStep)
             {
                 if (Targetting.RoutineWantsToLoot())
@@ -224,7 +224,7 @@ namespace AutoFollow.Coroutines
 
             await Coroutine.Sleep(250);
 
-            while (ZetaDia.IsLoadingWorld || ZetaDia.Me.LoopingAnimationEndTime != 0)
+            while (ZetaDia.Globals.IsLoadingWorld || ZetaDia.Me.LoopingAnimationEndTime != 0)
             {
                 await Coroutine.Sleep(250);
                 await Coroutine.Yield();
@@ -235,7 +235,7 @@ namespace AutoFollow.Coroutines
 
         private static bool CanTeleportToPlayer(Message playerMessage)
         {
-            if (!ZetaDia.IsInGame || ZetaDia.IsLoadingWorld)
+            if (!ZetaDia.IsInGame || ZetaDia.Globals.IsLoadingWorld)
                 return false;
 
             if (playerMessage.IsInSameWorld && playerMessage.Distance < 100f)

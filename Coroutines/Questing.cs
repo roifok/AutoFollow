@@ -26,7 +26,7 @@ namespace AutoFollow.Coroutines
             if (DateTime.UtcNow.Subtract(LastRequestedGemUpgrade).TotalSeconds < 10)
                 return false;
 
-            if (RiftHelper.IsInRift && RiftHelper.RiftQuest.Step == RiftQuest.RiftStep.UrshiSpawned && RiftHelper.CurrentRift.IsCompleted)
+            if (RiftHelper.IsInRift && RiftHelper.RiftQuest.Step == RiftQuest.RiftStep.UrshiSpawned && RiftHelper.IsCompleted)
             {
                 if (AutoFollow.CurrentLeader.Distance > 150f)
                 {

@@ -194,6 +194,7 @@ namespace AutoFollow
         private bool _isRealIdEnabled;
         private bool _inviteByParagon;
         private bool _alwaysAcceptInvites;
+        private bool _alwaysEnablePlugin;
 
         [DataMember, Setting]
         [DefaultValue(false)]
@@ -251,7 +252,15 @@ namespace AutoFollow
             set { SetField(ref _alwaysAcceptInvites, value); }
         }
 
-        
+        [DataMember, Setting]
+        [DefaultValue(false)]
+        public bool AlwaysEnablePlugin
+        {
+            get { return _alwaysEnablePlugin; }
+            set { SetField(ref _alwaysEnablePlugin, value); }
+        }
+
+
     }
 
 

@@ -4,7 +4,6 @@ using AutoFollow.Events;
 using AutoFollow.Networking;
 using Trinity.Framework;
 using Trinity.Framework.Objects;
-using Trinity.Framework.Objects.Api;
 using Trinity.Routines;
 using Zeta.Bot;
 using Zeta.Bot.Logic;
@@ -20,6 +19,8 @@ namespace AutoFollow.Resources
 {
     public static class Player
     {
+        public static double PrimaryResourcePct { get; set; }
+        public static DateTime LastSlowUpdate { get; set; }
         public static Vector3 Destination { get; set; }
         public static int Level { get; set; }
         public static int Paragon { get; set; }
@@ -115,7 +116,7 @@ namespace AutoFollow.Resources
             {
                 if (!ZetaDia.IsInGame)
                     return 0;
-                if (ZetaDia.IsLoadingWorld)
+                if (ZetaDia.Globals.IsLoadingWorld)
                     return 0;
                 if (ZetaDia.Me == null)
                     return 0;
@@ -155,8 +156,8 @@ namespace AutoFollow.Resources
 
         private static void RoutinesOnChanged(IRoutine newRoutine)
         {
-            Routine = ApiRoutineBuilder.CreateRoutine(); 
-            Build = ApiBuildBuilder.CreateBuild();
+            //Routine = ApiRoutineBuilder.CreateRoutine(); 
+            //Build = ApiBuildBuilder.CreateBuild();
         }
 
         public static void UpdateOutOfGame()
@@ -164,7 +165,7 @@ namespace AutoFollow.Resources
             var hero = ZetaDia.Service.Hero;
             HeroId = hero.HeroId;
             HeroName = Common.CleanString(hero.Name);
-            IsLoadingWorld = ZetaDia.IsLoadingWorld || ZetaDia.IsPlayingCutscene;
+            IsLoadingWorld = ZetaDia.Globals.IsLoadingWorld || ZetaDia.Globals.IsPlayingCutscene;
             ActorClass = ZetaDia.Service.Hero.Class;
             IsInGame = false;
             Level = ZetaDia.Service.Hero.Level;
@@ -177,19 +178,23 @@ namespace AutoFollow.Resources
             if (DateTime.UtcNow.Subtract(LastUpdate).TotalMilliseconds < 25)
                 return;
 
-            var shouldUpdate = ZetaDia.IsInGame && !ZetaDia.IsLoadingWorld && ZetaDia.Me != null;
+            var shouldUpdate = ZetaDia.IsInGame && !ZetaDia.Globals.IsLoadingWorld && ZetaDia.Me != null;
 
             if (ZetaDia.Me != null && (!ZetaDia.Me.IsValid || !ZetaDia.Me.CommonData.IsValid || ZetaDia.Me.CommonData.IsDisposed))
                 shouldUpdate = false;
 
-            if (!ZetaDia.IsInGame && (ZetaDia.PlayerData == null || !ZetaDia.PlayerData.IsValid))
-                shouldUpdate = false;            
+            if (!Core.TrinityIsReady)
+                shouldUpdate = false;
+
+            //var playerData = ZetaDia.Storage.PlayerDataManager.ActivePlayerData;
+            //if (!ZetaDia.IsInGame && (playerData == null || !playerData.IsValid))
+            //    shouldUpdate = false;            
 
             if (shouldUpdate)
             {
                 try
                 {
-                    Index = ZetaDia.PlayerData.Index;
+                    //Index = playerData.Index;
                     RActorId = ZetaDia.Me.RActorId;
                     LastUpdate = DateTime.UtcNow;
                     IsInGame = ZetaDia.IsInGame;
@@ -197,22 +202,23 @@ namespace AutoFollow.Resources
                     HitpointsCurrent = ZetaDia.Me.HitpointsCurrent;
                     HitpointsMaxTotal = ZetaDia.Me.HitpointsMaxTotal;
                     HitpointsCurrentPct = HitpointsMaxTotal > 0 ? ZetaDia.Me.HitpointsCurrent / ZetaDia.Me.HitpointsMaxTotal : 0;
-                    Position = ZetaDia.Me.Position;
+                    PrimaryResourcePct = Core.Player.PrimaryResourcePct;
+                    Position = Core.Player.Position;
                     CurrentLevelAreaId = LevelAreaId;
-                    CurrentWorldSnoId = ZetaDia.CurrentWorldSnoId;
-                    CurrentDynamicWorldId = ZetaDia.WorldId;
-                    IsInTown = ZetaDia.IsInTown;
+                    CurrentWorldSnoId = Core.Player.WorldSnoId;
+                    CurrentDynamicWorldId = ZetaDia.Globals.WorldId;
+                    IsInTown = Core.Player.IsInTown;
                     IsVendoring = BrainBehavior.IsVendoring;
-                    ActorId = ZetaDia.Me.ActorSnoId;
+                    ActorId = Core.Player.ActorSnoId;
                     ActorClass = ZetaDia.Service.Hero.Class;
                     Level = ZetaDia.Service.Hero.Level;
                     Paragon = ZetaDia.Me.ParagonLevel;
                     HeroName = Common.CleanString(ZetaDia.Service.Hero.Name);
-                    HeroId = ZetaDia.PlayerData.HeroId;
+                    HeroId = ZetaDia.Service.Hero.HeroId;
                     CurrentGameId = ZetaDia.Service.CurrentGameId;
                     IsInCombat = GetIsInCombat();
                     GameId = ZetaDia.Service.CurrentGameId;
-                    IsLoadingWorld = ZetaDia.IsLoadingWorld || ZetaDia.IsPlayingCutscene;
+                    IsLoadingWorld = ZetaDia.Globals.IsLoadingWorld || ZetaDia.Globals.IsPlayingCutscene;
                     IsQuickJoinEnabled = ZetaDia.SocialPreferences.QuickJoinEnabled;
                     IsInRift = RiftHelper.IsInRift;
                     IsIsInGreaterRift = RiftHelper.IsInGreaterRift;
@@ -228,7 +234,7 @@ namespace AutoFollow.Resources
                     ProfileTagName = GetProfileTagname();
                     IsInBossEncounter = ZetaDia.Me.IsInBossEncounter;
                     JewelUpgradesleft = ZetaDia.Me.JewelUpgradesLeft;
-                    FreeBackPackSlots = ZetaDia.Me.Inventory.NumFreeBackpackSlots;
+                    FreeBackPackSlots = InventoryManager.NumFreeBackpackSlots;
                     IsDead = ZetaDia.Me.IsDead;
                     LastCastTownPortal = ChangeMonitor.LastCastTownPortal;
                     Strength = (int)ZetaDia.Me.Strength;
@@ -246,16 +252,16 @@ namespace AutoFollow.Resources
                 }
             }
 
-            if (DateTime.UtcNow.Subtract(LastSlowUpdate).TotalSeconds > 30)
-            {
-                SettingsCode = Trinity.Settings.SettingsManager.GetCurrrentSettingsExportCode();
-                LastSlowUpdate = DateTime.UtcNow;
-            }
+            //if (DateTime.UtcNow.Subtract(LastSlowUpdate).TotalSeconds > 30)
+            //{
+            //    SettingsCode = Trinity.Settings.SettingsManager.GetCurrrentSettingsExportCode();
+            //    LastSlowUpdate = DateTime.UtcNow;
+            //}
             
             CurrentMessage = Message.GetMessage();
         }
 
-        public static DateTime LastSlowUpdate { get; set; }
+
 
 
         public static string GetProfileTagname()
@@ -385,7 +391,7 @@ namespace AutoFollow.Resources
                 if (!ZetaDia.Service.Hero.IsValid)
                     return _lastNumPartyMembers;
 
-                if (ZetaDia.IsLoadingWorld)
+                if (ZetaDia.Globals.IsLoadingWorld)
                     return _lastNumPartyMembers;
 
                 if (DateTime.UtcNow.Subtract((DateTime) _lastUpdateNumPartyMembers).TotalSeconds < 5)
@@ -393,7 +399,7 @@ namespace AutoFollow.Resources
 
                 if (ZetaDia.Service.IsValid &&
                     ZetaDia.Service.Platform.IsValid &&
-                    ZetaDia.Service.Platform.IsConnected &&
+                    //ZetaDia.Service.Platform.IsConnected &&
                     ZetaDia.Service.Hero.IsValid &&
                     ZetaDia.Service.Party.IsValid)
                 {
@@ -413,7 +419,7 @@ namespace AutoFollow.Resources
         //            return false;
         //        if (!ZetaDia.Service.Hero.IsValid)
         //            return false;
-        //        if (ZetaDia.IsLoadingWorld)
+        //        if (ZetaDia.Globals.IsLoadingWorld)
         //            return false;
 
         //        if (DateTime.UtcNow.Subtract((DateTime) _lastUpdateIsPartyLeaderMembers).TotalSeconds < 5)
@@ -446,9 +452,9 @@ namespace AutoFollow.Resources
 
         public static string SettingsCode { get; set; }
 
-        public static ApiRoutine Routine { get; set; }
+        //public static ApiRoutine Routine { get; set; }
 
-        public static ApiBuild Build { get; set; }
+        //public static ApiBuild Build { get; set; }
 
     }
 }

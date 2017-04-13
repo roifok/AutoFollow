@@ -117,7 +117,7 @@ namespace AutoFollow.Behaviors
 
         public static async Task<bool> WaitForGemUpgraded()
         {
-            if (RiftHelper.RiftQuest.Step == RiftQuest.RiftStep.UrshiSpawned) 
+            if (RiftHelper.RiftQuest?.Step == RiftQuest.RiftStep.UrshiSpawned) 
             {                 
                  if (Player.IsInTown)
                  {
@@ -140,7 +140,7 @@ namespace AutoFollow.Behaviors
 
         public override async Task<bool> OnInTrouble(Message sender, EventData e)
         {
-            if (e.IsFollowerEvent && !Data.Monsters.Any(m => m.Distance <= 80f) && sender.IsInSameWorld)
+            if (e.IsFollowerEvent && !Data.Monsters.Any(m => m.Distance <= 80f) && sender.IsInSameWorld && !RiftHelper.IsInGreaterRift)
             {
                 Log.Info("My minion needs help! Teleporting to {0}. Distance={1}", sender.HeroAlias, sender.Distance);
                 await Coordination.TeleportToPlayer(sender);

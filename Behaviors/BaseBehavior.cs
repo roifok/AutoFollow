@@ -12,6 +12,7 @@ using AutoFollow.Networking;
 using AutoFollow.Resources;
 using Buddy.Coroutines;
 using Trinity.Components.Combat.Resources;
+using Trinity.Framework;
 using Zeta.Bot;
 using Zeta.Common;
 using Zeta.Game;
@@ -149,7 +150,7 @@ namespace AutoFollow.Behaviors
 
             AutoFollow.Pulse();
 
-            if (Service.IsConnected && AutoFollow.NumberOfConnectedBots == 0)
+            if (Service.IsConnected && AutoFollow.NumberOfConnectedBots < 3)
             {
                 Log.Info("Waiting for bots to connect... ");
                 await Coroutine.Sleep(500);
@@ -187,6 +188,12 @@ namespace AutoFollow.Behaviors
             if (!IsGameReady || !ZetaDia.IsInGame || Party.IsLocked)
             {
                 Log.Verbose("Waiting (Invalid State)");
+                return true;
+            }
+
+            if (!Core.TrinityIsReady)
+            {
+                Log.Verbose("Waiting for Trinity to be ready");
                 return true;
             }
 
@@ -231,6 +238,9 @@ namespace AutoFollow.Behaviors
 
         private void Pulsator_OnPulse(object sender, EventArgs e)
         {
+            if (!Core.TrinityIsReady)
+                return;
+
             if (!TreeHooks.Instance.Hooks.Any(h => h.Value.Contains(_inGameHook)))
             {
                 InsertHooks();
@@ -276,7 +286,7 @@ namespace AutoFollow.Behaviors
 
         public virtual async Task<bool> OnSpawnedRiftGaurdian(Message sender, EventData e) => false;
 
-        public static bool IsGameReady => ZetaDia.Service.IsValid && ZetaDia.Service.Hero.IsValid && AutoFollow.Enabled && !ZetaDia.IsLoadingWorld;
+        public static bool IsGameReady => ZetaDia.Service.IsValid && ZetaDia.Service.Hero.IsValid && AutoFollow.Enabled && !ZetaDia.Globals.IsLoadingWorld;
 
         public override int GetHashCode() => Name.GetHashCode() * 127;
     }

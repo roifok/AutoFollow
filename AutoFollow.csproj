@@ -35,10 +35,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Demonbuddy">
-      <HintPath>..\..\DB-Current\Demonbuddy.exe</HintPath>
+      <HintPath>..\..\DemonBuddy 1\Demonbuddy.exe</HintPath>
     </Reference>
     <Reference Include="GreyMagic">
-      <HintPath>..\..\DB-Current\GreyMagic.dll</HintPath>
+      <HintPath>..\..\DemonBuddy 1\GreyMagic.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="PresentationCore" />
@@ -59,7 +59,7 @@
     <Reference Include="System.Xml.Linq" />
     <Reference Include="Trinity, Version=1.7.3.8, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\_Trinity New 2x\bin\Release\Trinity.dll</HintPath>
+      <HintPath>..\..\DemonBuddy 1\CompiledAssemblies\636277126483012765\Trinity.dll</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
   </ItemGroup>

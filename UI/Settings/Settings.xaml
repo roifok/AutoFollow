@@ -151,8 +151,11 @@
                         </CheckBox>
                         <CheckBox Margin="5,6,5,0" IsEnabled="True" ToolTip="Allow Trinity to Kite whenever it wants to" IsChecked="{Binding Combat.AllowKiting, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center">
                             <TextBlock Margin="1,1" Text="Allow Kiting" VerticalAlignment="Center" ToolTip="Allow Trinity to Kite whenever it wants to"/>
-                        </CheckBox>                        
-                        <!--<CheckBox Margin="5,6,5,0" IsEnabled="True" ToolTip="" IsChecked="{Binding Path=Misc.HideHeroName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center">
+                        </CheckBox>
+                      <CheckBox Margin="5,6,5,0" IsEnabled="True" ToolTip="Allow Trinity to Kite whenever it wants to" IsChecked="{Binding Misc.AlwaysEnablePlugin, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center">
+                        <TextBlock Margin="1,1" Text="Force Enable Plugin" VerticalAlignment="Center" ToolTip="Forcibly enable this plugin every application starts."/>
+                      </CheckBox>
+                      <!--<CheckBox Margin="5,6,5,0" IsEnabled="True" ToolTip="" IsChecked="{Binding Path=Misc.HideHeroName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center">
                         <TextBlock Margin="1,1" Text="Accept rifts as 'Empowered'" VerticalAlignment="Center" ToolTip=""/>
                     </CheckBox>-->
                         <StackPanel Margin="5" Visibility="{Binding Misc.IsRealIdEnabled, Converter={StaticResource VisibleWhenTrueConverter}}">

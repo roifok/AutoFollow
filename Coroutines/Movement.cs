@@ -37,7 +37,7 @@ namespace AutoFollow.Coroutines
 
             Navigator.PlayerMover.MoveTowards(location);
 
-            var startingWorldSnoId = ZetaDia.CurrentWorldSnoId;
+            var startingWorldSnoId = ZetaDia.Globals.WorldSnoId;
 
             while (ZetaDia.IsInGame && (distance = location.Distance(ZetaDia.Me.Position)) >= range)
             {
@@ -47,7 +47,7 @@ namespace AutoFollow.Coroutines
                 if (ZetaDia.Me.IsDead || Navigator.StuckHandler.IsStuck)
                     break;
 
-                if (ZetaDia.CurrentWorldSnoId != startingWorldSnoId)
+                if (ZetaDia.Globals.WorldSnoId != startingWorldSnoId)
                     break;
 
                 if (Navigation.IsBlocked)
@@ -222,7 +222,7 @@ namespace AutoFollow.Coroutines
             if (!Data.IsValid(obj))
                 return false;
 
-            var startWorldSnoId = ZetaDia.CurrentWorldSnoId;
+            var startWorldSnoId = ZetaDia.Globals.WorldSnoId;
 
             if (interactLimit < 1) interactLimit = 5;
             if (range < 0) range = obj.CollisionSphere.Radius - 2;
@@ -260,15 +260,14 @@ namespace AutoFollow.Coroutines
             Navigator.PlayerMover.MoveTowards(obj.Position);
             await Coroutine.Sleep(250);
 
-            if(!ZetaDia.IsLoadingWorld && Data.IsValid(obj))
+            if(!ZetaDia.Globals.IsLoadingWorld && Data.IsValid(obj))
                 obj.Interact();
 
             await Coroutine.Sleep(1000);
 
-            if (obj is GizmoPortal && ZetaDia.IsLoadingWorld || ZetaDia.CurrentWorldSnoId != startWorldSnoId)
+            if (obj is GizmoPortal && ZetaDia.Globals.IsLoadingWorld || ZetaDia.Globals.WorldSnoId != startWorldSnoId)
             {
                 Log.Verbose("A portal was successfully interacted with");
-                GameEvents.FireWorldTransferStart();
             }
 
             return true;

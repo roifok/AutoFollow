@@ -23,7 +23,7 @@
                     </WrapPanel>
                     <WrapPanel>
                         <Label>Behavior Type: </Label>
-                        <Label Content="{Binding BehaviorType, FallbackValue=Unknown}" />
+                        <Label Content="{Binding BehaviorName, FallbackValue=Unknown}" />
                     </WrapPanel>
                 </StackPanel>
                 <StackPanel>

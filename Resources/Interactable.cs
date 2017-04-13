@@ -25,7 +25,7 @@ namespace AutoFollow.Resources
             TimeFirstSeen = DateTime.UtcNow;
             LastTimeCloseTo = DateTime.UtcNow;
             GizmoType = obj.CommonData.GizmoType;
-            WorldSnoId = ZetaDia.CurrentWorldSnoId;
+            WorldSnoId = ZetaDia.Globals.WorldSnoId;
 
             var marker = ZetaDia.Minimap.Markers.AllMarkers.FirstOrDefault(m => m.Position.Distance(ActorPosition) < 15f);
             if (marker != null)

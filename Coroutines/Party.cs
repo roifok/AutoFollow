@@ -162,7 +162,7 @@ namespace AutoFollow.Coroutines
         /// </summary>
         public static async Task<bool> LeaveWhenInWrongGame()
         {
-            if (ZetaDia.IsLoadingWorld || DateTime.UtcNow.Subtract(ChangeMonitor.LastGameJoinedTime).Seconds < 5)
+            if (ZetaDia.Globals.IsLoadingWorld || DateTime.UtcNow.Subtract(ChangeMonitor.LastGameJoinedTime).Seconds < 5)
                 return false;
 
             // Leaves party when out of game the d3-party leader and not the bot-leader.
@@ -177,7 +177,7 @@ namespace AutoFollow.Coroutines
                 return true;
             }
 
-            if (ZetaDia.IsInGame && Player.IsFollower && !ZetaDia.IsLoadingWorld)
+            if (ZetaDia.IsInGame && Player.IsFollower && !ZetaDia.Globals.IsLoadingWorld)
             {
                 if (!AutoFollow.CurrentLeader.IsInSameGame && !AutoFollow.CurrentLeader.IsLoadingWorld)
                 {
@@ -404,7 +404,7 @@ namespace AutoFollow.Coroutines
             if (!ZetaDia.IsInGame)
                 return true;
 
-            if (ZetaDia.IsLoadingWorld || GameUI.LeaveGameButton.IsVisible)
+            if (ZetaDia.Globals.IsLoadingWorld || GameUI.LeaveGameButton.IsVisible)
                 return false;
 
             if (ZetaDia.Service.Party.CurrentPartyLockReasonFlags != PartyLockReasonFlag.None)

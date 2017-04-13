@@ -50,6 +50,9 @@ namespace AutoFollow.Resources
             if (ZetaDia.Me == null || !ZetaDia.Me.IsValid)
                 return;
 
+            if (!Core.TrinityIsReady)
+                return;
+
             switch (State)
             {
                 case CombatState.Pulsing:
@@ -114,14 +117,14 @@ namespace AutoFollow.Resources
             return combatTarget != null && combatTarget.ActorType == ActorType.Item;
         }
 
-        public static TrinityActor Target => Combat.Targeting.CurrentTarget;
+        public static TrinityActor Target => TrinityCombat.Targeting.CurrentTarget;
 
         public static bool RoutineWantsToClickGizmo()
         {
             //var combatTarget = CombatTargeting.Instance.Provider.GetObjectsByWeight().FirstOrDefault();
             //return combatTarget != null && combatTarget is GizmoShrine && combatTarget.Distance < 80f;
 
-            return Target.IsGizmo && !Target.IsUsed && Target.Weight > 0 && Target.Distance < 80f;
+            return Target != null && Target.IsGizmo && !Target.IsUsed && Target.Weight > 0 && Target.Distance < 80f;
         }
 
         public static bool RoutineWantsToAttackUnit()

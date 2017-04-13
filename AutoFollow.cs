@@ -15,12 +15,12 @@ using AutoFollow.Resources;
 using AutoFollow.UI;
 using JetBrains.Annotations;
 using Trinity.Components.Combat;
+using Trinity.Framework;
 using Zeta.Bot;
 using Zeta.Bot.Logic;
 using Zeta.Common;
 using Zeta.Common.Plugins;
 using Zeta.Game;
-using Combat = Trinity.Components.Combat.Combat;
 using EventManager = AutoFollow.Events.EventManager;
 
 namespace AutoFollow
@@ -57,11 +57,27 @@ namespace AutoFollow
         {
             Behaviors = new InterfaceLoader<IBehavior>();
             Instance = this;
+
+            if (Settings.Misc.AlwaysEnablePlugin)
+            {
+                PluginManager.OnPluginsReloaded += PluginManager_OnPluginsReloaded;
+            }
+        }
+
+        private void PluginManager_OnPluginsReloaded(object sender, EventArgs e)
+        {
+            foreach (var plugin in PluginManager.Plugins)
+            {
+                if (plugin.Plugin == this && !plugin.Enabled)
+                {
+                    plugin.Enabled = true;
+                }
+            }
         }
 
         public static AutoFollow Instance { get; set; }
         public static InterfaceLoader<IBehavior> Behaviors;
-        public static Version PluginVersion = new Version(1, 0, 30);
+        public static Version PluginVersion = new Version(1, 250, 33);
         internal static bool Enabled;
         internal static Message ServerMessage = new Message();
         internal static Dictionary<int, Message> ClientMessages = new Dictionary<int, Message>();
@@ -112,7 +128,7 @@ namespace AutoFollow
             if (!Enabled)
                 return;
 
-            if (ZetaDia.IsLoadingWorld)
+            if (ZetaDia.Globals.IsLoadingWorld)
                 return;
 
             if (!Service.IsConnected)
@@ -243,13 +259,13 @@ namespace AutoFollow
             Enabled = false;
             var thisPlugin = PluginManager.Plugins.FirstOrDefault(p => p.Plugin.Name == "AutoFollow");
             if (thisPlugin != null)
-                thisPlugin.Enabled = false;
+                thisPlugin.Enabled = false;                    
         }
 
         private void Disable()
         {
             Enabled = false;
-            Combat.Party = DefaultProviders.Party;
+            TrinityCombat.Party = DefaultProviders.Party;
             Log.Info("Plugin disabled! ");
             CurrentBehavior?.Deactivate();
             BotMain.OnStart -= BotMain_OnStart;
@@ -267,7 +283,7 @@ namespace AutoFollow
         {
             if (!Application.Current.CheckAccess()) return;
             Enabled = true;
-            Combat.Party = new AutoFollowPartyProvider();
+            TrinityCombat.Party = new AutoFollowPartyProvider();
             Log.Info(" v{0} Enabled", Version);
             BotMain.OnStart += BotMain_OnStart;
             BotMain.OnStop += BotMain_OnStop;

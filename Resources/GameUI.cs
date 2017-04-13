@@ -277,16 +277,13 @@ namespace AutoFollow.Resources
         /// <param name="name"></param>
         /// <param name="fireWorldTransfer"></param>
         /// <returns></returns>
-        public static bool SafeClickElement(UIElement element, string name = "", bool fireWorldTransfer = false)
+        public static bool SafeClickElement(UIElement element, string name = "")
         {
             if (!ZetaDia.IsInGame)
                 return false;
 
             if (!IsElementVisible(element))
                 return false;
-
-            if (fireWorldTransfer)
-                GameEvents.FireWorldTransferStart();
 
             Log.Info("Clicking UI element {0} ({1})", name, element.BaseAddress);
             element.Click();
@@ -295,7 +292,7 @@ namespace AutoFollow.Resources
 
         public static void SafeClickUIButtons()
         {
-            if (ZetaDia.IsLoadingWorld)
+            if (ZetaDia.Globals.IsLoadingWorld)
                 return;
 
             // These buttons should be clicked with no delay
@@ -310,15 +307,15 @@ namespace AutoFollow.Resources
                 return;
             if (ZetaDia.IsInGame && SafeClickElement(ConversationSkipButton, "Conversation Button"))
                 return;
-            if (ZetaDia.IsInGame && SafeClickElement(PartyLeaderBossAccept, "Party Leader Boss Accept", true))
+            if (ZetaDia.IsInGame && SafeClickElement(PartyLeaderBossAccept, "Party Leader Boss Accept"))
                 return;
-            if (ZetaDia.IsInGame && SafeClickElement(PartyFollowerBossAccept, "Party Follower Boss Accept", true))
+            if (ZetaDia.IsInGame && SafeClickElement(PartyFollowerBossAccept, "Party Follower Boss Accept"))
                 return;
             if (ZetaDia.IsInGame && SafeClickElement(TalktoInteractButton1, "Conversation Button"))
                 return;
             if (DateTime.UtcNow.Subtract(_lastCheckedUiButtons).TotalMilliseconds <= 500)
                 return;
-            if (ZetaDia.IsInGame && SafeClickElement(JoinRiftButton, "Join Rift Accept Button", true))
+            if (ZetaDia.IsInGame && SafeClickElement(JoinRiftButton, "Join Rift Accept Button"))
                 return;
 
             _lastCheckedUiButtons = DateTime.UtcNow;
@@ -341,9 +338,9 @@ namespace AutoFollow.Resources
                 return;
             if (SafeClickElement(GenericOK, "GenericOK"))
                 return;
-            if (SafeClickElement(UIElements.ConfirmationDialogOkButton, "ConfirmationDialogOKButton", true))
+            if (SafeClickElement(UIElements.ConfirmationDialogOkButton, "ConfirmationDialogOKButton"))
                 return;
-            if (ZetaDia.IsInGame && SafeClickElement(ConfirmTimedDungeonOK, "Confirm Timed Dungeon OK Button", true))
+            if (ZetaDia.IsInGame && SafeClickElement(ConfirmTimedDungeonOK, "Confirm Timed Dungeon OK Button"))
                 return;
             if (ZetaDia.IsInGame && SafeClickElement(StashBuyNewTabButton, "Buying new Stash Tab"))
                 return;
@@ -391,10 +388,10 @@ namespace AutoFollow.Resources
                 if (DateTime.UtcNow.Subtract(lastSafeClickCheck).TotalMilliseconds < 1000)
                     return;
 
-                if (ZetaDia.IsLoadingWorld)
+                if (ZetaDia.Globals.IsLoadingWorld)
                     return;
 
-                if (ZetaDia.IsPlayingCutscene)
+                if (ZetaDia.Globals.IsPlayingCutscene)
                     return;
 
                 if (!ZetaDia.Service.IsValid)
@@ -492,10 +489,6 @@ namespace AutoFollow.Resources
                         {
                             Log.Info("Clicking {0}={1}", uiElement.Hash, uiElement.Name);
                         }
-
-                        // sleep plugins for a bit
-                        if (ZetaDia.IsInGame && fireWorldTransferStart)
-                            GameEvents.FireWorldTransferStart();
 
                         _lastClick = DateTime.UtcNow;
                         uiElement.Click();
